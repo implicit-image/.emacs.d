@@ -34,55 +34,138 @@
 
 
 ;; global keybindings
-
+;; these keybindings are available independent of local buffer mode
+;; they can only be overriden by buffer local modes
 (+leader-keys
   ":" '("Execute command"                . counsel-M-x)
   "." '("Find file in cwd"               . counsel-find-file)
   "*" '("Find thing-at-point in project" . +search/rg-thing-at-point)
-  "f P" '("Browse modules"               . +modules/browse)
   "SPC" '("Find file in project"         . projectile-find-file)
   "/" '("Search project"                 . counsel-rg)
   "`" '("Last buffer"                    . evil-switch-to-windows-last-buffer)
-  ;; dummy entries for which-key labels
+  ;; launching client modes
   "a" '(:ignore t :which-key "applications")
+  "a c" '("Open calibre" . calibredb)
+
+  ;; buffer operations
   "b" '(:ignore t :which-key "buffer")
+  "b r" '("Revert" . revert-buffer)
+  "b i" '("Open ibuffer"     . ibuffer)
+  "b b" '("Find buffer"      . counsel-switch-buffer)
+  "b K" '("Kill this buffer" . kill-this-buffer)
+  "b k" '("Kill buffer"      . kill-buffer)
+  "b p" '("Popup buffer" . popwin:popup-buffer)
+
+  ;; code editing and lsp functions
   "c" '(:ignore t :which-key "code")
+  "c r" '("LSP Rename" . lsp-rename)
+  "c d" '("LSP Describe thing at point" . lsp-describe-thing-at-point)
+
+  ;; dired actions
   "d" '(:ignore t :which-key "dired")
+
+  ;; file operations
   "f" '(:ignore t :which-key "find")
+  "f P" '("Browse modules" . +modules/browse)
   "f R" '("Rename current file" . rename-visited-file)
+  "f r" '("Recent files" . counsel-recentf)
+
+  ;; git and version control generally
   "g" '(:ignore t :which-key "git")
   "g d" '("Show diff" . diff-hl-show-hunk)
   "g g" '("Magit" . magit)
-  "s" '(:ignore t :which-key "search")
-  "s i" '("imenu" . imenu)
+
+  ;; documentation lookup
   "h" '(:ignore t :which-key "help")
-  "h m" '("Describe keymap"   . describe-keymap)
-  "h p" '("Describe package"  . describe-package)
-  "h t" '("Describe font"     . describe-font)
   "h b" '("Describe bindings" . describe-bindings)
+  "h t" '("Describe font"     . describe-font)
+  "h l" '("Load library"      . counsel-load-library)
+  "h m" '("Describe keymap"   . describe-keymap)
   "h M" '("Describe mode"     . describe-mode)
-  "t" '(:ignore t :which-key "toggle")
-  "t c" '("Display colors" . rainbow-mode)
-  "t v" '("Visual line mode" . visual-line-mode)
+  "h F" '("Describe face"     . counsel-faces)
+  "h p" '("Describe package"  . describe-package)
+  "h s" '("Describe symbol"   . counsel-describe-symbol)
+  "h t" '("Load theme"        . counsel-load-theme)
+  "h v" '("Describe variable" . helpful-variable)
+  "h f" '("Describe function" . helpful-callable)
+  "h k" '("Describe key" . helpful-key)
+
+  ;; choosing and inserting data
+  "i" '(:ignore t :which-key "insert")
+  "i u" '("Unicode char" . counsel-unicode-char)
+
+  ;; notes, mostly org
+  "n" '(:ignore t :which-key "notes")
+  "n r" '(:ignore t :which-key "org roam")
+  "n r f" '("Find Org Roam node" . org-roam-node-find)
+  "n r r" '("Find random Org Roam node" . org-roam-node-random)
+  "n r s" '("Sync Org Roam database" . org-roam-db-sync)
+  "n r c" '("Org Roam capture" . org-roam-capture)
+
+  ;; opening important side windows and buffers
   "o" '(:ignore t :which-key "open")
   "o x" '("Scratch buffer" . scratch-buffer)
   "o t" '("Terminal" . vterm)
   "o p" '("Sidebar" . treemacs)
-  "n" '(:ignore t :which-key "notes")
+  "o u" '("Undo tree" . undo-tree-visualize)
+  "o A" '("Org agenda" . org-agenda)
+  "o a" `("Agenda file" . (lambda ()
+			    (interactive)
+			    (org-open-file +org/agenda-file)))
+
+  ;; projectile functions
   "p" '(:ignore t :which-key "projects")
+  "p !" '("Run cmd in project root"     . projectile-run-shell-command-in-root)
+  "p &" '("Async cmd in project root"   . projectile-run-async-shell-command-in-root)
+  "p ." '("Browse project"              . projectile-find-file)
+  "p >" '("Browse other project"        . projectile-find-other-file)
+  "p a" '("Add new project"             . projectile-add-known-project)
+  "p b" '("Switch to project buffer"    . projectile-switch-to-buffer)
+  "p c" '("Compile in project"          . projectile-compile-project)
+  "p C" '("Repeat last command"         . projectile-repeat-last-command)
+  "p d" '("Remove known project"        . projectile-remove-known-project)
+  "p D" '("Discover projects in folder" . projectile-discover-projects-in-directory)
+  "p e" '("Edit project's .dir-locals"  . projectile-edit-dir-locals)
+  "p f" '("Find file in project"        . projectile-find-file)
+  "p F" '("Find file in other project"  . projectile-find-other-file)
+  "p g" '("Configure project"           . projectile-configure-project)
+  "p i" '("Invalidate project cache"    . projectile-invalidate-cache)
+  "p k" '("Kill project buffers"        . projectile-kill-buffers)
+  "p o" '("Find sibling file"           . projectile-find-related-file)
+  "p p" '("Switch project"              . projectile-switch-project)
+  "p r" '("Find recent project files"   . projectile-recentf-files)
+  "p R" '("Run project"                 . projectile-run-project)
+  "p s" '("Save project files"          . projectile-save-project-buffers)
+  "p t" '("List project todos"          . magit-todos-list)
+  "p T" '("Test project"                . projectile-test-project)
+
+  ;; quitting and restarting emacs
   "q" '(:ignore t :which-key "quit")
   "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
   "q r" '("Restart emacs" . restart-emacs)
+
+  ;; searching buffer, dir or project
+  "s" '(:ignore t :which-key "search")
+  "s b" '("Swiper" . swiper)
+  "s i" '("imenu" . imenu)
+  ;; toggling features on and off
+  "t" '(:ignore t :which-key "toggle")
+  "t c" '("Display colors" . rainbow-mode)
+  "t v" '("Visual line mode" . visual-line-mode)
+
+  ;; window management
   "w" '(:ignore t :which-key "window")
   "w p" '("Popup window" . popwin:popup-window)
-  "w w" '("Switch" . ace-window))
+  "w s" '("Split window horizontally" . evil-window-split)
+  "w w" '("Switch" . ace-window)
+  "w v" '("Split window vertically" . evil-window-vsplit)
+  
+  "X" '("Org capture" . org-capture))
 
 
-
+;; local mode map keybindings
 (use-package calibredb
   :general
-  (+leader-keys
-    "a c" '("Open calibre" . calibredb))
   (calibredb-search-mode-map
    :states '(normal)
    "q" 'calibredb-search-quit))
@@ -107,51 +190,16 @@
    "C-=" 'pdf-view-center-in-window
    "q" 'kill-this-buffer))
 
-(use-package files
-  :straight nil
-  :general
-  (+leader-keys
-    "b r" '("Revert" . revert-buffer)))
-
 (use-package ibuffer
   :general
-  ("C-x k" 'kill-this-buffer)
-  (+leader-keys
-    "b i" '("Open ibuffer"     . ibuffer)
-    "b b" '("Find buffer"      . counsel-switch-buffer)
-    "b K" '("Kill this buffer" . kill-this-buffer)
-    "b k" '("Kill buffer"      . kill-buffer)))
-
-
-
-(use-package recentf
-  :general
-  (+leader-keys
-    "f r" '("Recent files" . counsel-recentf)))
-
-
-
-(+leader-keys
-  "b p" '("Popup buffer" . popwin:popup-buffer))
-
+  ("C-x k" 'kill-this-buffer))
 
 
 (use-package counsel
   :general
   ("M-x" '(lambda ()
 	    (interactive)
-	    (counsel-M-x "")))
-  (+leader-keys
-    "h F" '("Describe face"     . counsel-faces)
-    "h s" '("Describe symbol"   . counsel-describe-symbol)
-    "h t" '("Load theme"        . counsel-load-theme)
-    "h l" '("Load library"      . counsel-load-library)
-    "i u" '("Unicode char" . counsel-unicode-char)))
-
-(use-package swiper
-  :general
-  (+leader-keys
-    "s b" '("Swiper" . swiper)))
+	    (counsel-M-x ""))))
 
 (use-package corfu
   :general
@@ -164,6 +212,7 @@
 
 (use-package dired
   :straight nil
+  ;; makes dired operate in normal mode
   :general
   (dired-mode-map
    :states '(normal visual)
@@ -228,38 +277,21 @@
   (evil-normal-state-map
    "g c" 'evilnc-comment-or-uncomment-lines))
 
-(use-package undo-tree
-  :general
-  (+leader-keys
-    "o u" '("Undo tree" . undo-tree-visualize)))
-
 (use-package evil
   :general
   (evil-normal-state-map
-   "<escape>" 'keyboard-quit)
-  (+leader-keys
-    "w v" '("Split window vertically" . evil-window-vsplit)
-    "w s" '("Split window horizontally" . evil-window-split)))
-
-
+   "<escape>" 'keyboard-quit))
 
 (use-package helpful
   :general
   (evil-normal-state-map
    "K" 'helpful-at-point)
-  (+leader-keys
-    "h v" '("Describe variable" . helpful-variable)
-    "h f" '("Describe function" . helpful-callable)
-    "h k" '("Describe key" . helpful-key))
   (helpful-mode-map
    :states '(normal)
    "q" 'quit-window))
 
 (use-package lsp-mode
   :general
-  (+leader-keys
-    "c r" '("LSP Rename" . lsp-rename)
-    "c d" '("LSP Describe thing at point" . lsp-describe-thing-at-point))
   (lsp-mode-map
    :states '(normal)
    "K" 'lsp-describe-thing-at-point))
@@ -291,23 +323,11 @@
    "t p" '("Toggle pretty symbols" . org-toggle-pretty-entities))
   (org-mode-map
    :states '(normal visual)
-   "RET" 'org-return)
-  (+leader-keys
-    "X" '("Org capture" . org-capture)
-    "o A" '("Org agenda" . org-agenda)
-    "o a" `("Agenda file" . (lambda ()
-				   (interactive)
-				   (org-open-file ,+org/agenda-file)))))
+   "RET" 'org-return))
 
 
 (use-package org-roam
   :general
-  (+leader-keys
-   "n r" '(:ignore t :which-key "org roam")
-   "n r f" '("Find Org Roam node" . org-roam-node-find)
-   "n r r" '("Find random Org Roam node" . org-roam-node-random)
-   "n r s" '("Sync Org Roam database" . org-roam-db-sync)
-   "n r c" '("Org Roam capture" . org-roam-capture))
   (org-mode-map
    :states '(normal visual)
    :prefix "SPC n r"
@@ -316,31 +336,7 @@
 
 (use-package projectile
   :general
-  (+leader-keys
     ;; "p" '("Projectile map" . projectile-command-map)
-    "p !" '("Run cmd in project root"     . projectile-run-shell-command-in-root)
-    "p &" '("Async cmd in project root"   . projectile-run-async-shell-command-in-root)
-    "p ." '("Browse project"              . projectile-find-file)
-    "p >" '("Browse other project"        . projectile-find-other-file)
-    "p a" '("Add new project"             . projectile-add-known-project)
-    "p b" '("Switch to project buffer"    . projectile-switch-to-buffer)
-    "p c" '("Compile in project"          . projectile-compile-project)
-    "p C" '("Repeat last command"         . projectile-repeat-last-command)
-    "p d" '("Remove known project"        . projectile-remove-known-project)
-    "p D" '("Discover projects in folder" . projectile-discover-projects-in-directory)
-    "p e" '("Edit project's .dir-locals"  . projectile-edit-dir-locals)
-    "p f" '("Find file in project"        . projectile-find-file)
-    "p F" '("Find file in other project"  . projectile-find-other-file)
-    "p g" '("Configure project"           . projectile-configure-project)
-    "p i" '("Invalidate project cache"    . projectile-invalidate-cache)
-    "p k" '("Kill project buffers"        . projectile-kill-buffers)
-    "p o" '("Find sibling file"           . projectile-find-related-file)
-    "p p" '("Switch project"              . projectile-switch-project)
-    "p r" '("Find recent project files"   . projectile-recentf-files)
-    "p R" '("Run project"                 . projectile-run-project)
-    "p s" '("Save project files"          . projectile-save-project-buffers)
-    "p t" '("List project todos"          . magit-todos-list)
-    "p T" '("Test project"                . projectile-test-project))
   ("C-c p" '("Projectile commands" . projectile-command-map)))
 
 
