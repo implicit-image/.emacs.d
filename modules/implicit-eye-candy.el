@@ -73,6 +73,16 @@
   (doom-themes-org-config)
   (load-theme 'doom-gruber-darker t))
 
-(use-package nyan-mode)
+
+
+
+;; font ligatures
+(use-package ligature
+  :config
+  (ligature-set-ligatures 'org-mode '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
+				      "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" "<=>" "<==>" "<===>" "<====>" "<!---"
+				      "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
+				      ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++")))
+
 
 (provide 'implicit-eye-candy)
