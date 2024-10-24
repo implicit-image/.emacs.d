@@ -4,9 +4,9 @@
 (use-package emacs
   :demand
   :init
-  (setq +base/font-family "Comic Code Semi Bold"
+  (setq +base/font-family "Iosevka Comfy Fixed"
 	+base/font-weight 'semi-light
-	+base/font-size 20
+	+base/font-size 22
 	+base/font-spec (font-spec :family +base/font-family
 				   :weight +base/font-weight
 				   :size +base/font-size))
