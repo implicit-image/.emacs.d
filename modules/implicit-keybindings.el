@@ -162,192 +162,150 @@
   
   "X" '("Org capture" . org-capture))
 
-
-;; local mode map keybindings
-(use-package calibredb
-  :general
-  (calibredb-search-mode-map
-   :states '(normal)
-   "q" 'calibredb-search-quit))
-
-
-(use-package org-noter
-  :general
-  (pdf-view-mode-map
-   :states '(normal)
-   "g n" 'org-noter))
-
-(use-package pdf-tools
-  :general
-  (pdf-view-mode-map
-   :states '(normal)
-   "] ]" 'pdf-view-next-page
-   "[ [" 'pdf-view-previous-page
-   "j" 'pdf-view-scroll-up-or-next-page
-   "k" 'pdf-view-scroll-down-or-previous-page
-   "=" 'pdf-view-enlarge
-   "-" 'pdf-view-shrink
-   "C-=" 'pdf-view-center-in-window
-   "q" 'kill-this-buffer))
-
-(use-package ibuffer
-  :general
-  ("C-x k" 'kill-this-buffer))
-
-
-(use-package counsel
-  :general
-  ("M-x" '(lambda ()
+;; global keybindings
+(general-def
+  "C-x k" 'kill-this-buffer
+  "M-x" '(lambda ()
 	    (interactive)
-	    (counsel-M-x ""))))
+	    (counsel-M-x ""))
+  "C-SPC" 'completion-at-point
+  "C-c p" '("Projectile commands" . projectile-command-map))
+;; local mode map keybindings
+;;###################################################
 
-(use-package corfu
-  :general
-  ("C-SPC" 'completion-at-point)
-  (corfu-map
-   "C-h" 'corfu-doc-toggle
-   "C-d" 'evil-lookup-func
-   "<tab>" 'corfu-next
-   "<backtab>" 'corfu-previous))
-
-(use-package dired
-  :straight nil
-  ;; makes dired operate in normal mode
-  :general
-  (dired-mode-map
-   :states '(normal visual)
-   "RET" 'dired-find-file
-   "S-RET" 'dired-find-file-other-window
-   "!"	 'dired-do-shell-command
-   "#"	 'dired-flag-auto-save-files
-   "$"	 'dired-hide-subdir
-   "&"	 'dired-do-async-shell-command
-   "("	 'dired-hide-details-mode
-   "+"	 'dired-create-directory
-   "."	 'dired-clean-directory
-   "<"	 'dired-prev-dirline
-   "="	 'dired-diff
-   ">"	 'dired-next-dirline
-   "?"   'dired-summary
-   "A"	 'dired-do-find-regexp
-   "B"	 'dired-do-byte-compile
-   "C"   'dired-do-copy
-   "D" 	 'dired-do-delete
-   "G"	 'dired-do-chgrp
-   "H"	 'dired-do-hardlink
-   "I"	 'dired-do-info
-   "L"	 'dired-do-load
-   "M"	 'dired-do-chmod
-   "N" 	 'dired-do-man
-   "O"	 'dired-do-chown
-   "P"	 'dired-do-print
-   "Q"	 'dired-do-find-regexp-and-replace
-   "R"	 'dired-do-rename
-   "S"	 'dired-do-symlink
-   "T"	 'dired-do-touch
-   "U"	 'dired-unmark-all-marks
-   "W"	 'browse-url-of-dired-file
-   "X"	 'dired-do-shell-command
-   "Y"	 'dired-do-relsymlink
-   "Z"	 'dired-do-compress
-   "^"	 'dired-up-directory
-   "a"	 'dired-find-alternate-file
-   "c"	 'dired-do-compress-to
-   "d"	 'dired-flag-file-deletion
-   "o"   'dired-do-redisplay
-   "m"	 'dired-mark
-   "j"	 'dired-next-line
-   "k"	 'dired-previous-line
-   "q"	 'quit-window
-   "s"	 'dired-sort-toggle-or-edit
-   ;; "s"   '+dired/choose-sort
-   "t"	 'dired-toggle-marks
-   "u"	 'dired-unmark
-   "v"	 'dired-view-file
-   "w"	 'dired-copy-filename-as-kill
-   "x"	 'dired-do-flagged-delete
-   "i"	 'dired-show-file-type
-   "-"   'dired-up-directory))
-
-
-(use-package evil-nerd-commenter
-  :general
-  (evil-visual-state-map
-   "g c" 'evilnc-comment-or-uncomment-lines)
-  (evil-normal-state-map
-   "g c" 'evilnc-comment-or-uncomment-lines))
-
-(use-package evil
-  :general
-  (evil-normal-state-map
-   "<escape>" 'keyboard-quit))
-
-(use-package helpful
-  :general
-  (evil-normal-state-map
-   "K" 'helpful-at-point)
-  (helpful-mode-map
-   :states '(normal)
-   "q" 'quit-window))
-
-(use-package lsp-mode
-  :general
-  (lsp-mode-map
-   :states '(normal)
-   "K" 'lsp-describe-thing-at-point))
-
-
-(use-package lsp-ui
-  :general
-  (lsp-ui-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   "t s" '("Toggle sideline display" . (lambda ()
-					 (interactive)
-					 (lsp-ui-sideline-mode)))
-   "c a" '("Apply code actions" . lsp-ui-sideline-apply-code-actions)))
-
-
-(use-package org
-  :general
-  (org-mode-map
-   :states '(normal visual)
-   :prefix "SPC m"
-   "l" '(:ignore t :which-key "link")
-   "l i" '("Insert link" . org-insert-link))
-  (org-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :global-prefix "M-SPC"
-   "t l" '("Toggle latex preview" . org-latex-preview)
-   "t p" '("Toggle pretty symbols" . org-toggle-pretty-entities))
-  (org-mode-map
-   :states '(normal visual)
-   "RET" 'org-return))
-
-
-(use-package org-roam
-  :general
-  (org-mode-map
-   :states '(normal visual)
-   :prefix "SPC n r"
-   :global-prefix "M-SPC n r"
-   "i" '("Insert Org Roam node" . org-roam-node-insert)))
-
-(use-package projectile
-  :general
-    ;; "p" '("Projectile map" . projectile-command-map)
-  ("C-c p" '("Projectile commands" . projectile-command-map)))
-
-
-(use-package rustic
-  :general
-  (rustic-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   "c r" '("Cargo run" . rustic-cargo-run)))
-
+(general-defs
+  ;; globals
+  :states '(visual normal)
+  "g c" 'evilnc-comment-or-uncomment-lines
+  "<escape>" 'keyboard-quit
+  evil-normal-state-map
+  "K" 'helpful-at-point
   
+  ;; calibre
+  calibredb-search-mode-map
+  :states '(normal)
+  "q" 'calibredb-search-quit
+  
+  ;; pdf view 
+  pdf-view-mode-map
+  :states '(normal)
+  "g n" 'org-noter
+  pdf-view-mode-map
+  :states '(normal)
+  "] ]" 'pdf-view-next-page
+  "[ [" 'pdf-view-previous-page
+  "j" 'pdf-view-scroll-up-or-next-page
+  "k" 'pdf-view-scroll-down-or-previous-page
+  "=" 'pdf-view-enlarge
+  "-" 'pdf-view-shrink
+  "C-=" 'pdf-view-center-in-window
+  "q" 'kill-this-buffer
+  
+  ;; corfu
+  corfu-map
+  "C-h" 'corfu-doc-toggle
+  "C-d" 'evil-lookup-func
+  "<tab>" 'corfu-next
+  "<backtab>" 'corfu-previous
+  corfu-candidate-overlay-map
+  "<tab>" 'corfu-candidate-overlay-complete-at-point
+  
+  ;; dired
+  dired-mode-map
+  :states '(normal visual)
+  "RET" 'dired-find-file
+  "S-RET" 'dired-find-file-other-window
+  "!"	 'dired-do-shell-command
+  "#"	 'dired-flag-auto-save-files
+  "$"	 'dired-hide-subdir
+  "&"	 'dired-do-async-shell-command
+  "("	 'dired-hide-details-mode
+  "+"	 'dired-create-directory
+  "."	 'dired-clean-directory
+  "<"	 'dired-prev-dirline
+  "="	 'dired-diff
+  ">"	 'dired-next-dirline
+  "?"   'dired-summary
+  "A"	 'dired-do-find-regexp
+  "B"	 'dired-do-byte-compile
+  "C"   'dired-do-copy
+  "D" 	 'dired-do-delete
+  "G"	 'dired-do-chgrp
+  "H"	 'dired-do-hardlink
+  "I"	 'dired-do-info
+  "L"	 'dired-do-load
+  "M"	 'dired-do-chmod
+  "N" 	 'dired-do-man
+  "O"	 'dired-do-chown
+  "P"	 'dired-do-print
+  "Q"	 'dired-do-find-regexp-and-replace
+  "R"	 'dired-do-rename
+  "S"	 'dired-do-symlink
+  "T"	 'dired-do-touch
+  "U"	 'dired-unmark-all-marks
+  "W"	 'browse-url-of-dired-file
+  "X"	 'dired-do-shell-command
+  "Y"	 'dired-do-relsymlink
+  "Z"	 'dired-do-compress
+  "^"	 'dired-up-directory
+  "a"	 'dired-find-alternate-file
+  "c"	 'dired-do-compress-to
+  "d"	 'dired-flag-file-deletion
+  "o"   'dired-do-redisplay
+  "m"	 'dired-mark
+  "j"	 'dired-next-line
+  "k"	 'dired-previous-line
+  "q"	 'quit-window
+  "s"	 'dired-sort-toggle-or-edit
+  ;; "s"   '+dired/choose-sort
+  "t"	 'dired-toggle-marks
+  "u"	 'dired-unmark
+  "v"	 'dired-view-file
+  "w"	 'dired-copy-filename-as-kill
+  "x"	 'dired-do-flagged-delete
+  "i"	 'dired-show-file-type
+  "-"   'dired-up-directory
+  
+  ;; helpful docs
+  helpful-mode-map
+  :states '(normal)
+  "q" 'quit-window
+  
+  ;; lsp
+  lsp-mode-map
+  :states '(normal)
+  "K" 'lsp-describe-thing-at-point
+  lsp-ui-mode-map
+  :states '(normal visual)
+  :prefix "SPC"
+  "t s" '("Toggle sideline display" . (lambda ()
+					(interactive)
+					(lsp-ui-sideline-mode)))
+  "c a" '("Apply code actions" . lsp-ui-sideline-apply-code-actions)
+  
+  ;; org mode
+  org-mode-map
+  :states '(normal visual)
+  "RET" 'org-return
+  org-mode-map
+  :states '(normal visual)
+  :prefix "SPC"
+  :global-prefix "M-SPC"
+  "t l" '("Toggle latex preview" . org-latex-preview)
+  "t p" '("Toggle pretty symbols" . org-toggle-pretty-entities)
+  "m l" '(:ignore t :which-key "link")
+  "m l i" '("Insert link" . org-insert-link)
+  org-mode-map
+  :states '(normal visual)
+  :prefix "SPC n r"
+  :global-prefix "M-SPC n r"
+  "i" '("Insert Org Roam node" . org-roam-node-insert)
+  
+  ;; rustic mode
+  rustic-mode-map
+   :states '(normal visual)
+   :prefix "SPC"
+   "c r" '("Cargo run" . rustic-cargo-run))
 
 
 (provide 'implicit-keybindings)
