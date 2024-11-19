@@ -61,4 +61,11 @@
   (prog-mode . (lambda () (toggle-truncate-lines 1))))
 
 
+;; load $PATH from shell
+(use-package exec-path-from-shell
+  :demand
+  :commands exec-path-from-shell-initialize
+  :init (setq exec-path-from-shell-variables '("PATH" "MANPATH" "JAVA_HOME"))
+  :config (exec-path-from-shell-initialize))
+
 (provide 'implicit-base)
