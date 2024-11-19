@@ -1,19 +1,17 @@
-
-
 (use-package evil
   :demand
   :init
   (setq evil-want-integration t
+	evil-want-keybinding nil
 	evil-undo-system 'undo-tree
 	evil-lookup-func 'woman)
   :config
   (evil-mode 1))
 
-
 (use-package evil-collection
   :after evil
   :config
-  (evil-collection-init))
+  (evil-collection-init evil-collection-mode-list))
 
 (use-package evil-goggles
   :config
