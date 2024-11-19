@@ -60,15 +60,32 @@
   (editorconfig-mode 1))
 
 (use-package undo-tree
-  :demand
+  :demand 
   :init
   (require 'f)
   (setq undo-tree-history-directory-alist `(("." . ,(f-join user-emacs-directory "undo-tree/"))))
+  (+windows/cfg
+   '((" *undo-tree*")
+     :width 0.2 :position right))
   :config
-  (global-undo-tree-mode 1)
-  (push '(" *undo-tree*"
-	  :width 0.2
-	  :position left) popwin:special-display-config))
+  (global-undo-tree-mode +1)
+  :hook (undo-tree-visualizer-mode . (lambda ()
+				       (display-line-numbers-mode -1))))
 
+(use-package paren
+  :straight nil
+  :after evil
+  :custom-face
+  (show-paren-match ((t (:foreground unspecified))))
+  (show-paren-match-expression ((t (:box
+				    (:line-width -1 :color ,(doom-color 'base5) :style released-button)
+				    :foreground
+				    unspecified))))
+  :init
+  (setq show-paren-style 'expression
+	show-paren-when-point-inside-paren t
+	show-paren-when-point-in-periphery t))
 
 (provide 'implicit-editing)
+
+
