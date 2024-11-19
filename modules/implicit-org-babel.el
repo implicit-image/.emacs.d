@@ -16,6 +16,7 @@
      (python . t)
      (shell . t)
      (emacs-lisp . t)
+     (rust . t)
      (awk . t)
      (calc . t)
      (clojure . t)
