@@ -1,15 +1,13 @@
 (use-package cc-mode)
 
-
 (use-package c-ts-mode
-  :mode "\\.c\\'")
-
-(use-package ccls)
-
-
+  :mode "\\.c\\'"
+  :init
+  (setq c-ts-mode-indent-offset 4))
 
 (use-package rtags)
 
+(use-package ccls)
 
 (provide 'implicit-c)
 
