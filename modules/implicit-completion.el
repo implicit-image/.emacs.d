@@ -17,7 +17,7 @@
 (use-package ivy
   :after marginalia
   :custom-face
-  (ivy-current-match ((t (:background ,((doom-lighten (doom-color 'selection) 0.2))))))
+  (ivy-current-match ((t (:background ,(doom-lighten (doom-color 'selection) 0.2)))))
   :init
   (setq ivy-height 15
 	ivy-fixed-height-minibuffer t
