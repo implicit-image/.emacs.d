@@ -8,7 +8,9 @@
 
 (use-package imenu
   :straight nil
-  :demand)
+  :config
+  (setq imenu-auto-rescan t
+	imenu-use-popup-menu t))
 
 
 (provide 'implicit-search)
