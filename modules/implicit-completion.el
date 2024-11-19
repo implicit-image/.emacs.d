@@ -49,10 +49,6 @@
 ;; NOTE: maybe replace ivy+counsel in the future
 (use-package embark
   :disabled
-  :bind
-  (("C-."   . embark-act)         ;; pick some comfortable binding
-   ("C-;"   . embark-dwim)        ;; good alternative: M-.
-   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
   :init
   ;; Optionally replace the key help with a completing-read interface
   (setq prefix-help-command #'embark-prefix-help-command)
@@ -75,12 +71,6 @@
   (vertico-count 13)                    ; Number of candidates to display
   (vertico-resize t)
   (vertico-cycle nil) ; Go from last to first candidate and first to last (cycle)?
-  :general
-  (:keymaps 'vertico-map
-   "<tab>" #'vertico-insert  ; Insert selected candidate into text area
-   "<escape>" #'minibuffer-keyboard-quit ; Close minibuffer
-   "C-M-n" #'vertico-next-group
-   "C-M-p" #'vertico-previous-group)
   :config
   (vertico-mode))
 
