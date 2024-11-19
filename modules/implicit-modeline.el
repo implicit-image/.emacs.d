@@ -1,26 +1,45 @@
-
-;; display search/replace candidate count on modeline
-(use-package anzu
-  :demand
-  :after doom-modeline)
+(require 'eieio)
+(require 'doom-themes)
 
 (use-package evil-anzu
-  :after anzu
+  :demand
   :config (global-anzu-mode +1))
 
+(use-package hide-mode-line)
 
-;; the modeline
-(use-package doom-modeline
+(use-package mini-echo
   :demand
+  :custom-face
+  (minibuffer-prompt ((t (:foreground ,(doom-color 'fg)))))
+  (mini-echo-minibuffer-window
+   ((t (:background ,(doom-lighten (face-attribute 'default :background nil t) 0.05)))))
+  (mini-echo-blue ((t (:foreground ,(doom-color 'blue)))))
   :init
-  (setq doom-modeline-buffer-file-name-style 'truncate-nil
-        doom-modeline-minor-modes nil
-	doom-modeline-height 25
-	doom-modeline-project-detection 'auto)
+  (require 'mini-echo-segments)
+  ;; (defun +modeline--get-pdf-pos ()
+  ;;   "Get (current page . page count) in pdf-view buffer"
+  ;;   (let ((max-pages (or (pdf-cache-number-of-pages)
+  ;; 			 (pdf-info-number-of-pages (current-buffer))))
+  ;; 	  (curr-page (pdf-view-current-page)))
+  ;;     (format "%s / %s" curr-page max-pages)))
+  ;; (mini-echo-define-segment "pdf-pages"
+  ;;   "Show what page the pdf is on and max pages."
+  ;;   :
+  ;;   :update-hook '(pdf-view-change-page-hook)
+  ;;   :update-advice '(())
+  ;;   :update (if (bound-and-true-p 'pdf-view-mode)
+  ;; 		()))
+  (setq mode-line-format "")
+  (setq mini-echo-right-padding 2
+	mini-echo-project-detection 'projectile
+	mini-echo-separator "|"
+	mini-echo-persistent-function 'ignore
+	mini-echo-persistent-rule '(:long
+				    ("major-mode" "buffer-name" "project" "evil" "buffer-position" "lsp-bridge" "lsp-mode" "flycheck" "text-scale")
+				    :short
+				    ("major-mode" "shrink-path" "evil" "buffer-position" "flycheck")))
   :config
-  (doom-modeline-mode 1))
-  
-
+  (mini-echo-mode))
 
 (provide 'implicit-modeline)
 
