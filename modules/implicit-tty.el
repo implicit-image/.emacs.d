@@ -1,5 +1,14 @@
 (setq visible-cursor nil)
 
+;;;###autoload
+(defun +tty/setup-faces ()
+  "Setup faces for tty display."
+  (custom-set-faces `(vertical-border ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg) :width narrow))))
+		    `(border ((t (:background ,(doom-color  'bg) :foreground ,(doom-color 'fg) :width narrow))))
+		    `(internal-border ((t (:background ,(doom-color 'bg) :width narrow))))))
+
+(add-hook 'tty-setup-hook #'+tty/setup-faces)
+
 
 (use-package kkp
   :demand
@@ -8,6 +17,7 @@
 
 
 (use-package evil-terminal-cursor-changer
+  :demand
   :init
   (setq evil-motion-state-cursor 'box
 	evil-visual-state-cursor 'box
@@ -15,9 +25,6 @@
 	evil-insert-state-cursor 'bar
 	evil-emacs-state-cursor  'hbar)
   :hook
-  (tty-setup . evil-terminal-cursor-changer))
-
-
-(add-hook 'tty-setup-hook #'xterm-mouse-mode)
+  (tty-setup . etcc-on))
 
 (provide 'implicit-tty)
