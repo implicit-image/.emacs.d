@@ -1,47 +1,48 @@
-(require 'doom-themes)
+
+(defun +completion/initialize ()
+  "Set up completion functions and load required libraries.")
+;; 
+
+(defun +completion/popup ()
+  "Show a completion popup.")
 
 
 (use-package company
-  :preface
-  ;; disable company mode
-  (defalias 'company-mode 'ignore))
+  :disabled t)
 
-
-(defun +eye-candy/get-doom-face-attribute (face attr)
-  "Get an ATTR of a FACE in `doom-themes--faces'. Returns nil if there is no such FACE in `doom-themes--faces'"
-(plist-get (cdr (car (seq-filter
- (lambda (face-info)
-   (equal (car face-info) test-face))
- doom-themes--faces))) :background))
+;; disable loading company if something tries
+(defalias 'company-mode 'ignore)
 
 
 (use-package ivy
-  :demand
-  :after doom-themes
-  ;; :custom-face
-  ;; (ivy-current-match ((t (:background ,(+eye-candy/get-doom-face-attribute 'highlight :background)))))
+  :after marginalia
+  :custom-face
+  (ivy-current-match ((t (:background ,((doom-lighten (doom-color 'selection) 0.2))))))
   :init
-  (setq ivy-height 10
+  (setq ivy-height 15
 	ivy-fixed-height-minibuffer t
 	ivy-use-virtual-buffers t
 	enable-recursive-minibuffers t)
   :config
-  ;; override default initial input
   (ivy-mode)
-  (ivy-configure 'counsel-M-x :initial-input "")
   :hook (after-init . ivy-mode))
 
 (use-package counsel
-  :after evil)
-  
+  :after evil
+  :config
+  ;; dont use package.el at all
+  (defalias 'counsel-package 'ignore))
+
 (use-package swiper
   :after evil)
 
 (use-package marginalia
-  :bind (:map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
+  :demand
   :init
-  (marginalia-mode))
+  (setq marginalia-align 'center
+	marginalia-align-offset -3)
+  :config
+  (marginalia-mode +1))
 
 ;;################################################################
 ;; Embark + consult + vertico stack
