@@ -5,8 +5,7 @@
   (setq org-agenda-files '("~/org/agenda/agenda.org"
 			   "~/org/agenda/birthdays.org"
 			   "~/org/agenda/habits.org"
-			   "~/org/agenda/tasks.org"
-			   )
+			   "~/org/agenda/tasks.org")
 	org-agenda-skip-unavailable-files t
         org-agenda-breadcrumbs-separator ">"
         org-agenda-start-with-log-mode t

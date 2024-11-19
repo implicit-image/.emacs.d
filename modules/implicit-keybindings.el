@@ -1,13 +1,14 @@
 
 (use-package hydra)
 
+
 (use-package which-key
   :demand
   :commands
   (which-key-setup-side-window-bottom)
   :init
   (setq which-key-popup-type 'minibuffer
-        which-key-idle-delay 0.6
+	which-key-idle-delay 0.6
 	which-key-max-display-columns 5
 	which-key-add-column-padding 10
 	which-key-min-display-lines 5)
