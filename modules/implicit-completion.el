@@ -93,58 +93,18 @@
 ;; #########################################################
 
 ;; in-buffer completion
-(use-package corfu
-  :demand
-  :after doom-themes
-  :init 
-  (setq corfu-cycle t
-	corfu-doc-delay 0.00
-	corfu-popupinfo-delay '(0.4 . 0.2)
-	corfu-left-margin-width 1
-	corfu-right-margin-width 1
-	corfu-bar-width 0
-	corfu-count 15)
-  :custom-face
-  ;; (corfu-border ((t (:background ,(face-attribute 'font-lock-keyword-face :foreground nil 'default)))))
-  ;; (corfu-border ((t (:background ,(+eye-candy/get-doom-face-attribute 'font-lock-keyword-face :foreground)))))
-  :config
-  (global-corfu-mode)
-  (corfu-history-mode)
-  (corfu-popupinfo-mode))
-
-;; for corfu terminal support
-(use-package corfu-terminal)
-
-(use-package corfu-doc-terminal
-  :straight '(corfu-doc-terminal
-	      :type git
-	      :repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git"))
-
-
-(use-package corfu-candidate-overlay
-  :demand
-  :config
-  (set-face-attribute 'corfu-candidate-overlay-face nil :inherit font-lock-comment-face)
-  (corfu-candidate-overlay-mode 1))
-
-(use-package cape
-  :after corfu
-  :init
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file))
 
 (use-package yasnippet-capf
-  :after yasnippet
+  :after doom-snippets
   :config
   (add-hook 'completion-at-point-functions #'yasnippet-capf))
 
 (use-package tempel
-  :after corfu
-  :init
-  (add-hook 'completion-at-point-functions #'tempel-expand))
+  :after cape)
 
 (use-package tempel-collection
   :after tempel)
 
 
 (provide 'implicit-completion)
+
