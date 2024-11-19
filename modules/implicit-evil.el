@@ -30,6 +30,16 @@
   :config
   (global-evil-vimish-fold-mode 1))
 
+(use-package evil-org
+  :after org
+  :hook (org-mode . (lambda () (evil-org-mode)))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
+(use-package treemacs-evil
+  :demand
+  :after treemacs)
 
 
 (provide 'implicit-evil)
