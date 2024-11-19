@@ -13,17 +13,21 @@
   :after org
   :hook (org-mode . org-fragtog-mode))
 
-;; (use-package org-bullets
-;;   :hook (org-mode . org-bullets-mode))
 
-;; (use-package org-pretty-table
-;;   :straight (org-pretty-table :type git
-;; 			      :host github
-;; 			      :repo "Fuco1/org-pretty-table")
-;;   :hook (org-mode . org-pretty-table-mode))
 
+(use-package toc-org
+  :hook
+  (org-mode . toc-org-mode))
+
+(use-package org-special-block-extras
+  :hook (org-mode . org-special-block-extras-mode)
+  :custom
+    (o-docs-libraries
+     '("~/org-special-block-extras/documentation.org")
+     "The places where I keep my ‘#+documentation’"))
 
 (use-package org
+  :demand
   :init
   (setq org-confirm-babel-evaluate nil
 	org-startup-indented t
@@ -36,15 +40,10 @@
 	+org/journal-file (substitute-in-file-name "$HOME/org/journal.org")
 	+org/metrics-file (substitute-in-file-name "$HOME/org/metrics.org"))
   :config
-  ;; ;; popwin integration
-  ;; (push '("\*Org\**"
-  ;; 	  :regexp t
-  ;; 	  :height 0.25
-  ;; 	  :position bottom
-  ;; 	  :dedicated nil) popwin:special-display-config)
   (plist-put org-format-latex-options :background "#181818")
   (plist-put org-format-latex-options :foreground "#f1f1f1")
   (plist-put org-format-latex-options :scale 2.0)
+  (plist-put org-preview-latex-process-alist )
   (setq org-hide-emphasis-markers 1
         org-directory "~/org/"
         org-hide-macro-markers 1
@@ -54,6 +53,7 @@
         org-md-headline-style 'setext
         org-odt-preferred-output-format "doc"
 	org-return-follows-link t
+	org-latex-compiler "lualatex" 
         ;; agenda
         org-log-done 'time
         org-log-into-drawer t)
@@ -90,7 +90,7 @@
           ("tt" "Task" entry (file+olp ,+org/tasks-file "TODOS")
            "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 	  ("tn" "Next Task" entry (file+headline +org/tasks-file "Tasks")
-	  "** NEXT %? \nDEADLINE: %t")
+	   "** NEXT %? \nDEADLINE: %t")
           ("j" "Journal Entries")
           ("jj" "Journal" entry
            (file+olp+datetree +org/journal-file)
