@@ -1,9 +1,9 @@
 
-(add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
-(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
 
 
 (use-package calibredb
+  :init
+  (evil-set-initial-state 'calibredb-search-mode 'emacs)
   :config
   (setq calibredb-root-dir "~/library"
         calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir)
@@ -17,7 +17,10 @@
         calibredb-format-icons-in-terminal t
         calibredb-format-character-icons t)
   :hook
-  (calibredb-search-mode . (lambda () (display-line-numbers-mode -1))))
+  (calibredb-search-mode . (lambda ()
+			     (interactive)
+			     (display-line-numbers-mode -1)
+			     (blink-cursor-mode -1))))
 
 (use-package org-noter
   :init
@@ -30,11 +33,15 @@
 (use-package pdf-tools
   :init
   (evil-set-initial-state 'pdf-view-mode 'normal)
+  (add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
   :hook
-  (pdf-view-mode . (lambda () (display-line-numbers-mode -1))))
+  (pdf-view-mode . (lambda ()
+		     (interactive)
+		     (display-line-numbers-mode -1))))
  
 
-(use-package nov)
+(use-package nov
+  :init (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 
 (use-package djvu)
 
