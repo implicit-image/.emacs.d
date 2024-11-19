@@ -22,7 +22,11 @@
 	dired-recursive-copies 'always
 	dired-recursive-deletes 'top
 	dired-auto-revert-buffer t
-	dired-create-destination-dirs 'ask))
+	dired-create-destination-dirs 'ask)
+  :hook ((dired-mode) . (lambda ()
+			  (interactive)
+			  (display-line-numbers-mode -1)
+			  (toggle-truncate-lines +1))))
 
 (use-package diredfl
   :commands
