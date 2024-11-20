@@ -31,7 +31,7 @@
 	  ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation-buffer))
 	  (t (message "No documentation function found")))))
 
-(defun +lookup-set-fn (type forms)
+(defun +lookup-set-fn (type &rest forms)
   ""
   (let ((fn-list (pcase type
 		   ('popup '+lookup/popup-functions-alist)
@@ -108,7 +108,7 @@
 
 (use-package helpful
   :init
-  (+lookup-set-fn 'buffer '((helpful-mode . helpful-at-point)))
+  (+lookup-set-fn 'buffer '(helpful-mode . helpful-at-point))
   ;;popwin support
   (+windows-cfg
    '(("\*helpful*")

@@ -3,8 +3,7 @@
   :init
   (+windows-cfg '((treemacs-mode) :position left :width 0.18 :noselect t :stick t :dedicated t))
   (setq treemacs-indent-guide-style 'line
-	treemacs-indentation 1
-	treemacs-pre-refresh-hook)
+	treemacs-indentation 1)
   :config
   (treemacs-load-theme "Default")
   :hook

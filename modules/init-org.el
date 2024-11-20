@@ -38,7 +38,6 @@
   (plist-put org-format-latex-options :background "#181818")
   (plist-put org-format-latex-options :foreground "#f1f1f1")
   (plist-put org-format-latex-options :scale 2.0)
-  (plist-put org-preview-latex-process-alist )
   (setq org-hide-emphasis-markers 1
         org-directory "~/org/"
         org-hide-macro-markers 1
