@@ -56,21 +56,17 @@
 
 (use-package popon)
 
-(use-package acm-terminal
-  :custom-face
-  (acm-terminal-default-face ((t (:background "#343434"))))
-  (acm-terminal-select-face ((t (:background "#111111" :box t))))
-  :straight (acm-terminal :host github
-			  :repo "twlz0ne/acm-terminal")
-  :hook
-  (lsp-bridge-mode . (lambda ()
-		       (require 'acm-terminal))))
+;; emacs 31 should  add tty child frames
+(when (< (string-to-number emacs-version) 31)
+  (use-package acm-terminal
+    :custom-face
+    (acm-terminal-default-face ((t (:background "#343434"))))
+    (acm-terminal-select-face ((t (:background "#111111" :box t))))
+    :straight (acm-terminal :host github
+			    :repo "twlz0ne/acm-terminal")
+    :hook
+    (lsp-bridge-mode . (lambda ()
+			 (require 'acm-terminal)))))
 
 
 (provide 'implicit-lsp-bridge)
-
-
-
-
-
-

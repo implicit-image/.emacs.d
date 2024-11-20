@@ -75,7 +75,7 @@
 	lsp-signature-render-documentation t
 	;; completion
 	lsp-completion-show-kind t
-	lsp-completion-provider :none 
+	lsp-completion-provider :none
 	lsp-completion-enable t
 	;; headerline
 	lsp-headerline-breadcrumb-enable t
@@ -142,7 +142,7 @@
 
 (use-package corfu
   :demand
-  :init 
+  :init
   (setq corfu-cycle t
 	corfu-doc-delay 0.00
 	corfu-preselect 'first
@@ -174,17 +174,19 @@
   (lsp-bridge . (lambda ()
 		  (corfu-mode -1))))
 
-;; for corfu terminal support
-(use-package corfu-terminal
-  :hook
-  (tty-setup . corfu-terminal-mode))
+;; emacs 31 should add tty child frames
+(when (< (string-to-number emacs-version) 31)
+  ;; for corfu terminal support
+  (use-package corfu-terminal
+    :hook
+    (tty-setup . corfu-terminal-mode))
 
 
-(use-package corfu-doc-terminal
-  :after corfu-terminal
-  :straight '(corfu-doc-terminal
-	      :type git
-	      :repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git"))
+  (use-package corfu-doc-terminal
+    :after corfu-terminal
+    :straight '(corfu-doc-terminal
+		:type git
+		:repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git")))
 
 
 (use-package corfu-candidate-overlay
@@ -202,4 +204,3 @@
 
 
 (provide 'implicit-lsp-mode)
-
