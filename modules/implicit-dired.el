@@ -31,4 +31,4 @@
   :hook
   (dired-mode . diredfl-mode))
 
-(provide 'implicit-dired)
+(provide 'init-dired)

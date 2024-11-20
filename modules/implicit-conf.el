@@ -5,4 +5,4 @@
 
 (use-package nix-mode)
 
-(provide 'implicit-conf)
+(provide 'init-conf)

@@ -9,4 +9,4 @@
 			(elm-format-on-save-mode)
 			(lsp))))
 
-(provide 'implicit-elm)
+(provide 'init-elm)

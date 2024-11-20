@@ -7,4 +7,4 @@
   (autoload 'dired-async-mode "dired-async.el" nil t)
   (dired-async-mode 1))
 
-(provide 'implicit-elisp-libs)
+(provide 'init-elisp-libs)

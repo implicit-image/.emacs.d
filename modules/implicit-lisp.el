@@ -36,4 +36,4 @@
 			      (interactive)
 			      (slime-mode +1))))
 
-(provide 'implicit-lisp)
+(provide 'init-lisp)

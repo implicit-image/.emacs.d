@@ -71,4 +71,4 @@
   :init (setq exec-path-from-shell-variables '("PATH" "MANPATH" "JAVA_HOME"))
   :config (exec-path-from-shell-initialize))
 
-(provide 'implicit-base)
+(provide 'init-base)

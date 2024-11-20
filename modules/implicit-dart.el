@@ -1,3 +1,3 @@
 (use-package dart-mode)
 
-(provide 'implicit-dart)
+(provide 'init-dart)

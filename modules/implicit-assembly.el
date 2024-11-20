@@ -11,4 +11,4 @@
 
 (use-package nasm-mode)
 
-(provide 'implicit-assembly)
+(provide 'init-assembly)

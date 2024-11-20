@@ -21,4 +21,4 @@
   :config
   (eglot-booster-mode))
 
-(provide 'implicit-eglot)
+(provide 'init-eglot)

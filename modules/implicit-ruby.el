@@ -2,4 +2,4 @@
 
 (use-package robe)
 
-(provide 'implicit-ruby)
+(provide 'init-ruby)

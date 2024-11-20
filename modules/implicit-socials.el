@@ -5,4 +5,4 @@
 (use-package rcirc
   :straight nil)
 
-(provide 'implicit-socials)
+(provide 'init-socials)

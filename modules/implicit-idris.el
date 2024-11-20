@@ -1,3 +1,3 @@
 (use-package idris-mode)
 
-(provide 'implicit-idris)
+(provide 'init-idris)

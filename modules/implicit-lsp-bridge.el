@@ -45,4 +45,4 @@
     (lsp-bridge-mode . (lambda ()
 			 (require 'acm-terminal)))))
 
-(provide 'implicit-lsp-bridge)
+(provide 'init-lsp-bridge)

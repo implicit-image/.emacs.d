@@ -1,3 +1,3 @@
 (use-package markdown-mode)
 
-(provide 'implicit-md)
+(provide 'init-md)

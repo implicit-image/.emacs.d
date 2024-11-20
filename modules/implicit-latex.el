@@ -2,4 +2,4 @@
 
 (use-package cdlatex)
 
-(provide 'implicit-latex)
+(provide 'init-latex)

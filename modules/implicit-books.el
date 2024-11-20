@@ -42,4 +42,4 @@
 
 (use-package djvu)
 
-(provide 'implicit-books)
+(provide 'init-books)

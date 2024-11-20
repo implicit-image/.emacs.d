@@ -45,4 +45,4 @@
   :config
   (org-babel-jupyter-override-src-block "haskell"))
 
-(provide 'implicit-org-babel)
+(provide 'init-org-babel)

@@ -6,4 +6,4 @@
 
 (use-package ocaml-ts-mode)
 
-(provide 'implicit-ml)
+(provide 'init-ml)

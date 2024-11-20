@@ -20,4 +20,4 @@
   :config
   (global-diff-hl-mode))
 
-(provide 'implicit-vc)
+(provide 'init-vc)

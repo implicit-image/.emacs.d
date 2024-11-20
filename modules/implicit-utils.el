@@ -65,4 +65,4 @@
 
 (use-package sideline)
 
-(provide 'implicit-utils)
+(provide 'init-utils)

@@ -41,5 +41,4 @@
   :config
   (mini-echo-mode))
 
-(provide 'implicit-modeline)
-
+(provide 'init-modeline)

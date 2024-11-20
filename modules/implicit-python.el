@@ -7,4 +7,4 @@
   (setq python-indent-offset 4)
   :straight nil)
 
-(provide 'implicit-python)
+(provide 'init-python)

@@ -23,4 +23,4 @@
 
 (use-package fstar-mode)
 
-(provide 'implicit-dotnet)
+(provide 'init-dotnet)

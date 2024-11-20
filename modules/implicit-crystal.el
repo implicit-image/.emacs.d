@@ -5,4 +5,4 @@
 			    (interactive)
 			    (lsp))))
 
-(provide 'implicit-crystal)
+(provide 'init-crystal)

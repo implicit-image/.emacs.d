@@ -25,4 +25,4 @@
   :hook
   (tty-setup . etcc-on))
 
-(provide 'implicit-tty)
+(provide 'init-tty)

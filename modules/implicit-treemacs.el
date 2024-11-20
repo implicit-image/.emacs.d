@@ -23,4 +23,4 @@
 
 (use-package treemacs-all-the-icons)
 
-(provide 'implicit-treemacs)
+(provide 'init-treemacs)

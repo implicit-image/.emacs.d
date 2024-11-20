@@ -203,4 +203,4 @@
   (add-hook 'completion-at-point-functions #'cape-file))
 
 
-(provide 'implicit-lsp-mode)
+(provide 'init-lsp-mode)

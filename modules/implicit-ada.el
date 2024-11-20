@@ -8,4 +8,4 @@
 			(lsp))))
 
 
-(provide 'implicit-ada)
+(provide 'init-ada)

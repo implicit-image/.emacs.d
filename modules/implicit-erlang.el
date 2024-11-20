@@ -5,4 +5,4 @@
 
 (use-package otp)
 
-(provide 'implicit-erlang)
+(provide 'init-erlang)

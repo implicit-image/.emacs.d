@@ -7,4 +7,4 @@
 	       (lsp)
 	       (flycheck-mode +1))))
 
-(provide 'implicit-go)
+(provide 'init-go)

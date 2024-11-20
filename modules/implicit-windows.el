@@ -32,4 +32,4 @@
      :regexp t :height 0.3 :position bottom :dedicated nil))
   (popwin-mode 1))
 
-(provide 'implicit-windows)
+(provide 'init-windows)

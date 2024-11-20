@@ -51,4 +51,4 @@
 
 (use-package know-your-http-well)
 
-(provide 'implicit-web)
+(provide 'init-web)

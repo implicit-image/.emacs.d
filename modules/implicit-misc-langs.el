@@ -27,4 +27,4 @@
 
 (use-package purescript-mode)
 
-(provide 'implicit-misc-langs)
+(provide 'init-misc-langs)

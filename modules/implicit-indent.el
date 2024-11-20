@@ -32,4 +32,4 @@
   (before-save . whitespace-cleanup)
   (before-save . delete-trailing-whitespace))
 
-(provide 'implicit-indent)
+(provide 'init-indent)

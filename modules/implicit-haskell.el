@@ -16,4 +16,4 @@
 
 (use-package dante)
 
-(provide 'implicit-haskell)
+(provide 'init-haskell)

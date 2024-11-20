@@ -9,4 +9,4 @@
 (use-package evil-textobj-tree-sitter
   :after (treeesit evil))
 
-(provide 'implicit-treesitter)
+(provide 'init-treesitter)

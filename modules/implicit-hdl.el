@@ -6,4 +6,4 @@
   :config
   (setq nand2tetris-core-base-dir "~/projects/nand2tetris/core"))
 
-(provide 'implicit-hdl)
+(provide 'init-hdl)

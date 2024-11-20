@@ -15,4 +15,4 @@
 
 (use-package flymake)
 
-(provide 'implicit-checkers)
+(provide 'init-checkers)

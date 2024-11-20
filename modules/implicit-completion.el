@@ -87,4 +87,4 @@
   :after tempel)
 
 
-(provide 'implicit-completion)
+(provide 'init-completion)

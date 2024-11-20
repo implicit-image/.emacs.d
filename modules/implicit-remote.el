@@ -22,4 +22,4 @@
 
 (use-package tramp)
 
-(provide 'implicit-remote)
+(provide 'init-remote)

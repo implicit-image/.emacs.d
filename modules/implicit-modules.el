@@ -2,4 +2,4 @@
   (interactive)
   (counsel-find-file "" +modules/path))
 
-(provide 'implicit-modules)
+(provide 'init-modules)

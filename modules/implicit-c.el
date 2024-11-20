@@ -9,6 +9,4 @@
 
 (use-package ccls)
 
-(provide 'implicit-c)
-
-
+(provide 'init-c)

@@ -42,6 +42,4 @@
   :config
   (setq compilation-scroll-output t))
 
-(provide 'implicit-coding)
-
-
+(provide 'init-coding)

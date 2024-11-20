@@ -23,4 +23,4 @@
   (setq rust-ts-mode-indent-offset 4))
 
 
-(provide 'implicit-rust)
+(provide 'init-rust)

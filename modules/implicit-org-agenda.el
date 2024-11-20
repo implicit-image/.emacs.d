@@ -55,4 +55,4 @@
 		  ((org-agenda-overriding-header "Cancelled Projects")
 		   (org-agenda-files org-agenda-files))))))))
 
-(provide 'implicit-org-agenda)
+(provide 'init-org-agenda)

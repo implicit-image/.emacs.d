@@ -19,4 +19,4 @@
 			("lsp-mode" ((lsp-deferred)))
 			("lsp-bridge" ((lsp-bridge-mode +1)))))))
 
-(provide 'implicit-lsp)
+(provide 'init-lsp)

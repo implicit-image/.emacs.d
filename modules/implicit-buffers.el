@@ -33,4 +33,4 @@
   (recentf-mode 1))
 
 
-(provide 'implicit-buffers)
+(provide 'init-buffers)

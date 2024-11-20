@@ -11,4 +11,4 @@
   (setq imenu-auto-rescan t
 	imenu-use-popup-menu t))
 
-(provide 'implicit-search)
+(provide 'init-search)

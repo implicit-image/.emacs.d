@@ -33,4 +33,4 @@
 
 (use-package clj-refactor)
 
-(provide 'implicit-jvm)
+(provide 'init-jvm)

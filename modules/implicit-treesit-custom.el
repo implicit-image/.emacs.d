@@ -45,4 +45,4 @@
 
 ;; ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
 
-(provide 'implicit-treesit-custom)
+(provide 'init-treesit-custom)

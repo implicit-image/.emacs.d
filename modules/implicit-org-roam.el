@@ -18,4 +18,4 @@
         org-roam-db-update-on-save t
         org-roam-completion-everywhere t))
 
-(provide 'implicit-org-roam)
+(provide 'init-org-roam)

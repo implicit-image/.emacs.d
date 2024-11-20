@@ -18,4 +18,4 @@
   (elysium-window-size 0.33)
   (elysium-window-style 'vertical))
 
-(provide 'implicit-llm)
+(provide 'init-llm)

@@ -109,4 +109,4 @@
   :hook
   (org-mode . visual-line-mode))
 
-(provide 'implicit-org)
+(provide 'init-org)

@@ -1,4 +1,4 @@
 (use-package ess)
 
 
-(provide 'implicit-R)
+(provide 'init-R)

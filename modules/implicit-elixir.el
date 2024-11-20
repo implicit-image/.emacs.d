@@ -11,4 +11,4 @@
 (use-package mix
   :hook (elixir-mode . mix-minor-mode))
 
-(provide 'implicit-elixir)
+(provide 'init-elixir)
