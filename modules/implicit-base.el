@@ -1,30 +1,30 @@
 (require 'f)
 
-
 (use-package emacs
   :demand
   :init
-  (setq +base/font-family "Iosevka Comfy Fixed"
-	+base/font-weight 'semi-light
-	+base/font-size 22
-	+base/font-spec (font-spec :family +base/font-family
-				   :weight +base/font-weight
-				   :size +base/font-size))
+  (setq +base/font-family "Comic Code" ;; "Iosevka Comfy Fixed"
+        +base/font-weight 'semi-light
+        +base/font-size 20
+        +base/font-spec (font-spec :family +base/font-family
+                                   :weight +base/font-weight
+                                   :size +base/font-size)
+	+base/theme 'doom-gruvbox)
   ;; (set-frame-font +base/font-spec nil t)
   (add-to-list 'default-frame-alist `(font . ,(string-join `(,+base/font-family ,(number-to-string +base/font-size)) "-")))
   (setq user-full-name "Błażej Niewiadomski"
-        user-mail-address "blaz.nie@protonmail.com"
+	user-mail-address "blaz.nie@protonmail.com"
+	read-process-output-max (* 1024 16)
 	;;startup screen
-        inhibit-startup-screen t
-	
-        visible-bell nil
+	inhibit-startup-screen t
+	visible-bell nil
 	;; lines
-        display-line-numbers-type 'relative
+	display-line-numbers-type 'relative
 	truncate-lines t
 	truncate-partial-width-windows t
 	;;tempfiles
-        create-lockfiles nil
-	backup-directory-alist `(("." . ,(f-join user-emacs-directory "backups/")))
+	create-lockfiles nil
+	backup-directory-alist `(("." . ,(f-join user-emacs-directory "backups")))
 	;; increase garbage collector limit
 	gc-cons-threshold 100000000
 	;; scrollling
@@ -36,6 +36,7 @@
   ;; remove toolbar and menu bar
   (tool-bar-mode 0)
   (menu-bar-mode 0)
+  (indent-tabs-mode -1)
   ;; line numbers
   (global-display-line-numbers-mode 1)
   ;; remove scroll bar
@@ -48,6 +49,8 @@
   (global-hl-line-mode 1)
   ;; show borders between windows
   (window-divider-mode 1)
+;;;  auto revert all buffers
+  (global-auto-revert-mode t)
   (add-to-list 'default-frame-alist
                '(vertical-scroll-bars . nil))
   ;; write customizations to seperate file
