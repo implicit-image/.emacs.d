@@ -106,6 +106,6 @@
 ;; apps
 (require 'init-socials)
 ;; website export config
-(require 'init-image-dot-github-dot-io)
+(require 'init-implicit-image-dot-github-dot-io)
 
 ;; load theme
