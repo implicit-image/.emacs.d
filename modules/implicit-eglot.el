@@ -5,7 +5,7 @@
   :init
   (setq eglot-autoshutdown t
 	eglot-extend-to-xref t)
-  (+windows/cfg '(("\*eldoc\*")
+  (+windows-cfg '(("\*eldoc\*")
 		  :regexp t :height 0.3 :position bottom :dedicated nil))
   :hook
   (eglot-mode . (lambda ()

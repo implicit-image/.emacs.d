@@ -1,7 +1,6 @@
 (require 'projectile)
 (require 'ivy)
 
-
 (defun +terminal--get-buffers (&optional preds)
   (match-buffers `(or . ,(append '((major-mode . vterm-mode))
 			      preds))))
@@ -13,7 +12,6 @@
 
 (defun +terminal--get-dwim-command (&optional new-window)
   "Open terminal. If NEW-WINDOW is not `nil' open it in new window instead of the current one. Tries to detect current project"
-  (interactive)
   (let* ((command-suffix (if (and (boundp 'new-window) new-window)
 			     "other-window"
 			   ""))
@@ -50,7 +48,7 @@
 	    :caller '+terminal/run-command
 	    :action (lambda (command)
 		      (interactive)
-		      (let ((buffer (funcall-interactively (+terminal--get-dwim-command t))))
+		      (let ((buffer (funcall (+terminal--get-dwim-command t))))
 			(with-current-buffer buffer
 			  (interactive)
 			  (when (not (eq evil-state 'insert))
@@ -70,7 +68,6 @@
 		      (switch-to-buffer buffer nil nil))
 	    :caller '+terminal/counsel-vterm))
 
-
 (use-package vterm
   :init
   (evil-set-initial-state 'vterm-mode 'insert)
@@ -81,6 +78,5 @@
   (evil-set-initial-state 'eat-mode 'insert)
   :hook
   (eat-mode . (lambda () (display-line-numbers-mode -1))))
-
 
 (provide 'implicit-terminal)

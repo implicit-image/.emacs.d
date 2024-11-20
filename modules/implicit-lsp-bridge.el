@@ -1,25 +1,3 @@
-
-
-;;;###autoload
-;; (defun +lsp/reload-autocompletion ()
-;;   ""
-;;   (interactive)
-;;   (if (display-graphic-p)
-;;       (when (featurep 'acm-terminal)
-;; 	(acm-terminal-deactive)
-;; 	(message "Deactivating acm-terminal")
-;; 	(message "Reloading acm")
-;; 	(acm-mode -1)
-;; 	(acm-mode +1))
-;;     (when (not (featurep 'acm-terminal))
-;;       (require 'acm-terminal)
-;;       (acm-terminal-active)
-;;       (message "Activated acm'terminal"))))
-
-;; (add-function :after after-focus-change-function '+lsp/reload-autocompletion)
-
-
-
 (use-package lsp-bridge
   :demand
   :straight (lsp-bridge :type git
@@ -31,7 +9,7 @@
   :custom-face
   (lsp-bridge-semantic-tokens-variable-face ((t (:family "Iosevka Comfy" :box (:color "#FFDD33" :line-width -1 :style nil)))))
   :init
-  (+windows/cfg
+  (+windows-cfg
    '(("\*lsp-bridge-doc\*")
      :regexp t :height 0.3 :position bottom :dedicated t :noselect nil))
   :config
@@ -53,7 +31,6 @@
 	acm-terminal-max-width 30)
   (global-lsp-bridge-mode 1))
 
-
 (use-package popon)
 
 ;; emacs 31 should  add tty child frames
@@ -67,6 +44,5 @@
     :hook
     (lsp-bridge-mode . (lambda ()
 			 (require 'acm-terminal)))))
-
 
 (provide 'implicit-lsp-bridge)

@@ -5,7 +5,4 @@
   :hook
   (gleam-ts-mode . (lambda () (lsp))))
 
-
 (provide 'implicit-gleam)
-
-

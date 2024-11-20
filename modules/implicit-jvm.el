@@ -1,9 +1,3 @@
-;; TODO: fix tree sitter grammar url
-;;(use-package java-ts-mode)
-
-;; (use-package java-ts-mode
-;;   :straight nil)
-
 (use-package java-ts-mode
   :config
   (setq java-ts-mode-indent-offset 4)
@@ -27,10 +21,7 @@
 (use-package sbt-mode)
 
 (use-package lsp-metals
-  :config
-  (setq lsp-metals-java-home )
   :after scala-mode)
-
 
 (use-package groovy-mode)
 

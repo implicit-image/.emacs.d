@@ -4,7 +4,6 @@
   :config
   (setq compilation-scroll-output t))
 
-
 (use-package rustic
   :mode "\\.rs\\'"
   :config

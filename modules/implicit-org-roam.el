@@ -1,4 +1,3 @@
-
 (use-package org-roam
   :demand
   :custom
@@ -18,6 +17,5 @@
           (not (member "ATTACH" (org-get-tags))))
         org-roam-db-update-on-save t
         org-roam-completion-everywhere t))
-
 
 (provide 'implicit-org-roam)

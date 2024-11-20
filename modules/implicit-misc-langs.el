@@ -1,6 +1,3 @@
-;; misc config for minor languages
-
-
 (use-package nwscript-mode
   :mode "\\.nss\\'"
   :commands
@@ -20,7 +17,6 @@
   :after nwscript-mode
   :init)
 
-
 (use-package gdscript-mode)
 
 (use-package lua-mode)
@@ -30,7 +26,5 @@
 (use-package d-mode)
 
 (use-package purescript-mode)
-
-
 
 (provide 'implicit-misc-langs)

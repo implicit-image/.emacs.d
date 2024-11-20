@@ -1,18 +1,8 @@
-
-(defun +completion/initialize ()
-  "Set up completion functions and load required libraries.")
-;; 
-
-(defun +completion/popup ()
-  "Show a completion popup.")
-
-
 (use-package company
   :disabled t)
 
 ;; disable loading company if something tries
 (defalias 'company-mode 'ignore)
-
 
 (use-package ivy
   :after marginalia
@@ -98,4 +88,3 @@
 
 
 (provide 'implicit-completion)
-

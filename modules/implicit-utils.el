@@ -23,12 +23,12 @@
 	    :caller '+utils/counsel-toggle-minor-mode))
 
 
-(defun +utils/nth-wrapped (n list)
+(defun +utils-nth-wrapped (n list)
   "Returnd nth element of `list'. If `n' is greater than length of `list' takes `(mod n (length list))' instead."
   (nth (mod (length list) n) list))
 
 
-;;;###autoload  
+;;;###autoload
 (defun +utils/delete-visited-file ()
   (interactive)
   (let* ((curr-buf (current-buffer))
@@ -55,17 +55,14 @@
 
 
 
-(defun +utils/whole-buffer-as-string (buffer)
+(defun +utils-whole-buffer-as-string (buffer)
   (with-current-buffer buffer
     (save-restriction
       (widen)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
-
 (use-package restart-emacs)
-
 
 (use-package sideline)
 
 (provide 'implicit-utils)
-

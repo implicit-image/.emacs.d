@@ -39,5 +39,4 @@
   :demand
   :after treemacs)
 
-
 (provide 'implicit-evil)

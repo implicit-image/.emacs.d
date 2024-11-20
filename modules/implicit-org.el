@@ -5,15 +5,10 @@
 
 ;; (use-package org-appear
 ;;   :hook (org-mode . org-appear-mode))
-`
-;; (use-package olivetti
-;;   :hook (org-mode . olivetti-mode))
 
 (use-package org-fragtog
   :after org
   :hook (org-mode . org-fragtog-mode))
-
-
 
 (use-package toc-org
   :hook
@@ -53,7 +48,7 @@
         org-md-headline-style 'setext
         org-odt-preferred-output-format "doc"
 	org-return-follows-link t
-	org-latex-compiler "lualatex" 
+	org-latex-compiler "lualatex"
         ;; agenda
         org-log-done 'time
         org-log-into-drawer t)
@@ -96,7 +91,7 @@
            (file+olp+datetree +org/journal-file)
            "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
            ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-           :clock-in :clock-resume 
+           :clock-in :clock-resume
            :empty-lines 1)
           ("jm" "Meeting" entry
            (file+olp+datetree +org/journal-file)
@@ -113,6 +108,5 @@
            "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
   :hook
   (org-mode . visual-line-mode))
-
 
 (provide 'implicit-org)

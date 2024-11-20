@@ -1,4 +1,3 @@
-
 (use-package mips-mode)
 
 (use-package riscv-mode)

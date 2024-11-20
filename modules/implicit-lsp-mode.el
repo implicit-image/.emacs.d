@@ -59,7 +59,7 @@
 
 (use-package lsp-mode
   :config
-  (+windows/cfg
+  (+windows-cfg
    '(("\*lsp-help\**" "\*lsp-install*")
      :regexp t :height 0.35 :position bottom :dedicated nil))
   (setq lsp-enable-symbol-highlighting t

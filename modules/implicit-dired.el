@@ -1,4 +1,3 @@
-
 ;;;###autoload
 (defun +dired/choose-sort ()
   "Change sort type in current dired buffer."
@@ -11,8 +10,6 @@
 		   (("dir") "-Al --group-directories-first")
 		 (t "-Al"))))
     (dired-sort-other ls-args)))
-
-
 
 (use-package dired
   :straight nil

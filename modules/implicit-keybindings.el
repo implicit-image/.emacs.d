@@ -1,6 +1,4 @@
-
 (use-package hydra)
-
 
 (use-package which-key
   :demand

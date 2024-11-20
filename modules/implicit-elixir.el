@@ -1,5 +1,3 @@
-
-
 (use-package elixir-ts-mode
   :mode (rx (or "\\.exs\\'" "\\.ex\\'"))
   :init (add-to-list '+lsp/servers-to-install 'elixir-ls)

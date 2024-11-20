@@ -1,5 +1,5 @@
-
 (defun +buffers/decide-ibuffer-filters ()
+  (interactive)
   (let ((group (symbol-name 'default)))
     (ibuffer-switch-to-saved-filter-groups group)))
 

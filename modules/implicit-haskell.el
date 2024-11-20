@@ -1,4 +1,3 @@
-
 (use-package haskell-mode
   :init
   (setq haskell-process-log t

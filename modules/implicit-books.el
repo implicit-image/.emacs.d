@@ -1,6 +1,3 @@
-
-
-
 (use-package calibredb
   :init
   (evil-set-initial-state 'calibredb-search-mode 'emacs)
@@ -38,7 +35,7 @@
   (pdf-view-mode . (lambda ()
 		     (interactive)
 		     (display-line-numbers-mode -1))))
- 
+
 
 (use-package nov
   :init (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))

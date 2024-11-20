@@ -1,34 +1,10 @@
 (require 'f)
 
-;; (defvar +eye-candy/custom-faces ()
-;;   "Alist of custom faces to reload when the theme changes")
-
-;; (defun +eye-candy/reload-faces ()
-;;   "Reload faces saved in `+eye-candy/custom-faces'."
-;;   (apply #'custom-set-faces +eye-candy/custom-faces))
-
-
-;; ;;; (+eye-candy--set-face '(corfu-border ((frame (:background (doom-color color))))))
-;; (defun +eye-candyc-set-face (face-def)
-;;   "")
-
-
-
-;; (defun +eye-candy/set-custom-faces (&rest face-defs)
-;;   ""
-;;   ())
-
-
-
-
 (defun +eye-candy/load-theme (theme)
   ""
   (interactive)
   (load-theme theme t)
   (solaire-global-mode +1))
-
-;; (advice-add 'load-theme :after +eye-candy/reload-faces)
-
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -65,7 +41,6 @@
 
 (use-package olivetti)
 
-
 (use-package solaire-mode
   :after doom-themes)
 
@@ -95,8 +70,6 @@
                                       :host github
                                       :repo "implicit-image/doom-gruber-darker-theme"))
 
-
-
 ;; font ligatures
 (use-package ligature
   :config
@@ -104,6 +77,5 @@
 				      "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" "<=>" "<==>" "<===>" "<====>" "<!---"
 				      "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
 		      ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++")))
-
 
 (provide 'implicit-eye-candy)

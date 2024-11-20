@@ -1,4 +1,3 @@
-
 (use-package anaconda-mode)
 
 (use-package lsp-pyright)

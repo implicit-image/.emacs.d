@@ -1,4 +1,3 @@
-
 (use-package go-ts-mode
   :mode "\\.go\\'"
   :init
@@ -7,6 +6,5 @@
   (go-mode . (lambda ()
 	       (lsp)
 	       (flycheck-mode +1))))
-
 
 (provide 'implicit-go)

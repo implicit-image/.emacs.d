@@ -1,8 +1,8 @@
-
 (defvar +lsp/servers-to-install '()
   "Alist of (INSTALLER-SYMBOL . SERVER-NAME) to ensure are installed by `lsp-install-server'")
 
 (defun +lsp/doc-popup ())
+
 (defun +lsp/doc-buffer ())
 
 ;;;###autoload
@@ -18,8 +18,5 @@
 		      (pcase client
 			("lsp-mode" ((lsp-deferred)))
 			("lsp-bridge" ((lsp-bridge-mode +1)))))))
-
-
-
 
 (provide 'implicit-lsp)

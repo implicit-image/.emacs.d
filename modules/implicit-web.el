@@ -1,6 +1,5 @@
 (require 'rx)
 
-
 (use-package js2-mode)
 
 (use-package js-ts-mode
@@ -23,8 +22,8 @@
 
 (use-package tide
   :init
-  (+windows/cfg '(("\*tide-documenation\*") :position bottom :height 0.3))
-  (+lookup/set-fn 'buffer '(typescript-ts-mode . tide-documentation-at-point))
+  (+windows-cfg '(("\*tide-documenation\*") :position bottom :height 0.3))
+  (+lookup-set-fn 'buffer '(typescript-ts-mode . tide-documentation-at-point))
   :config
   (setq tide-enable-xref t)
   :hook ((typescript-ts-mode) . (lambda ()
@@ -39,7 +38,6 @@
   :hook ((web-mode) . (lambda ()
 			(lsp))))
 
-
 ;; rest api interaction in org mode
 (use-package verb)
 
@@ -52,6 +50,5 @@
   :hook ((php-mode)) . #'composer)
 
 (use-package know-your-http-well)
-
 
 (provide 'implicit-web)

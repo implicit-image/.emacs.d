@@ -1,4 +1,3 @@
-
 (use-package indent-bars
   :straight '(indent-bars :type git
 			  :host github
@@ -20,7 +19,6 @@
   (indent-bars-prefer-character t)
   :hook
   ((c-mode nwscript-mode c-ts-mode js2-mode css-mode rust-ts-mode) . indent-bars-mode))
-
 
 (use-package whitespace
   :demand

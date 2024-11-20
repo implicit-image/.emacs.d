@@ -1,12 +1,10 @@
-
-
 (use-package org
   :init
   (setq org-src-tab-acts-natively t
 	org-edit-src-content-indentation 0
 	org-src-preserve-indentation nil)
   :config
-  (+windows/cfg
+  (+windows-cfg
    '(("\*Org-Babel\**" "\*Org Src\**")
      :regexp t :height 0.25 :position bottom :dedicated nil))
   (org-babel-do-load-languages
@@ -43,10 +41,8 @@
   (add-to-list 'org-src-lang-modes (cons "nwscript" 'nwscript-mode)))
 
 (use-package jupyter
-  :after org/org-src
+  :after org
   :config
   (org-babel-jupyter-override-src-block "haskell"))
-
-
 
 (provide 'implicit-org-babel)

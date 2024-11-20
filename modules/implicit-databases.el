@@ -7,5 +7,4 @@
 
 (use-package ob-sql-mode)
 
-
 (provide 'implicit-databases)

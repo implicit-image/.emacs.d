@@ -1,6 +1,3 @@
-;;; llm integration
-
-
 (use-package gptel)
 
 (use-package ellama)

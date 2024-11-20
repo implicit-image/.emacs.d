@@ -1,4 +1,3 @@
-
 (use-package lispy
   :commands
   lispy-mode
@@ -10,7 +9,7 @@
 (use-package emacs-lisp-mode
   :straight nil
   :init
-  (+lookup/set-fn 'buffer '((emacs-lisp-mode . helpful-at-point)
+  (+lookup-set-fn 'buffer '((emacs-lisp-mode . helpful-at-point)
 			    (lisp-interaction-mode . helpful-at-point))))
 
 ;; common lisp
@@ -19,18 +18,16 @@
 ;; racket
 (use-package racket-mode)
 
-
 (use-package slime
   :init
   (setq inferior-lisp-program "sbcl")
-  (+lookup/set-fn 'buffer '((lisp-mode . (lambda ()
+  (+lookup-set-fn 'buffer '((lisp-mode . (lambda ()
 					   (interactive)
 					   (let ((tap  (thing-at-point 'symbol t)))
 					     (slime-documentation tap))))))
   :hook
   (lisp-repl-mode . (lambda ()
 		      (display-line-numbers-mode -1))))
-
 
 (use-package lisp-mode
   :straight nil

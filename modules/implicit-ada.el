@@ -1,5 +1,3 @@
-
-
 (use-package ada-mode
   :preface(add-to-list '+lsp/servers-to-install 'ada-ls)
   :init

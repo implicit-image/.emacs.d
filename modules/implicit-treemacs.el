@@ -1,9 +1,7 @@
-
-
 (use-package treemacs
   :demand
   :init
-  (+windows/cfg '((treemacs-mode) :position left :width 0.18 :noselect t :stick t :dedicated t))
+  (+windows-cfg '((treemacs-mode) :position left :width 0.18 :noselect t :stick t :dedicated t))
   (setq treemacs-indent-guide-style 'line
 	treemacs-indentation 1
 	treemacs-pre-refresh-hook)
@@ -25,7 +23,4 @@
 
 (use-package treemacs-all-the-icons)
 
-
 (provide 'implicit-treemacs)
-
- 

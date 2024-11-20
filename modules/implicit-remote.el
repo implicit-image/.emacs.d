@@ -1,4 +1,3 @@
-
 ;;;###autoload
 (defun +remote/counsel-find-file ()
   (interactive)
@@ -16,15 +15,11 @@
   (interactive)
   (counsel-find-file "/sudo::"))
 
-
 (use-package auth-source
   :demand
   :config
   (setq auth-sources '("~/.authinfo" "~/.authinfo.gpg" "~/.netrc")))
 
 (use-package tramp)
-
-
-
 
 (provide 'implicit-remote)

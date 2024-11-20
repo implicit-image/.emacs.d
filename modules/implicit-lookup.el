@@ -1,5 +1,3 @@
-(require 'general)
-
 (defvar +lookup/buffer-functions-alist '()
   "alist of form (MAJOR-MODE . FUNCTION).")
 
@@ -24,8 +22,6 @@
 	  ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation))
 	  (t (message "No documentation function found")))))
 
-    
-
 ;;;###autoload
 (defun +lookup/in-buffer ()
   "Display temporary documentation buffer using a mode dependent function."
@@ -35,8 +31,7 @@
 	  ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation-buffer))
 	  (t (message "No documentation function found")))))
 
-
-(defun +lookup/set-fn (type forms)
+(defun +lookup-set-fn (type forms)
   ""
   (let ((fn-list (pcase type
 		   ('popup '+lookup/popup-functions-alist)
@@ -49,7 +44,6 @@
       (mapc (lambda (form)
 	      (add-to-list fn-list form))
 	    forms))))
-
 
 ;;;###autoload
 (defun +lookup/documentation ()
@@ -66,7 +60,6 @@
 	  ((memq 'lsp-bridge-mode local-minor-modes)
 	   (lsp-bridge-show-documentation))
 	  (t (message "No documentation function found")))))
-
 
 ;;;###autoload
 (defun +lookup/find-references ()
@@ -92,7 +85,6 @@
 (defun +lookup/peek-implementation ()
   "Peek implementation of symbol at point.")
 
-
 (use-package dumb-jump
   :init
   (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
@@ -116,19 +108,18 @@
 
 (use-package helpful
   :init
-  (+lookup/set-fn 'buffer '((helpful-mode . helpful-at-point)))
+  (+lookup-set-fn 'buffer '((helpful-mode . helpful-at-point)))
   ;;popwin support
-  (+windows/cfg
+  (+windows-cfg
    '(("\*helpful*")
      :regexp t :height 0.3 :position bottom :dedicated nil :stick nil :noselect nil))
   :hook
   (helpful-mode . (lambda () (display-line-numbers-mode -1))))
 
-
 (use-package dictionary
   :straight nil
   :init
-  (+windows/cfg '(("\*Dictionary\*")
+  (+windows-cfg '(("\*Dictionary\*")
 		  :position bottom :height 0.3))
   (setq dictionary-server "dict.org")
   :hook

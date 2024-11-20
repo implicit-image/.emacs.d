@@ -1,5 +1,3 @@
-
-
 (use-package toml-mode)
 
 (use-package nxml-mode
@@ -8,4 +6,3 @@
 (use-package nix-mode)
 
 (provide 'implicit-conf)
-

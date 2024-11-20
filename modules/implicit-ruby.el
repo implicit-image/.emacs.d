@@ -2,5 +2,4 @@
 
 (use-package robe)
 
-
 (provide 'implicit-ruby)
