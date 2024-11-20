@@ -19,19 +19,19 @@
   :custom
   (indent-bars-prefer-character t)
   :hook
-  ((c-mode c-ts-mode js2-mode css-mode rust-mode) . indent-bars-mode))
-
-
+  ((c-mode nwscript-mode c-ts-mode js2-mode css-mode rust-ts-mode) . indent-bars-mode))
 
 
 (use-package whitespace
   :demand
+  :custom-face
+  (whitespace-space ((t (:foreground "#4a4a4a"))))
+  (whitespace-empty ((t (:foreground "#4a4a4a"))))
   :config
-  (setq whitespace-style '(indentation tabs spaces)
-        whitespace-display-mappings '((tab-mark 9 [8250 9])
-                                      (newline-mark 10 [172 10])
-                                      (space-mark 32 [8226] [46]))
-	indent-tabs-mode nil)
-  :hook (prog-mode . whitespace-mode))
+  (setq whitespace-style '(face))
+  :hook
+  (prog-mod . whitespace-mode)
+  (before-save . whitespace-cleanup)
+  (before-save . delete-trailing-whitespace))
 
 (provide 'implicit-indent)
