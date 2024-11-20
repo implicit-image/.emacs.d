@@ -9,7 +9,7 @@
   (evil-mode 1))
 
 (use-package evil-collection
-  :after evil
+  :demand
   :config
   (evil-collection-init evil-collection-mode-list))
 
@@ -41,4 +41,3 @@
 
 
 (provide 'implicit-evil)
-
