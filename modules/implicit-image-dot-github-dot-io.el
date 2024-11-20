@@ -31,13 +31,12 @@
 (defun wiki/make-org-sitemap-entry (entry style project)
   "Format ENTRY"
   (let ((filename (org-publish-find-title entry project))
-        (tags (org-publish-find-property entry project))))
+        (tags (org-publish-find-property :tags entry project))))
   (format
    "{{{timestamp(%s)}}} [[file:%s][%s]]"
    (format-time-string
     "%Y-%m-%d"
-    (org-publish-find-date entry project))
-   ))
+    (org-publish-find-date entry project))))
 
 (setq wiki/html-head  "<link rel=\"stylesheet\" href=\"../../css/style.css\" type=\"text/css\"/><link rel=\"stylesheet\" href=\"../css/style.css\" type=\"text/css\"/>")
 
@@ -76,10 +75,9 @@
         </div>
         </footer>")
 
-
-
 (setq website/wiki-publish-info
       `(("wiki-posts"
+	 :select-tags ("notes")
          :with-latex t
          :with-toc t
          :base-directory "~/org/roam/"
@@ -93,7 +91,7 @@
          :html-postamble ,wiki/html-postamble
          :auto-sitemap t
          :sitemap-title "notes"
-         :sitemap-filename "index.org"
+         :sitemap-filename "wiki-index.org"
          :sitemap-sort-folders 'ignore
          :sitemap-ignore-case t
          :sitemap-format-entry lc/org-sitemap-date-entry-format)
@@ -107,9 +105,9 @@
 
 (setq website/writing-publish-info
       `(("writing-posts"
-         :base-directory "~/org/writing/"
+	 :select-tags ("writing")
+         :base-directory "~/org/roam/"
          :base-extension "org"
-         :exclude-tags ("noexport" "notready")
          :with-author t
          :timestamp nil
          :with-date t
@@ -125,7 +123,7 @@
          :makeindex t
          :auto-sitemap t
          :sitemap-title "my writing"
-         :sitemap-filename "index.org"
+         :sitemap-filename "writing-index.org"
          :sitemap-sort-files 'chronologically
          :sitemap-sort-folders 'ignore
          :sitemap-ignore-case t
@@ -140,6 +138,7 @@
 
 (setq website/learning-publish-info
       `(("learning-notes"
+	 :select-tags ("learning")
          :with-latex t
          :with-toc t
          :base-directory "~/org/learning/src"
@@ -165,9 +164,13 @@
          :publishing-function org-publish-attachment)
         ("learning" :components ("learning-notes" "learning-resources"))))
 
-(setq org-publish-project-alist (append
-                                 website/wiki-publish-info
-                                 website/writing-publish-info
-				 website/learning-publish-info))
+
+(mapcar (lambda (project)
+	  (add-to-list 'org-publish-project-alist project))
+	(append website/wiki-publish-info
+		website/writing-publish-info
+		website/learning-publish-info))
+
+
 
 (provide 'implicit-image-dot-github-dot-io)
