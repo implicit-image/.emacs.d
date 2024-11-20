@@ -24,9 +24,10 @@
       ;; lazy load by default
       use-package-always-defer t)
 
-(setq my/modules-dir-path (expand-file-name "./modules/" user-emacs-directory))
+(setq +modules/path (expand-file-name "./modules/" user-emacs-directory))
 
-(add-to-list 'load-path my/modules-dir-path)
+(add-to-list 'load-path +modules/path)
+
 
 ;; useful elisp libraries
 (require 'implicit-elisp-libs)
@@ -37,9 +38,9 @@
 (require 'implicit-keybindings)
 (require 'implicit-modules)
 ;; ui
+(require 'implicit-eye-candy)
 (require 'implicit-windows)
 (require 'implicit-modeline)
-(require 'implicit-eye-candy)
 ;; programming
 (require 'implicit-checkers)
 (require 'implicit-coding)
@@ -47,8 +48,11 @@
 (require 'implicit-editing)
 (require 'implicit-indent)
 (require 'implicit-lookup)
+(require 'implicit-eglot)
 (require 'implicit-lsp)
-;; languages
+(require 'implicit-lsp-mode)
+;; (require 'implicit-lsp-bridge)
+;; language support
 (require 'implicit-haskell)
 (require 'implicit-rust)
 (require 'implicit-lisp)
@@ -66,8 +70,16 @@
 (require 'implicit-assembly)
 (require 'implicit-md)
 (require 'implicit-c)
+(require 'implicit-idris)
+(require 'implicit-ada)
+(require 'implicit-elm)
+(require 'implicit-crystal)
+(require 'implicit-dart)
+;(require 'implicit-hdl)
 (require 'implicit-ml)
 (require 'implicit-latex)
+(require 'implicit-shell)
+(require 'implicit-conf)
 (require 'implicit-misc-langs)
 ;; management
 (require 'implicit-remote)
@@ -76,7 +88,7 @@
 (require 'implicit-projects)
 (require 'implicit-buffers)
 (require 'implicit-dired)
-;; (require 'implicit-workspaces)
+(require 'implicit-workspaces)
 ;; org mode
 (require 'implicit-org)
 (require 'implicit-org-agenda)
@@ -91,7 +103,8 @@
 (require 'implicit-books)
 (require 'implicit-llm)
 (require 'implicit-treesitter)
-;; (require 'implicit-treesit-custom)
+;; apps
+(require 'implicit-socials)
 ;; website export config
 (require 'implicit-image-dot-github-dot-io)
 
