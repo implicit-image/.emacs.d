@@ -1,20 +1,34 @@
 (require 'f)
 
-(defvar +eye-candy/custom-faces ()
-  "Alist of custom faces to reload when the theme changes")
+;; (defvar +eye-candy/custom-faces ()
+;;   "Alist of custom faces to reload when the theme changes")
 
-;; (
-;;  ()
-;;  )
-
-;;(defun +eye-candy/reload-custom-faces ()
-;;  (message "TODO: reloading custom faces"))
+;; (defun +eye-candy/reload-faces ()
+;;   "Reload faces saved in `+eye-candy/custom-faces'."
+;;   (apply #'custom-set-faces +eye-candy/custom-faces))
 
 
-;;(use-package emacs
-;;  :config
-;;  ;; reload all custom faces after theme reload 
-;;  (advice-add 'load-theme :after '+eye-candy/reload-custom-faces))
+;; ;;; (+eye-candy--set-face '(corfu-border ((frame (:background (doom-color color))))))
+;; (defun +eye-candyc-set-face (face-def)
+;;   "")
+
+
+
+;; (defun +eye-candy/set-custom-faces (&rest face-defs)
+;;   ""
+;;   ())
+
+
+
+
+(defun +eye-candy/load-theme (theme)
+  ""
+  (interactive)
+  (load-theme theme t)
+  (solaire-global-mode +1))
+
+;; (advice-add 'load-theme :after +eye-candy/reload-faces)
+
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -28,8 +42,9 @@
   (helpful-mode . rainbow-mode))
 
 (use-package hl-todo
+  :after doom-themes
   :config
-  (setq hl-todo-keyword-faces 
+  (setq hl-todo-keyword-faces
 	`(("HOLD" . "#d0bf8f")
 	  ("TODO" . "#cc9393")
 	  ("NEXT" . "#dca3a3")
@@ -50,11 +65,8 @@
 
 (use-package olivetti)
 
-(use-package doom-gruber-darker-theme
-  :demand
-  :straight (doom-gruber-darker-theme :type git
-                                      :host github
-                                      :repo "implicit-image/doom-gruber-darker-theme")
+
+(use-package solaire-mode
   :after doom-themes)
 
 (use-package doom-themes
@@ -65,24 +77,33 @@
                                                straight-build-dir
                                                "doom-gruber-darker-theme/"))
   (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t)
+        doom-themes-enable-italic t
+	doom-themes-treemacs-enable-variable-pitch nil
+	doom-themes-treemacs-theme "doom-atom")
   (doom-themes-visual-bell-config)
   (doom-themes-neotree-config)
-  (setq doom-themes-treemacs-theme "doom-atom")
   (doom-themes-treemacs-config)
   (doom-themes-org-config)
-  (load-theme 'doom-gruber-darker t))
+  (+eye-candy/load-theme +base/theme)
+  :hook
+  (tty-setup . (lambda ()
+		 (interactive)
+		 (+eye-candy/load-theme +base/theme))))
 
+(use-package doom-gruber-darker-theme
+  :straight (doom-gruber-darker-theme :type git
+                                      :host github
+                                      :repo "implicit-image/doom-gruber-darker-theme"))
 
 
 
 ;; font ligatures
 (use-package ligature
   :config
-  (ligature-set-ligatures 'org-mode '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
+  (ligature-set-ligatures 'haskell-mode '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
 				      "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" "<=>" "<==>" "<===>" "<====>" "<!---"
 				      "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
-				      ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++")))
+		      ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++")))
 
 
 (provide 'implicit-eye-candy)
