@@ -173,4 +173,4 @@
 
 
 
-(provide 'init-image-dot-github-dot-io)
+(provide 'init-implicit-image-dot-github-dot-io)
