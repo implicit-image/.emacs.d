@@ -1,9 +1,7 @@
 
 
 
-(use-package magit
-  :init
-  (+windows/cfg '(("magit:*") :width 0.5)))
+(use-package magit)
 
 (use-package magit-todos)
 
