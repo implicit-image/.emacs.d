@@ -35,7 +35,7 @@
 	mini-echo-separator "|"
 	mini-echo-persistent-function 'ignore
 	mini-echo-persistent-rule '(:long
-				    ("major-mode" "buffer-name" "project" "evil" "buffer-position" "lsp-bridge" "lsp-mode" "flycheck" "text-scale")
+				    ("major-mode" "buffer-name" "project" "evil" "buffer-position" "lsp-bridge" "flycheck" "text-scale")
 				    :short
 				    ("major-mode" "shrink-path" "evil" "buffer-position" "flycheck")))
   :config
