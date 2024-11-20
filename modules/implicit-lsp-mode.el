@@ -170,7 +170,9 @@
   (corfu-mode . (lambda ()
 		  (corfu-echo-mode +1)
 		  (corfu-history-mode +1)
-		  (corfu-popupinfo-mode +1))))
+		  (corfu-popupinfo-mode +1)))
+  (lsp-bridge . (lambda ()
+		  (corfu-mode -1))))
 
 ;; for corfu terminal support
 (use-package corfu-terminal
