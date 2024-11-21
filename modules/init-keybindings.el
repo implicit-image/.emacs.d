@@ -108,6 +108,7 @@
     "n r r" '("Find random Org Roam node" . org-roam-node-random)
     "n r s" '("Sync Org Roam database" . org-roam-db-sync)
     "n r c" '("Org Roam capture" . org-roam-capture)
+    "n r *" '("Grep in org roam dir" . +org-roam/rg-in-notes)
 
     ;; opening important side windows and buffers
     "o" '(:ignore t :which-key "open")
