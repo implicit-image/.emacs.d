@@ -6,6 +6,13 @@
 ;; (use-package org-appear
 ;;   :hook (org-mode . org-appear-mode))
 
+(use-package org-pretty-table
+  :straight (org-pretty-table :type git
+			       :host github
+			       :repo "Fuco1/org-pretty-table")
+  :hook
+  (org-mode . org-pretty-table-mode))
+
 (use-package org-fragtog
   :after org
   :hook (org-mode . org-fragtog-mode))
