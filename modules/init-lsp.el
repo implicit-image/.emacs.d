@@ -19,4 +19,9 @@
 			("lsp-mode" ((lsp-deferred)))
 			("lsp-bridge" ((lsp-bridge-mode +1)))))))
 
+(+leader-keys
+  "t a" '("Toggle autocompletion" . (lambda ()
+				      (interactive)
+				      (setq lsp-bridge-complete-manually (not lsp-bridge-complete-manually)))))
+
 (provide 'init-lsp)

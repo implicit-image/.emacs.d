@@ -1,5 +1,4 @@
 (require 'projectile)
-(require 'ivy)
 
 (defun +terminal--get-buffers (&optional preds)
   (match-buffers `(or . ,(append '((major-mode . vterm-mode))
@@ -8,7 +7,6 @@
 (defun +terminal--get-name ()
   "Get a name for local vterm buffer"
   (string-join `(,vterm-buffer-name ,default-directory)))
-
 
 (defun +terminal--get-dwim-command (&optional new-window)
   "Open terminal. If NEW-WINDOW is not `nil' open it in new window instead of the current one. Tries to detect current project"
@@ -78,5 +76,11 @@
   (evil-set-initial-state 'eat-mode 'insert)
   :hook
   (eat-mode . (lambda () (display-line-numbers-mode -1))))
+
+(+leader-keys
+  "o t" '(:ignore t :which-key "Terminal")
+  "o t r" '("Run command" . +terminal/run-command)
+  "o t c" '("Switch to other" . +terminal/counsel-vterm)
+  "o T" '("Popup terminal" . +terminal/open))
 
 (provide 'init-terminal)

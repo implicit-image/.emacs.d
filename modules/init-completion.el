@@ -12,6 +12,7 @@
   (setq ivy-height 15
 	ivy-fixed-height-minibuffer t
 	ivy-use-virtual-buffers t
+	ivy-initial-inputs-alist '()
 	enable-recursive-minibuffers t)
   :config
   (ivy-mode)
@@ -21,10 +22,38 @@
   :after evil
   :config
   ;; dont use package.el at all
-  (defalias 'counsel-package 'ignore))
+  (defalias 'counsel-package 'ignore)
+  :general
+  (+leader-keys
+    ":" '("Execute command" . counsel-M-x)
+    "." '("Find file in cwd" . counsel-find-file)
+    "/" '("Search project" . counsel-rg)
+    ;; buffer
+    "b b" '("Find buffer" . counsel-switch-buffer)
+    ;; code
+    "c c" '("Compile" . counsel-compile)
+    ;; file
+    "f r" '("Recent files" . counsel-recentf)
+    ;; help
+    "h l" '("Load library" . counsel-load-library)
+    "h F" '("Describe face" . counsel-faces)
+    "h s" '("Describe symbol" . counsel-describe-symbol)
+    "h t" '("Load theme" . counsel-load-theme)
+    ;; insert
+    "i u" '("Unicode char" . counsel-unicode-char)
+    "i c" '("Color hexstring" . counsel-colors-web)
+    ;; search
+    "s i" '("imenu" . counsel-imenu))
+  (general-def general-override-mode-map
+    :states '(normal visual emacs insert)
+    "M-x" 'counsel-M-x))
 
 (use-package swiper
-  :after evil)
+  :after evil
+  :general
+  (+leader-keys
+    "s b" '("Swiper" . swiper)
+    "s B" '("swiper thing at point" . swiper-thing-at-point)))
 
 (use-package marginalia
   :demand
@@ -86,5 +115,7 @@
 (use-package tempel-collection
   :after tempel)
 
+(general-def global-map
+  "C-SPC" 'completion-at-point)
 
 (provide 'init-completion)

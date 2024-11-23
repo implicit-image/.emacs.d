@@ -1,5 +1,5 @@
 (use-package indent-bars
-  :straight '(indent-bars :type git
+  :straight (indent-bars :type git
 			  :host github
 			  :repo "jdtsmith/indent-bars")
   :commands

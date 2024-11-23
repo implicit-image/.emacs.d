@@ -10,7 +10,7 @@
 
 (use-package elysium
   :straight (elysium :type git
-		     :host github
+	     :host github
 		     :repo "lanceberge/elysium"
 		     :branch "main"
 		     :files ("*.el"))

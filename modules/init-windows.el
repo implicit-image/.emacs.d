@@ -22,7 +22,14 @@
 (use-package ace-window
   :after popwin
   :init
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  :general
+  (+leader-keys
+    "w w" '("Switch" . ace-window))
+  (global-map
+   "<remap> <evil-window-next>" 'ace-window
+    "C-x w" 'ace-window
+   ))
 
 (use-package popwin
   :demand
@@ -30,6 +37,9 @@
   (+windows-cfg
    '(("\*Warnings\*" "\*Warnings\**" "\*scratch\*" shell-mode help-mode)
      :regexp t :height 0.3 :position bottom :dedicated nil))
-  (popwin-mode 1))
+  (popwin-mode 1)
+  :general
+  (+leader-keys
+    "b p" '("Popup buffer" . popwin:popup-buffer)))
 
 (provide 'init-windows)

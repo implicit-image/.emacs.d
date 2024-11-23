@@ -3,7 +3,12 @@
 
 (use-package evil-anzu
   :demand
-  :config (global-anzu-mode +1))
+  :config (global-anzu-mode +1)
+  :general
+  (+leader-keys
+    "c R" '("Rename" . anzu-query-replace)
+    "s r" '("Query replace" . anzu-query-replace)
+    "s R" '("Query replace regexp" . anzu-query-replace-regexp)))
 
 (use-package hide-mode-line)
 
@@ -16,19 +21,6 @@
   (mini-echo-blue ((t (:foreground ,(doom-color 'blue)))))
   :init
   (require 'mini-echo-segments)
-  ;; (defun +modeline--get-pdf-pos ()
-  ;;   "Get (current page . page count) in pdf-view buffer"
-  ;;   (let ((max-pages (or (pdf-cache-number-of-pages)
-  ;; 			 (pdf-info-number-of-pages (current-buffer))))
-  ;; 	  (curr-page (pdf-view-current-page)))
-  ;;     (format "%s / %s" curr-page max-pages)))
-  ;; (mini-echo-define-segment "pdf-pages"
-  ;;   "Show what page the pdf is on and max pages."
-  ;;   :
-  ;;   :update-hook '(pdf-view-change-page-hook)
-  ;;   :update-advice '(())
-  ;;   :update (if (bound-and-true-p 'pdf-view-mode)
-  ;; 		()))
   (setq mode-line-format "")
   (setq mini-echo-right-padding 2
 	mini-echo-project-detection 'projectile

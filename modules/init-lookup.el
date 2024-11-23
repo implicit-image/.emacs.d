@@ -92,7 +92,10 @@
 (use-package ivy-xref
   :after ivy
   :init
-  (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+  (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)
+  :general
+  (+leader-keys
+    "c r" '("Goto references" . xref-find-references)))
 
 ;; TODO: add :dash to use-package language mode declarations
 (use-package dash-docs
@@ -114,7 +117,15 @@
    '(("\*helpful*")
      :regexp t :height 0.3 :position bottom :dedicated nil :stick nil :noselect nil))
   :hook
-  (helpful-mode . (lambda () (display-line-numbers-mode -1))))
+  (helpful-mode . (lambda () (display-line-numbers-mode -1)))
+  :general
+  (+leader-keys
+    "h v" '("Describe variable" . helpful-variable)
+    "h f" '("Describe function" . helpful-callable)
+    "h k" '("Describe key" . helpful-key))
+  (helpful-mode-map
+   :states 'normal
+   "q" 'quit-window))
 
 (use-package dictionary
   :straight nil
@@ -125,5 +136,20 @@
   :hook
   (dictionary-mode . (lambda ()
 		       (display-line-numbers-mode -1))))
+
+(+leader-keys
+  "h b" '("Describe bindings" . describe-bindings)
+  "h d" '("Dictionary" . dictionary-search)
+  "h m" '("Describe keymap"   . describe-keymap)
+  "h M" '("Describe mode"     . describe-mode)
+  "h p" '("Describe package"  . describe-package))
+
+(general-defs
+  global-map
+  :states '(visual normal)
+  "K" '+lookup/documentation
+  help-mode-map
+  :states '(normal)
+  "q" 'quit-window)
 
 (provide 'init-lookup)

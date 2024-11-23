@@ -20,6 +20,11 @@
   :config
   (setq auth-sources '("~/.authinfo" "~/.authinfo.gpg" "~/.netrc")))
 
-(use-package tramp)
+(use-package tramp
+  :general
+  (+leader-keys
+    "f s" '("Open as sudo" . +remote/open-file-as-sudo)
+    "f S" '("Open remote file" . +remote/counsel-find-file)))
+
 
 (provide 'init-remote)

@@ -29,7 +29,50 @@
 	acm-enable-capf t
 	acm-terminal-doc-max-width 50
 	acm-terminal-max-width 30)
-  (global-lsp-bridge-mode 1))
+  (global-lsp-bridge-mode 1)
+  :general
+  (acm-mode-map
+   :states 'insert
+   "<tab>" 'acm-select-next
+   "M-j" 'acm-select-next
+   "<backtab>" 'acm-select-prev
+   "M-k" 'acm-select-prev
+   "RET" 'acm-complete
+   "C-<tab>" 'acm-complete
+   "C-f" 'acm-filter
+   "M-d" 'acm-doc-toggle
+   "<escape>" 'acm-hide)
+  (lsp-bridge-mode-map
+   :states '(insert)
+   "C-SPC" 'lsp-bridge-popup-complete-menu)
+  (lsp-bridge-mode-map
+   :states '(normal visual)
+   :prefix "SPC c"
+   :global-prefix "M-SPC c"
+   "a" '("Code actions" . lsp-bridge-code-action)
+   "d" '("Find definition" . lsp-bridge-find-def)
+   "D" '("Find definition other window" . lsp-bridge-find-def-other-window)
+   "t" '("Find typedef" . lsp-bridge-find-type-def)
+   "T" '("Find typedef other window" . lsp-bridge-find-type-def-other-window)
+   "f r" '("Return to symbol" . lsp-bridge-find-def-return)
+   "i" '("Find implementation" . lsp-bridge-find-impl)
+   "I" '("Find implementation other window" . lsp-bridge-find-impl-other-window)
+   "r" '("Find references" . lsp-bridge-find-references)
+   "k" '("Show doc popup" . lsp-bridge-popup-documentation)
+   "K" '("Show doc buffer" . lsp-bridge-show-documentation)
+   "p" '(:ignore t :which-key "Process")
+   "p R" '("Restart process" . lsp-bridge-restart-process)
+   "R" '("Rename" . lsp-bridge-rename)
+   "s S" '("LSP imenu" . lsp-bridge-imenu))
+  (lsp-bridge-mode-map
+   :states '(normal visual)
+   :prefix "SPC s"
+   :global-prefix "M-SPC s"
+   "S" '("List symbols" . lsp-bridge-workspace-list-symbol-at-point))
+  (lsp-bridge-doc-map
+   :states '(normal visual)
+   "q" 'quit-window))
+
 
 (use-package popon)
 

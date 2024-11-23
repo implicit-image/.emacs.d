@@ -6,7 +6,21 @@
 	evil-undo-system 'undo-tree
 	evil-lookup-func 'woman)
   :config
-  (evil-mode 1))
+  (evil-mode 1)
+  :general
+  (+leader-keys
+    "`" '("Last buffer" . evil-switch-to-windows-last-buffer)
+    "c d" '("Goto definition" . evil-goto-definition)
+    "w s" '("Split window horizontally" . evil-window-split)
+    "w v" '("Split window vertically" . evil-window-vsplit))
+  (general-override-mode-map
+   :states '(normal visual)
+   "C-h" 'evil-window-left
+   "C-j" 'evil-window-down
+   "C-k" 'evil-window-up
+   "C-l" 'evil-window-right)
+  (global-map
+   "C-TAB" 'evil-jump-forward))
 
 (use-package evil-collection
   :demand
@@ -37,6 +51,10 @@
 
 (use-package treemacs-evil
   :demand
-  :after treemacs)
+  :after treemacs
+  :general
+  (evil-treemacs-state-map
+   :states '(motion)
+   "p" 'treemacs-project-map))
 
 (provide 'init-evil)

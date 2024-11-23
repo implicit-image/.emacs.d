@@ -61,8 +61,20 @@
       (widen)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
-(use-package restart-emacs)
+(use-package restart-emacs
+  :general
+  (+leader-keys
+    "q r" '("Restart emacs" . restart-emacs)))
 
 (use-package sideline)
+
+(+leader-keys
+  "f D" '("Delete current file" . +utils/delete-visited-file)
+  "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
+  "t c" '("Colorize color strings" . rainbow-mode)
+  "t I" '("Select input method" . set-input-method)
+  "t m" '("Toggle minor mode" . +utils/counsel-toggle-minor-mode)
+  "t v" '("Visual line mode" . visual-line-mode)
+  )
 
 (provide 'init-utils)

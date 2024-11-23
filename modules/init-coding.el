@@ -8,7 +8,12 @@
 				   ,(f-join user-emacs-directory "snippets")
 				   ,(f-join user-emacs-directory "straight" straight-build-dir "yasnippet-snippets/snippets"))))
   :config
-  (yas-global-mode))
+  (yas-global-mode)
+  :general
+  (+leader-keys
+    "i s" '("Insert snippet" . yas-insert-snippet)))
+
+
 
 (use-package doom-snippets
   :after corfu
@@ -23,7 +28,7 @@
 
 (use-package eldoc
   :init
-  (setq eldoc-echo-area-prefer-doc-buffer nil))
+  (setq eldoc-echo-area-prefer-doc-buffer t))
 
 
 (use-package eldoc-box

@@ -15,7 +15,10 @@
   :straight nil
   :init
   (setq ibuffer-show-empty-filter-groups nil)
-  :hook (ibuffer-mode . #'+buffers/decide-ibuffer-filters))
+  :hook (ibuffer-mode . #'+buffers/decide-ibuffer-filters)
+  :general
+  (+leader-keys
+    "b i" '("Open ibuffer" . ibuffer)))
 
 
 (use-package ibuffer-projectile)
@@ -31,6 +34,20 @@
   :demand
   :config
   (recentf-mode 1))
+
+
+(+leader-keys
+  "b r" '("Revert" . revert-buffer)
+  "b K" '("Kill this buffer" . kill-this-buffer)
+  "b k" '("Kill buffer" . kill-buffer)
+  "f o" '("Find file in other window" . find-file-other-window)
+  "f R" '("Rename current file" . rename-visited-file)
+  "o x" '("Scratch buffer" . scratch-buffer))
+
+(general-def global-map
+    "C-=" 'text-scale-increase
+    "C--" 'text-scale-decrease
+    "C-x k" 'kill-this-buffer)
 
 
 (provide 'init-buffers)

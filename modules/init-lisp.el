@@ -3,7 +3,13 @@
   lispy-mode
   :init
   (add-to-list '+editing/evil-mc-incompatible-modes 'lispy-mode)
-  :hook ((emacs-lisp-mode common-lisp-mode) . lispy-mode))
+  :hook ((emacs-lisp-mode common-lisp-mode) . lispy-mode)
+  :general
+  (lispy-mode-map
+   :states '(insert)
+   "M-<" 'lispy-move-left
+   "M->" 'lispy-move-right
+   "M-k" 'lispy-kill-sentence))
 
 ;; emacs lisp
 (use-package emacs-lisp-mode
@@ -28,7 +34,11 @@
 					     (slime-documentation tap)))))
   :hook
   (lisp-repl-mode . (lambda ()
-		      (display-line-numbers-mode -1))))
+		      (display-line-numbers-mode -1)))
+  :general
+  (slime-popup-buffer-mode-map
+   :states '(normal)
+   "q" 'quit-window))
 
 (use-package lisp-mode
   :straight nil

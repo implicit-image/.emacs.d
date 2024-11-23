@@ -1,9 +1,7 @@
-(use-package nand2tetris
-  :mode "\\.hdl\\'"
-  :straight (nand2tetris :type git
+(use-package init-nand2tetris
+  :demand
+  :straight (init-nand2tetris :type git
 			 :host github
-			 :repo "CestDiego/nand2tetris.el")
-  :config
-  (setq nand2tetris-core-base-dir "~/projects/nand2tetris/core"))
+			 :repo "Deng-Li3/emacs-nand2tetris"))
 
 (provide 'init-hdl)

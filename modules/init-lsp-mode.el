@@ -105,9 +105,14 @@
 		(lsp-ui-doc-mode +1)
 		(lsp-completion-mode +1)
 		(lsp-lens-mode +1)
-		(eldoc-mode +1)
-		(eldoc-box-hover-at-point-mode +1)
-		(flycheck-mode +1))))
+		(flycheck-mode +1)))
+  :general
+  (lsp-mode-map
+   :states '(normal visual)
+   :prefix "SPC"
+   :global-prefix "M-SPC"
+   "s S" '("Search LSP symbol" . lsp-ivy-workspace-symbol)
+   "c R" '("LSP rename" . lsp-rename)))
 
 (use-package lsp-ui
   :custom-face
@@ -134,7 +139,17 @@
   (lsp-ui-doc-mode +1)
   :hook
   (lsp-ui-imenu-mode . (lambda ()
-			 (display-line-numbers-mode -1))))
+			 (display-line-numbers-mode -1)))
+  :general
+  (lsp-ui-mode-map
+   :states '(normal visual)
+   :prefix "SPC"
+   :global-prefix "M-SPC"
+   "t s" '("Toggle sideline display" . (lambda ()
+					 (interactive)
+					 (lsp-ui-sideline-mode)))
+   "c a" '("Apply code actions" . lsp-ui-sideline-apply-code-actions)
+   "c d" '("Popup documentation" . lsp-ui-doc-show)))
 
 
 (use-package lsp-ivy
@@ -172,7 +187,17 @@
 		  (corfu-history-mode +1)
 		  (corfu-popupinfo-mode +1)))
   (lsp-bridge . (lambda ()
-		  (corfu-mode -1))))
+		  (corfu-mode -1)))
+  :general
+  (corfu-map
+   :states 'insert
+   "M-h" 'corfu-doc-toggle
+   [tab] 'corfu-next
+   "<tab>" 'corfu-next
+   "TAB" 'corfu-next
+   [backtab] 'corfu-previous
+   "<backtab>" 'corfu-previous
+   "S-TAB" 'corfu-previous))
 
 ;; emacs 31 should add tty child frames
 (when (< (string-to-number emacs-version) 31)
@@ -181,12 +206,10 @@
     :hook
     (tty-setup . corfu-terminal-mode))
 
-
   (use-package corfu-doc-terminal
     :after corfu-terminal
-    :straight '(corfu-doc-terminal
-		:type git
-		:repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git")))
+    :straight (corfu-doc-terminal :type git
+				   :repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git")))
 
 
 (use-package corfu-candidate-overlay

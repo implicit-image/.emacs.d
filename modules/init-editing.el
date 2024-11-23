@@ -52,7 +52,11 @@
 
 
 (use-package evil-nerd-commenter
-  :after evil)
+  :after evil
+  :general
+  (global-map
+   :states '(visual normal)
+   "g c" 'evilnc-comment-or-uncomment-lines))
 
 (use-package editorconfig
   :demand
@@ -70,7 +74,10 @@
   :config
   (global-undo-tree-mode +1)
   :hook (undo-tree-visualizer-mode . (lambda ()
-				       (display-line-numbers-mode -1))))
+				       (display-line-numbers-mode -1)))
+  :general
+  (+leader-keys
+    "o u" '("Undo tree" . undo-tree-visualize)))
 
 (use-package paren
   :straight nil
@@ -85,5 +92,12 @@
   (setq show-paren-style 'expression
 	show-paren-when-point-inside-paren t
 	show-paren-when-point-in-periphery t))
+
+(use-package origami
+  :straight (origami :type git
+		     :host github
+		     :repo "elp-revive/origami.el")
+  :hook
+  (after-init . global-origami-mode))
 
 (provide 'init-editing)
