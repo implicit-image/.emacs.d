@@ -19,6 +19,7 @@
   (interactive)
   (let ((lookup-function (alist-get major-mode +lookup/popup-functions-alist)))
     (cond (lookup-function (funcall-interactively lookup-function))
+	  ((memq 'lsp-ui-mode local-minor-modes) (lsp-ui-doc-glance))
 	  ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation))
 	  (t (message "No documentation function found")))))
 
@@ -28,6 +29,7 @@
   (interactive)
   (let ((lookup-function (alist-get major-mode +lookup/buffer-functions-alist)))
     (cond (lookup-function (funcall-interactively lookup-function))
+	  ((memq 'lsp-mode local-minor-modes) (lsp-describe-thing-at-point))
 	  ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation-buffer))
 	  (t (message "No documentation function found")))))
 
