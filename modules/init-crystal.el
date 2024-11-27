@@ -1,8 +1,5 @@
 (use-package crystal-mode
   :init
-  (setq crystal-indent-level 4)
-  :hook ((crystal-mode) . (lambda ()
-			    (interactive)
-			    (lsp))))
+  (setq crystal-indent-level 4))
 
 (provide 'init-crystal)

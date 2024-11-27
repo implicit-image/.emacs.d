@@ -5,27 +5,35 @@
 (use-package js-ts-mode
   :straight nil
   :init (add-to-list '+lsp/servers-to-install 'ts-ls)
-  :mode (rx  (or "\\.js\\'" "\\.jsm\\'"))
-  :hook ((js-ts-mode) . (lambda ()
-			  (lsp))))
+  :mode (rx  (or "\\.js\\'" "\\.jsm\\'")))
 
 (use-package rjsx-mode
-  :mode (rx (or "\\.tsx\\'" "\\.jsx\\'"))
-  :hook ((rjsx-mode) . (lambda ()
-			 (lsp))))
+  :mode (rx (or "\\.tsx\\'" "\\.jsx\\'")))
+
+(use-package typescript-ts-mode
+  :straight nil
+  :init
+  (setq typescript-ts-mode-indent-offset 2)
+  :hook
+  (typescript-ts-mode . lsp)
+  (tsx-ts-mode . lsp))
+
+(use-package css-ts-mode
+  :straight nil
+  :mode (rx (or "\\.css\\'" "\\.scss\\'" "\\.rasi\\'")))
 
 (use-package json-ts-mode
   :mode "\\.json\\'"
-  :init (add-to-list '+lsp/servers-to-install 'json-ls)
-  :hook (json-mode . (lambda ()
-		       (lsp))))
+  :init (add-to-list '+lsp/servers-to-install 'json-ls))
 
 (use-package tide
   :init
   (+windows-cfg '(("\*tide-documenation\*") :position bottom :height 0.3))
   (+lookup-set-fn 'buffer '(typescript-ts-mode . tide-documentation-at-point))
   :config
-  (setq tide-enable-xref t)
+  (setq tide-enable-xref t
+	tide-imenu-flatten t
+	tide-completion-detailed t)
   :hook ((typescript-ts-mode) . (lambda ()
 				  (interactive)
 				  (tide-setup)
@@ -34,17 +42,13 @@
 (use-package web-mode
   :mode "\\.html\\'"
   :config
-  (setq web-mode-enable-auto-expanding t)
-  :hook ((web-mode) . (lambda ()
-			(lsp))))
+  (setq web-mode-enable-auto-expanding t))
 
 ;; rest api interaction in org mode
 (use-package verb)
 
 (use-package php-mode
-  :mode "\\.php\\'"
-  :hook ((php-mode) . (lambda ()
-			(lsp))))
+  :mode "\\.php\\'")
 
 (use-package composer
   :hook ((php-mode)) . #'composer)

@@ -5,15 +5,12 @@
   (setq compilation-scroll-output t))
 
 (use-package rustic
-  :mode "\\.rs\\'"
+  :mode ("\\.rs\\'" . rustic-mode)
   :config
   (setq rustic-indent-offset 4
 	rustic-lsp-server "rust-analyzer"
 	;; formatting
-	rustic-format-trigger 'on-save)
-  :hook
-  (rustic-mode . (lambda ()
-		   (lsp))))
+	rustic-format-trigger 'on-save))
 
 (use-package ob-rust
   :after org)

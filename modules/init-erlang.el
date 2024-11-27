@@ -1,7 +1,5 @@
 (use-package erlang
-  :init (add-to-list 'auto-mode-alist '("\\.erl\\'" . erlang-mode))
-  :hook ((erlang-mode) . (lambda ()
-			   (lsp))))
+  :init (add-to-list 'auto-mode-alist '("\\.erl\\'" . erlang-mode)))
 
 (use-package otp)
 

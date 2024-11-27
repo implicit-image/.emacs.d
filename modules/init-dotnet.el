@@ -3,9 +3,7 @@
   :straight nil
   :mode "\\.cs\\'"
   :init
-  (add-to-list '+lsp/servers-to-install 'omnisharp)
-  :hook ((csharp-mode) . (lambda ()
-			   (lsp))))
+  (add-to-list '+lsp/servers-to-install 'omnisharp))
 
 (use-package csproj-mode)
 

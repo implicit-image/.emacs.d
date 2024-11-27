@@ -3,10 +3,6 @@
   :init
   (setq elm-reactor-port 6969
 	elm-indent-offset 4
-	elm-format-on-save t)
-  :hook ((elm-mode) . (lambda ()
-			(interactive)
-			(elm-format-on-save-mode)
-			(lsp))))
+	elm-format-on-save t))
 
 (provide 'init-elm)

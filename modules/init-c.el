@@ -7,6 +7,8 @@
 
 (use-package rtags)
 
-(use-package ccls)
+(use-package ccls
+  :init
+  (setq ccls-executable "ccls"))
 
 (provide 'init-c)

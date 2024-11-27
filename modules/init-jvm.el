@@ -8,15 +8,12 @@
   :config
   (setq kotlin-tab-width 4)
   :hook (kotlin-mode . (lambda ()
-			 (exec-path-from-shell--standard-shell-p)
-			 (lsp))))
+			 (exec-path-from-shell--standard-shell-p))))
 
 (use-package scala-mode
   :config
   (setq scala-indent:step 2
-	scala-indent:align-parameters t)
-  :hook (scala-mode . (lambda ()
-			(lsp))))
+	scala-indent:align-parameters t))
 
 (use-package sbt-mode)
 

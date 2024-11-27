@@ -4,9 +4,7 @@
   :config
   (setq elixir-basic-offset 4
 	;; lsp config
-	lsp-elixir-dialyzer-enabled t)
-  :hook ((elixir-ts-mode) . (lambda ()
-			      (lsp))))
+	lsp-elixir-dialyzer-enabled t))
 
 (use-package mix
   :hook (elixir-mode . mix-minor-mode))
