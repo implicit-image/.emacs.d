@@ -1,4 +1,7 @@
-
+(defun +utils/disable-line-numbers ()
+  "Disable `display-line-numbers-mode' in current buffer."
+  (interactive)
+  (display-line-numbers-mode -1))
 
 (defun +utils/toggle-mode (mode)
   (interactive)
@@ -52,8 +55,6 @@
 			(interactive)
 			(set-frame-font selected-font t t t))
               :caller 'counsel-set-font)))
-
-
 
 (defun +utils-whole-buffer-as-string (buffer)
   (with-current-buffer buffer

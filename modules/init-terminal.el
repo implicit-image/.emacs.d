@@ -1,8 +1,13 @@
 (require 'projectile)
 
-(defun +terminal--get-buffers (&optional preds)
+(defun +terminal--get-buffers (&rest preds)
   (match-buffers `(or . ,(append '((major-mode . vterm-mode))
-			      preds))))
+				 preds))))
+
+(defun +terminal--get-annotated-buffers (&rest preds)
+  (mapcar (lambda (buffer)
+	    (append '(,buffer) (marginalia-annotate-buffer buffer)))
+	  (+terminal--get-buffers)))
 
 (defun +terminal--get-name ()
   "Get a name for local vterm buffer"
@@ -20,6 +25,17 @@
 			   ,(when (not (string= command-suffix ""))
 			      "-")
 			   ,command-suffix)))))
+
+;;;###autoload
+(defun +terminal/popup (&optional create-new)
+  "Popup an exiisting terminal or a new one."
+  (interactive)
+  (ivy-read "Popup vterm" (+terminal--get-buffers)
+	    :preselect 1
+	    :require-match nil
+	    :action (lambda (buffer)
+		      (popwin:popup-buffer buffer))
+	    :caller '+terminal/popup))
 
 ;;;###autoload
 (defun +terminal/open (&optional other-window)
@@ -66,6 +82,7 @@
 		      (switch-to-buffer buffer nil nil))
 	    :caller '+terminal/counsel-vterm))
 
+
 (use-package vterm
   :init
   (evil-set-initial-state 'vterm-mode 'insert)
@@ -79,8 +96,9 @@
 
 (+leader-keys
   "o t" '(:ignore t :which-key "Terminal")
-  "o t r" '("Run command" . +terminal/run-command)
   "o t c" '("Switch to other" . +terminal/counsel-vterm)
+  "o t p" '("Popup terminal" . +terminal/popup)
+  "o t r" '("Run command" . +terminal/run-command)
   "o T" '("Popup terminal" . +terminal/open))
 
 (provide 'init-terminal)
