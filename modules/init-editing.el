@@ -48,7 +48,7 @@
    'evil-mc-after-cursors-deleted
    '+editing/evil-mc-turn-on-incompatible-modes)
   :config
-  (global-evil-mc-mode 1))
+  (global-evil-mc-mode +1))
 
 
 (use-package evil-nerd-commenter
@@ -99,5 +99,12 @@
 		     :repo "elp-revive/origami.el")
   :hook
   (after-init . global-origami-mode))
+
+;; (use-package combobulate
+;;   :straight (combobulate :type git
+;; 			 :host github
+;; 			 :repo "mickeynp/combobulate")
+;;   :custom
+;;   (combobulate-key-prefix "C-c o"))
 
 (provide 'init-editing)
