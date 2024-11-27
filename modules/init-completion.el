@@ -12,8 +12,8 @@
   (setq ivy-height 15
 	ivy-fixed-height-minibuffer t
 	ivy-use-virtual-buffers t
-	ivy-initial-inputs-alist '()
-	enable-recursive-minibuffers t)
+	enable-recursive-minibuffers t
+	ivy-initial-inputs-alist '())
   :config
   (ivy-mode)
   :hook (after-init . ivy-mode))

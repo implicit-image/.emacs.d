@@ -21,22 +21,32 @@
 			   :host github
 			   :repo "doomemacs/snippets"
 			   :files ("*.el" "*"))
-  :after yasnippet)
+  :init
+  (setq doom-snippets-enable-short-helpers t))
 
 (use-package yasnippet-snippets
   :after yasnippet)
 
 (use-package eldoc
   :init
-  (setq eldoc-echo-area-prefer-doc-buffer t))
+  (setq eldoc-echo-area-prefer-doc-buffer t
+	eldoc-echo-area-use-multiline-p nil))
 
 
 (use-package eldoc-box
   :custom-face
   (eldoc-box-body ((t (:box nil))))
   ;; TODO: maybe remove some prettify functions from eldoc-box-buffer-hook, it looks wonky
+  :init
+  (setq eldoc-box-clear-with-C-g t)
   :config
-  (set-face-attribute 'eldoc-box-body nil :inherit 'corfu-default))
+  (set-face-attribute 'eldoc-box-body nil :inherit 'corfu-default)
+  :hook
+  (lsp-mode . eldoc-box-hover-at-point-mode)
+  (emacs-lisp-mode . (lambda ()
+		       (if (display-graphic-p)
+			   (eldoc-box-hover-at-point-mode +1)
+			 (eldoc-mode +1)))))
 
 (use-package dap-mode
   :after lsp-mode

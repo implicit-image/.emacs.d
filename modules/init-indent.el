@@ -18,7 +18,7 @@
   :custom
   (indent-bars-prefer-character t)
   :hook
-  ((c-mode nwscript-mode c-ts-mode js2-mode css-mode rust-ts-mode) . indent-bars-mode))
+  ((c-mode nwscript-mode tsx-ts-mode c-ts-mode js2-mode css-mode rust-ts-mode) . indent-bars-mode))
 
 (use-package whitespace
   :demand

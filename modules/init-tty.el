@@ -1,11 +1,17 @@
+
 (setq visible-cursor nil)
 
 ;;;###autoload
 (defun +tty-setup-faces ()
   "Setup faces for tty display."
-  (custom-set-faces `(vertical-border ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg) :width narrow))))
-		    `(border ((t (:background ,(doom-color  'bg) :foreground ,(doom-color 'fg) :width narrow))))
-		    `(internal-border ((t (:background ,(doom-color 'bg) :width narrow))))))
+
+
+  (progn (custom-set-faces `(vertical-border ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg-alt) :width narrow))))
+			   `(border ((t (:background ,(doom-color  'bg) :foreground ,(doom-color 'fg) :width narrow))))
+			   `(internal-border ((t (:background ,(doom-color 'bg) :width narrow)))))
+	 (set-display-table-slot standard-display-table
+				 'vertical-border
+				 (make-glyph-code ?┃))))
 
 (add-hook 'tty-setup-hook #'+tty-setup-faces)
 

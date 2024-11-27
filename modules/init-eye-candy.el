@@ -10,11 +10,12 @@
   :if (display-graphic-p))
 
 (use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  :hook ((prog-mode emacs-lisp-mode) . rainbow-delimiters-mode))
 
 (use-package rainbow-mode
   :hook
   (css-mode . rainbow-mode)
+  (css-ts-mode . rainbow-mode)
   (helpful-mode . rainbow-mode))
 
 (use-package hl-todo
