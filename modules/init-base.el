@@ -5,11 +5,11 @@
   :init
   (setq +base/font-family "Comic Code" ;; "Iosevka Comfy Fixed"
         +base/font-weight 'semi-light
-        +base/font-size 20
+        +base/font-size 19
         +base/font-spec (font-spec :family +base/font-family
                                    :weight +base/font-weight
                                    :size +base/font-size)
-	+base/theme 'doom-gruvbox)
+	+base/theme 'doom-gruber-darker)
   ;; (set-frame-font +base/font-spec nil t)
   (add-to-list 'default-frame-alist `(font . ,(string-join `(,+base/font-family ,(number-to-string +base/font-size)) "-")))
   (setq user-full-name "Błażej Niewiadomski"
@@ -18,6 +18,7 @@
 	;;startup screen
 	inhibit-startup-screen t
 	visible-bell nil
+	debug-on-error nil
 	;; lines
 	display-line-numbers-type 'relative
 	truncate-lines t
@@ -50,7 +51,7 @@
   ;; show borders between windows
   (window-divider-mode 1)
 ;;;  auto revert all buffers
-  (global-auto-revert-mode t)
+  (global-auto-revert-mode nil)
   (add-to-list 'default-frame-alist
                '(vertical-scroll-bars . nil))
   ;; write customizations to seperate file
@@ -62,7 +63,6 @@
     (load custom-file 'noerror))
   :hook
   (prog-mode . (lambda () (toggle-truncate-lines 1))))
-
 
 ;; load $PATH from shell
 (use-package exec-path-from-shell
