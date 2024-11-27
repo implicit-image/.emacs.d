@@ -94,6 +94,14 @@
   :hook
   (eat-mode . (lambda () (display-line-numbers-mode -1))))
 
+(use-package eee
+  :straight (eee :type git
+		 :host github
+		 :repo "eval-exec/eee.el"
+                 :files (:defaults "*.el" "*.sh"))
+  :init
+  (setq ee-terminal-command (exec-path-from-shell-getenv "TERM")))
+
 (+leader-keys
   "o t" '(:ignore t :which-key "Terminal")
   "o t c" '("Switch to other" . +terminal/counsel-vterm)
