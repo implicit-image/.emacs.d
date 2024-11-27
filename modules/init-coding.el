@@ -57,4 +57,12 @@
   :config
   (setq compilation-scroll-output t))
 
+(use-package comint
+  :straight nil
+  :init
+  (setq comint-eol-on-send t)
+  :general
+  (+leader-keys
+    "!" '("Comint run" . comint-run)))
+
 (provide 'init-coding)
