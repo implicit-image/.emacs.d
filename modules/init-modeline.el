@@ -12,25 +12,27 @@
 
 (use-package hide-mode-line)
 
-(use-package mini-echo
+
+(use-package telephone-line
   :demand
-  :custom-face
-  (minibuffer-prompt ((t (:foreground ,(doom-color 'fg)))))
-  (mini-echo-minibuffer-window
-   ((t (:background ,(doom-lighten (face-attribute 'default :background nil t) 0.05)))))
-  (mini-echo-blue ((t (:foreground ,(doom-color 'blue)))))
   :init
-  (require 'mini-echo-segments)
-  (setq mode-line-format "")
-  (setq mini-echo-right-padding 2
-	mini-echo-project-detection 'projectile
-	mini-echo-separator "|"
-	mini-echo-persistent-function 'ignore
-	mini-echo-persistent-rule '(:long
-				    ("major-mode" "buffer-name" "project" "evil" "buffer-position" "lsp-bridge" "flycheck" "text-scale")
-				    :short
-				    ("major-mode" "shrink-path" "evil" "buffer-position" "flycheck")))
+  (setq telephone-line-lhs
+	'((evil . (telephone-line-evil-tag-segment))
+	  (accent . (telephone-line-buffer-modified-segment))
+	  (unimportant . (telephone-line-project-buffer-segment))
+	  (nil . (telephone-line-vc-segment)))
+	telephone-line-primary-left-separator 'telephone-line-nil
+	telephone-line-secondary-left-separator 'telephone-line-nil
+	telephone-line-rhs
+	'((nil . (telephone-line-flycheck-segment))
+	  (evil . (telephone-line-major-mode-segment))
+	  (accent . (telephone-line-airline-position-segment)))
+	telephone-line-primary-right-separator 'telephone-line-nil
+	telephone-line-secondary-right-separator 'telephone-line-nil)
+
+  (setq telephone-line-evil-use-short-tag t
+	telephone-line-height 15)
   :config
-  (mini-echo-mode))
+  (telephone-line-mode 1))
 
 (provide 'init-modeline)
