@@ -14,7 +14,10 @@
   :general
   (+leader-keys
     "TAB" '("Switch to project tree" . treemacs-select-window)
-    "o p" '("Sidebar" . treemacs)))
+    "o p" '("Sidebar" . treemacs))
+  (evil-treemacs-state-map
+   :states '(normal visual)
+   "SPC TAB" 'evil-window-next))
 
 (use-package treemacs-projectile
   :demand
