@@ -24,6 +24,9 @@
       ;; lazy load by default
       use-package-always-defer t)
 
+(defvar +modules/path ""
+  "Directory containing module files.")
+
 (setq +modules/path (expand-file-name "./modules/" user-emacs-directory))
 
 (add-to-list 'load-path +modules/path)
@@ -51,7 +54,7 @@
 (require 'init-eglot)
 (require 'init-lsp)
 (require 'init-lsp-mode)
-;; (require 'init-lsp-bridge)
+(require 'init-lsp-bridge)
 ;; management
 (require 'init-remote)
 (require 'init-treemacs)
