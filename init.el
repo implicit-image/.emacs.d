@@ -59,7 +59,6 @@
 (require 'init-projects)
 (require 'init-buffers)
 (require 'init-dired)
-(require 'init-workspaces)
 ;; utils
 (require 'init-databases)
 (require 'init-terminal)
