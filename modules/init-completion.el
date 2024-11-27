@@ -115,6 +115,11 @@
 (use-package tempel-collection
   :after tempel)
 
+(use-package nerd-icons-corfu
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
 (general-def global-map
   "C-SPC" 'completion-at-point)
 

@@ -29,4 +29,10 @@
   (global-map
    "C-c p" '("Projectile commands" . projectile-command-map)))
 
+(use-package persp-mode
+  :config
+  (setq persp-autokill-buffer-on-remove 'kill-weak
+	persp-reset-windows-on-nil-window-conf
+	persp-nil-hidden t))
+
 (provide 'init-projects)

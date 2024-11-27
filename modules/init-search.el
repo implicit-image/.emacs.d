@@ -11,6 +11,9 @@
   (setq imenu-auto-rescan t
 	imenu-use-popup-menu t))
 
+(use-package isearch
+  :straight nil)
+
 (+leader-keys
   "*" '("Find thing-at-point in project" . +search/rg-thing-at-point))
 

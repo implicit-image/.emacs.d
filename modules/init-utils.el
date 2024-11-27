@@ -68,13 +68,16 @@
 
 (use-package sideline)
 
+(use-package ready-player
+  :config
+  (ready-player-mode +1))
+
 (+leader-keys
   "f D" '("Delete current file" . +utils/delete-visited-file)
   "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
   "t c" '("Colorize color strings" . rainbow-mode)
   "t I" '("Select input method" . set-input-method)
   "t m" '("Toggle minor mode" . +utils/counsel-toggle-minor-mode)
-  "t v" '("Visual line mode" . visual-line-mode)
-  )
+  "t v" '("Visual line mode" . visual-line-mode))
 
 (provide 'init-utils)
