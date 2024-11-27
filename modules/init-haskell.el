@@ -1,9 +1,13 @@
+(require 'rx)
+
 (use-package haskell-mode
   :init
   (setq haskell-process-log t
 	haskell-process-type 'stack-ghci
 	haskell-compiler-type 'stack))
 
+(use-package haskell-ts-mode
+  :mode (rx (or "\\.hs\\'" "\\.lhs\\'")))
 
 (use-package lsp-haskell
   :init
