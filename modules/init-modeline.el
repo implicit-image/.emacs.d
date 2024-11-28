@@ -12,27 +12,25 @@
 
 (use-package hide-mode-line)
 
-
-(use-package telephone-line
+(use-package mood-line
+  :custom-face
+  (mode-line ((t (:background ,(doom-color 'bg-alt)))))
   :demand
-  :init
-  (setq telephone-line-lhs
-	'((evil . (telephone-line-evil-tag-segment))
-	  (accent . (telephone-line-buffer-modified-segment))
-	  (unimportant . (telephone-line-project-buffer-segment))
-	  (nil . (telephone-line-vc-segment)))
-	telephone-line-primary-left-separator 'telephone-line-nil
-	telephone-line-secondary-left-separator 'telephone-line-nil
-	telephone-line-rhs
-	'((nil . (telephone-line-flycheck-segment))
-	  (evil . (telephone-line-major-mode-segment))
-	  (accent . (telephone-line-airline-position-segment)))
-	telephone-line-primary-right-separator 'telephone-line-nil
-	telephone-line-secondary-right-separator 'telephone-line-nil)
-
-  (setq telephone-line-evil-use-short-tag t
-	telephone-line-height 15)
+  ;; Enable mood-line
   :config
-  (telephone-line-mode 1))
+  (setq mood-line-format
+	(mood-line-defformat
+	 :left
+	 (((mood-line-segment-modal) . " ")
+	  ((mood-line-segment-project) . "")
+	  ((mood-line-segment-buffer-status) . ":")
+	  ((mood-line-segment-buffer-name) . " ")
+	  ((mood-line-segment-cursor-position) . " ")
+	  ((mood-line-segment-multiple-cursors) . ""))
+	 :right
+	 (((mood-line-segment-checker) . " ")
+	  ((mood-line-segment-major-mode) . " ")
+	  ((mood-line-segment-vc) . ""))))
+  (mood-line-mode))
 
 (provide 'init-modeline)
