@@ -19,12 +19,24 @@
 
 (use-package diff-hl
   :demand
+  :custom-face
+  (diff-hl-margin-insert ((t (:background ,(doom-color 'bg)))))
+  (diff-hl-margin-delete ((t (:background ,(doom-color 'bg)))))
+  (diff-hl-margin-change ((t (:background ,(doom-color 'bg)))))
   :init
   (setq diff-hl-show-hunk-function 'diff-hl-show-hunk-inline-popup
 	diff-hl-draw-borders t
+	diff-hl-margin-symbols-alist '((insert . "+")
+				       (delete . "-")
+				       (change . "=")
+				       (unknown . "?")
+				       (ignored . "i"))
 	diff-hl-reference-revision "HEAD^")
   :config
-  (global-diff-hl-mode)
+  (diff-hl-margin-mode +1)
+  (global-diff-hl-mode +1)
+  :hook
+  (dired-mode . diff-hl-dired-mode)
   :general
   (diff-hl-mode-map
    :states '(normal visual)
