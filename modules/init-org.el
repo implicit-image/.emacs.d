@@ -16,7 +16,6 @@
   (org-mode . org-pretty-table-mode))
 
 (use-package org-fragtog
-  :after org
   :hook (org-mode . org-fragtog-mode))
 
 (use-package toc-org
@@ -31,10 +30,9 @@
      "The places where I keep my ‘#+documentation’"))
 
 (use-package org
-  :demand
   :init
   (setq org-confirm-babel-evaluate nil
-	org-startup-indented t
+	org-startup-indented nil
 	org-pretty-entities t
 	org-use-sub-superscripts "{}"
 	org-startup-with-inline-images t
@@ -76,7 +74,7 @@
 
   (setq org-tag-alist
         '((:startgroup)
-                                        ; Put mutually exclusive tags here
+					; Put mutually exclusive tags here
           (:endgroup)
           ("@errand" . ?E)
           ("@home" . ?H)

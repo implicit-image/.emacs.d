@@ -43,8 +43,9 @@
   (add-to-list 'org-src-lang-modes (cons "nwscript" 'nwscript-mode)))
 
 (use-package jupyter
-  :after org
-  :config
-  (org-babel-jupyter-override-src-block "haskell"))
+  :hook
+  (org-mode . (lambda ()
+		(require 'ob-jupyter)
+		(org-babel-jupyter-override-src-block "haskell"))))
 
 (provide 'init-org-babel)

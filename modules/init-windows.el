@@ -15,7 +15,7 @@
 (use-package frame
   :straight nil
   :config
-  (setq window-divider-default-places t
+  (setq window-divider-default-places 'right-only
 	window-divider-default-right-width 1
 	window-divider-default-bottom-width 1)
   (window-divider-mode)
@@ -35,14 +35,16 @@
    ))
 
 (use-package popwin
-  :demand
   :config
   (+windows-cfg
    '(("\*Warnings\*" "\*Warnings\**" "\*scratch\*" shell-mode help-mode)
      :regexp t :height 0.3 :position bottom :dedicated nil))
-  (popwin-mode 1)
   :general
   (+leader-keys
-    "b p" '("Popup buffer" . popwin:popup-buffer)))
+    "b p" '("Popup buffer" . popwin:popup-buffer))
+  :hook
+  (after-init . (lambda ()
+		  (interactive)
+		  (popwin-mode 1))))
 
 (provide 'init-windows)

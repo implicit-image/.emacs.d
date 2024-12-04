@@ -7,10 +7,10 @@
   (setq compilation-scroll-output t))
 
 (use-package rustic
-  :mode ("\\.rs\\'" . rustic-mode)
   :config
   (setq rustic-indent-offset 4
 	rustic-lsp-server "rust-analyzer"
+	rustic-lsp-client 'lsp-mode
 	;; formatting
 	rustic-format-trigger 'on-save))
 

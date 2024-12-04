@@ -19,8 +19,7 @@
   (tsx-ts-mode . lsp))
 
 (use-package css-ts-mode
-  :straight nil
-  :mode (rx (or "\\.css\\'" "\\.scss\\'" "\\.rasi\\'")))
+  :straight nil)
 
 (use-package json-ts-mode
   :mode "\\.json\\'"
