@@ -99,6 +99,7 @@
 (require 'init-latex)
 (require 'init-shell)
 (require 'init-conf)
+(require 'init-cuda)
 (require 'init-misc-langs)
 ;; org mode
 (require 'init-org)
@@ -110,5 +111,3 @@
 (require 'init-emms)
 ;; website export config
 (require 'init-implicit-image-dot-github-dot-io)
-
-;; load theme
