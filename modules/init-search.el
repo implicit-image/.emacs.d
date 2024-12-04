@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package rg)
 
 (defun +search/rg-thing-at-point ()

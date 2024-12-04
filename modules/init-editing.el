@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 
 (defvar +editing/evil-mc-incompatible-modes '()
   "Modes not compatible with `evil-mc'.")

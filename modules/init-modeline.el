@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (require 'eieio)
 (require 'doom-themes)
 

@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (require 'projectile)
 
 (defun +terminal--get-buffers (&rest preds)

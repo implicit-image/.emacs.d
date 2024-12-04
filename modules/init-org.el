@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package org-contrib)
 (use-package htmlize)
 (use-package ox-rss)

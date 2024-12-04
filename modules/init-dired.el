@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;;;###autoload
 (defun +dired/choose-sort ()
   "Change sort type in current dired buffer."

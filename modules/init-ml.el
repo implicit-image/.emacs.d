@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package reason-mode)
 
 (use-package dune)

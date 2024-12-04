@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package emms
   :init
   (setq emms-player-list '()

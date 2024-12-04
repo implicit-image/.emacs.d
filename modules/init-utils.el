@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (defun +utils/disable-line-numbers ()
   "Disable `display-line-numbers-mode' in current buffer."
   (interactive)

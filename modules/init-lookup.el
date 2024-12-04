@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (defvar +lookup/buffer-functions-alist '()
   "alist of form (MAJOR-MODE . FUNCTION).")
 

@@ -1,6 +1,9 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package calibredb
   :init
-  (evil-set-initial-state 'calibredb-search-mode 'emacs)
+  (evil-set-initial-state 'calibredb-search-mode 'normal)
+  (evil-set-initial-state 'calibredb-show-mode 'normal)
   :config
   (setq calibredb-root-dir "~/library"
 	calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir)

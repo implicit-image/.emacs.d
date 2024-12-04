@@ -1,4 +1,4 @@
-
+;;; -*- lexical-binding: t -*-
 
 (defvar +lsp/installers '((npm-global . "npm install -g %s"))
   "Alist of (SYMBOL . COMMAND-STRING) where COMMAND-STRING is a command to install a server.")

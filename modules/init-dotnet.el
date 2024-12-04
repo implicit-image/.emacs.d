@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;; TODO: complete dotnet config
 (use-package csharp-mode
   :straight nil

@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (defun +buffers/decide-ibuffer-filters ()
   (interactive)
   (let ((group (symbol-name 'default)))

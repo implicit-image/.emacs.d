@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package elm-mode
   :preface (add-to-list '+lsp/servers-to-install 'elm-ls)
   :init

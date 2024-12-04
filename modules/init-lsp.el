@@ -1,14 +1,12 @@
+;;; -*- lexical-binding: t -*-
+
 (defvar +lsp/servers-to-install '()
   "Alist of (INSTALLER-SYMBOL . SERVER-NAME) to ensure are installed by `lsp-install-server'")
-
-(defun +lsp/doc-popup ())
-
-(defun +lsp/doc-buffer ())
 
 ;;;###autoload
 (defun +lsp/init-choose-client ()
   (interactive)
-  (ivy-read "LSP Client: " '("lsp-mode" "lsp-bridge")
+  (ivy-read "LSP Client: " '("lsp-mode" "lsp-bridge" "eglot" "none")
 	    :preselect 0
 	    :require-match t
 	    :history '+lsp/choose-client-history

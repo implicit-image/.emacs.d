@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package go-ts-mode
   :mode "\\.go\\'"
   :init

@@ -1,8 +1,10 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package java-ts-mode
   :config
-  (setq java-ts-mode-indent-offset 4)
-  :hook (java-ts-mode . (lambda ()
-			  (eglot-ensure))))
+  (setq java-ts-mode-indent-offset 4))
+
+(use-package lsp-java)
 
 (use-package kotlin-mode
   :config

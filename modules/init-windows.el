@@ -1,5 +1,8 @@
+;;; -*- lexical-binding: t -*-
+
 (defun +windows-cfg (&rest popwin-cfg-forms)
   "Each POPWIN-CFG-FORM is (BUFFER-NAMES . POPWIN-OPTIONS-PLIST)."
+  (require 'popwin)
   (mapc (lambda (cfg-form)
 	  (let ((buffers (car cfg-form))
 		(cfg-opts (cdr cfg-form)))

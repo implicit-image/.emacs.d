@@ -1,11 +1,10 @@
+;;; -*- lexical-binding: t -*-
 
 (setq visible-cursor nil)
 
 ;;;###autoload
 (defun +tty-setup-faces ()
   "Setup faces for tty display."
-
-
   (progn (custom-set-faces `(vertical-border ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg-alt) :width narrow))))
 			   `(border ((t (:background ,(doom-color  'bg) :foreground ,(doom-color 'fg) :width narrow))))
 			   `(internal-border ((t (:background ,(doom-color 'bg) :width narrow)))))

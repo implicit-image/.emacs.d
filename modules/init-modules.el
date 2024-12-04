@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (defun +modules/browse ()
   "Open user init module file."
   (interactive)

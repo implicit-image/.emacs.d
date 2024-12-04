@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 (require 'f)
 
 (use-package emacs

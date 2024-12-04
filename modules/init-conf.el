@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 (use-package toml-mode)
 
 (use-package nxml-mode

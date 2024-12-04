@@ -1,10 +1,11 @@
+;;; -*- lexical-binding: t -*-
+
 (defun +org-roam/rg-in-notes ()
   (interactive)
   (counsel-rg nil org-roam-directory))
 
 
 (use-package org-roam
-  :demand
   :custom
   (org-roam-directory (substitute-in-file-name "$HOME/org/roam"))
   (org-roam-dailies-directory "daily")

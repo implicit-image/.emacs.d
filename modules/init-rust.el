@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package cargo-mode
   :hook
   (rust-mode . cargo-minor-mode)

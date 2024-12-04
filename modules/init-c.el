@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package cc-mode)
 
 (use-package c-ts-mode

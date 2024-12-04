@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package lsp-bridge
   :demand
   :straight (lsp-bridge :type git

@@ -1,14 +1,14 @@
+;;; -*- lexical-binding: t -*-
+
 (require 'rx)
 
 (use-package js2-mode)
 
 (use-package js-ts-mode
   :straight nil
-  :init (add-to-list '+lsp/servers-to-install 'ts-ls)
-  :mode (rx  (or "\\.js\\'" "\\.jsm\\'")))
+  :init (add-to-list '+lsp/servers-to-install 'ts-ls))
 
-(use-package rjsx-mode
-  :mode (rx (or "\\.tsx\\'" "\\.jsx\\'")))
+(use-package rjsx-mode)
 
 (use-package typescript-ts-mode
   :straight nil

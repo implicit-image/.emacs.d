@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package org
   :init
   (evil-set-initial-state 'org-agenda-mode 'normal)

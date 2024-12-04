@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (use-package nwscript-mode
   :mode "\\.nss\\'"
   :commands
