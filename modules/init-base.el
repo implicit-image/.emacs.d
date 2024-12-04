@@ -19,7 +19,7 @@
 	;;startup screen
 	inhibit-startup-screen t
 	visible-bell nil
-	debug-on-error nil
+	;; debug-on-error t
 	;; lines
 	display-line-numbers-type 'relative
 	truncate-lines t
@@ -28,7 +28,7 @@
 	create-lockfiles nil
 	backup-directory-alist `(("." . ,(f-join user-emacs-directory "backups")))
 	;; increase garbage collector limit
-	gc-cons-threshold 100000000
+	gc-cons-threshold (* 1024 1024 1024)
 	;; scrollling
 	scroll-step 1
 	scroll-margin 15)
