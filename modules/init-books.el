@@ -21,12 +21,75 @@
 			     (interactive)
 			     (display-line-numbers-mode -1)
 			     (blink-cursor-mode -1)))
+  (calibredb-show-mode . (lambda ()
+			   (interactive)
+			   (display-line-numbers-mode -1)))
   :general
   (+leader-keys
     "a c" '("Open calibre" . calibredb))
   (calibredb-search-mode-map
-   :states '(normal)
-   "q" 'quit-window))
+   :states '(normal visual)
+   "TAB" 'calibredb-toggle-view-at-point
+   "RET" 'calibredb-find-file
+   "*" 'calibredb-toggle-favorite-at-point
+   "," 'calibredb-quick-look
+   "." 'calibredb-dired-open
+   "/" 'calibredb-search-live-filter
+   "?" 'calibredb-dispatch
+   "A" 'calibredb-add-dir
+   "D" 'calibredb-remove-marked-items
+   "L" 'calibredb-library-list
+   "N" 'calibredb-library-next
+   "O" 'calibredb-find-file-other-frame
+   "P" 'calibredb-library-previous
+   "R" 'calibredb-search-clear-filter
+   "S" 'calibredb-switch-library
+   "V" 'calibredb-open-file-with-default-tool
+   "a" 'calibredb-add
+   "b" 'calibredb-catalog-bib-dispatch
+   "c" 'calibredb-clone
+   "d" 'calibredb-remove
+   "e" 'calibredb-export-dispatch
+   "g" 'calibredb-filter-dispatch
+   "h" 'calibredb-toggle-highlight-at-point
+   "i" 'calibredb-edit-annotation
+   "j" 'calibredb-next-entry
+   "k" 'calibredb-previous-entry
+   "l" 'calibredb-virtual-library-list
+   "m" 'calibredb-mark-and-forward
+   "n" 'calibredb-virtual-library-next
+   "o" 'calibredb-sort-dispatch
+   "p" 'calibredb-virtual-library-previous
+   "q" 'calibredb-search-quit
+   "r" 'calibredb-search-refresh-and-clear-filter
+   "s" 'calibredb-set-metadata-dispatch
+   "u" 'calibredb-unmark-and-forward
+   "v" 'calibredb-view
+   "x" 'calibredb-toggle-archive-at-point
+   "y" 'calibredb-yank-dispatch
+   "DEL" 'calibredb-unmark-and-backward
+   "<backtab>" 'calibredb-toggle-view
+   "<mouse-3>" 'calibredb-search-mouse
+   "q" 'quit-window)
+  (calibredb-show-mode-map
+   :states '(normal visual)
+   "," 'calibredb-quick-look
+   "." 'calibredb-open-dired
+   "?" 'calibredb-entry-dispatch
+   "O" 'calibredb-find-file-other-frame
+   "V" 'calibredb-open-file-with-default-tool
+   "e" 'calibredb-export-dispatch
+   "o" 'calibredb-find-file
+   "q" 'calibredb-entry-quit
+   "ESC" 'calibredb-entry-quit
+   "s" 'calibredb-set-metadata-dispatch
+   "y" 'calibredb-yank-dispatch
+   "M-/" 'calibredb-rga
+   "M-A" 'calibredb-set-metadata--authors
+   "M-T" 'calibredb-set-metadata--title
+   "M-a" 'calibredb-set-metadata--author_sort
+   "M-c" 'calibredb-set-metadata--comments
+   "M-t" 'calibredb-set-metadata--tags))
 
 (use-package org-noter
   :init
