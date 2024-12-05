@@ -23,7 +23,7 @@
 			   :host github
 			   :repo "doomemacs/snippets"
 			   :files ("*.el" "*"))
-  :init
+  :config
   (setq doom-snippets-enable-short-helpers t))
 
 (use-package yasnippet-snippets
@@ -32,12 +32,14 @@
 (use-package eldoc
   :init
   (setq eldoc-echo-area-prefer-doc-buffer t
+	eldoc-idle-delay 0.1
 	eldoc-echo-area-use-multiline-p nil))
 
 
 (use-package eldoc-box
   :custom-face
   (eldoc-box-body ((t (:box nil))))
+  (eldoc-box-border ((t (:width narrow :background ,(doom-color 'fg-alt)))))
   ;; TODO: maybe remove some prettify functions from eldoc-box-buffer-hook, it looks wonky
   :init
   (setq eldoc-box-clear-with-C-g t)
@@ -56,6 +58,9 @@
 
 (use-package compile
   :straight nil
+  :init
+  (+windows-cfg '((compilation-mode)
+		  :position bottom :height 0.3 :noselect nil :dedicated t))
   :config
   (setq compilation-scroll-output t))
 
@@ -66,5 +71,11 @@
   :general
   (+leader-keys
     "!" '("Comint run" . comint-run)))
+
+
+
+(+leader-keys
+  "c g f" '("Xref forward" . xref-go-forward)
+  "c g b" '("Xref back" . xref-go-back))
 
 (provide 'init-coding)
