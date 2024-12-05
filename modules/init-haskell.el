@@ -1,23 +1,25 @@
+;;; -*- lexical-binding: t -*-
+
 (require 'rx)
 
 (use-package haskell-mode
   :init
   (setq haskell-process-log t
-	haskell-process-type 'stack-ghci
-	haskell-compiler-type 'stack))
+	haskell-process-type 'auto
+	haskell-compiler-type 'auto))
 
 (use-package haskell-ts-mode
   :mode (rx (or "\\.hs\\'" "\\.lhs\\'")))
 
 (use-package lsp-haskell
   :init
-  (setq lsp-haskell-server-path (expand-file-name "~/.ghcup/bin/haskell-language-server-wrapper")
-	lsp-haskell-max-completions 80
-	lsp-haskell-plugin-ghcide-completions-global-on nil)
-  :hook
-  (haskell-mode . (lambda ()
-		    (require 'lsp-haskell))))
+  (setq lsp-haskell-server-path "haskell-language-server-wrapper"
+	;; lsp-haskell-server-args '()
+	lsp-haskell-check-project nil
+	lsp-haskell-completion-in-comments nil
+	lsp-haskell-plugin-eval-global-on nil
+	lsp-haskell-plugin-semantic-tokens-global-on t))
 
-(use-package dante)
+;; (use-package dante)
 
 (provide 'init-haskell)
