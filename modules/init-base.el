@@ -63,7 +63,8 @@
     (setq custom-file customization-file)
     (load custom-file 'noerror))
   :hook
-  (prog-mode . (lambda () (toggle-truncate-lines 1))))
+  (prog-mode . (lambda () (toggle-truncate-lines 1)))
+  (minibuffer-mode . (lambda () (display-line-numbers-mode -1))))
 
 ;; load $PATH from shell
 (use-package exec-path-from-shell
