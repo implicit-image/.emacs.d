@@ -48,6 +48,7 @@
 (require 'init-checkers)
 (require 'init-coding)
 (require 'init-completion)
+(require 'init-corfu)
 (require 'init-editing)
 (require 'init-indent)
 (require 'init-lookup)
