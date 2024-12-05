@@ -102,8 +102,7 @@
     "c r" '("Goto references" . xref-find-references)))
 
 ;; TODO: add :dash to use-package language mode declarations
-(use-package dash-docs
-  :demand)
+(use-package dash-docs)
 
 (use-package info
   :straight nil
@@ -147,6 +146,15 @@
   "h m" '("Describe keymap"   . describe-keymap)
   "h M" '("Describe mode"     . describe-mode)
   "h p" '("Describe package"  . describe-package))
+
+
+(with-eval-after-load 'init-windows
+  (+windows-cfg '((help-mode)
+		  :height 0.3
+		  :position bottom
+		  :dedicated nil
+		  :stick nil
+		  :noselect nil)))
 
 (general-defs
   global-map
