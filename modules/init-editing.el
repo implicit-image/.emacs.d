@@ -40,7 +40,6 @@
 (setq +editing/input-methods '())
 
 (use-package evil-mc
-  :after evil
   :init
   (add-hook
    'evil-mc-before-cursors-created
@@ -48,12 +47,13 @@
   (add-hook
    'evil-mc-after-cursors-deleted
    '+editing/evil-mc-turn-on-incompatible-modes)
-  :config
-  (global-evil-mc-mode +1))
+  :hook
+  (after-init . (lambda ()
+		 (interactive)
+		 (global-evil-mc-mode 1))))
 
 
 (use-package evil-nerd-commenter
-  :after evil
   :general
   (global-map
    :states '(visual normal)
@@ -84,13 +84,13 @@
   :straight nil
   :after evil
   :custom-face
-  (show-paren-match ((t (:foreground unspecified))))
+  (show-paren-match ((t (:background ,(doom-color 'red) :foreground unspecified))))
   (show-paren-match-expression ((t (:box
-				    (:line-width -1 :color ,(doom-color 'base5) :style released-button)
+				    (:line-width -1 :color ,(doom-color 'base6) :style released-button)
 				    :foreground
 				    unspecified))))
   :init
-  (setq show-paren-style 'expression
+  (setq show-paren-style 'parenthesis
 	show-paren-when-point-inside-paren t
 	show-paren-when-point-in-periphery t))
 
