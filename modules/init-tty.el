@@ -15,12 +15,14 @@
 (add-hook 'tty-setup-hook #'+tty-setup-faces)
 
 (use-package kkp
-  :demand
-  :config
-  (global-kkp-mode +1))
+  :hook
+  (tty-setup . (lambda ()
+		 (interactive)
+		 (global-kkp-mode +1))))
 
 (use-package evil-terminal-cursor-changer
-  :demand
+  :commands
+  (etcc-on)
   :init
   (setq evil-motion-state-cursor 'box
 	evil-visual-state-cursor 'box
