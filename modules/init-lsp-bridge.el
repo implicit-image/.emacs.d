@@ -8,8 +8,8 @@
 			:files ("*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
 			;; do not perform byte compilation or native compilation for lsp-bridge
 			:build (:not compile))
-  :custom-face
-  (lsp-bridge-semantic-tokens-variable-face ((t (:family "Iosevka Comfy" :box (:color "#FFDD33" :line-width -1 :style nil)))))
+  ;; :custom-face
+  ;; (lsp-bridge-semantic-tokens-variable-face ((t (:family "Iosevka Comfy" :box (:color "#FFDD33" :line-width -1 :style nil)))))
   :init
   (+windows-cfg
    '(("\*lsp-bridge-doc\*")
@@ -31,7 +31,6 @@
 	acm-enable-capf t
 	acm-terminal-doc-max-width 50
 	acm-terminal-max-width 30)
-  (global-lsp-bridge-mode 1)
   :general
   (acm-mode-map
    :states 'insert
@@ -39,7 +38,6 @@
    "M-j" 'acm-select-next
    "<backtab>" 'acm-select-prev
    "M-k" 'acm-select-prev
-   "RET" 'acm-complete
    "C-<tab>" 'acm-complete
    "C-f" 'acm-filter
    "M-d" 'acm-doc-toggle
@@ -62,8 +60,8 @@
    "r" '("Find references" . lsp-bridge-find-references)
    "k" '("Show doc popup" . lsp-bridge-popup-documentation)
    "K" '("Show doc buffer" . lsp-bridge-show-documentation)
-   "p" '(:ignore t :which-key "Process")
-   "p R" '("Restart process" . lsp-bridge-restart-process)
+   "s" '(:ignore t :which-key "Server")
+   "s R" '("Restart process" . lsp-bridge-restart-process)
    "R" '("Rename" . lsp-bridge-rename)
    "s S" '("LSP imenu" . lsp-bridge-imenu))
   (lsp-bridge-mode-map
