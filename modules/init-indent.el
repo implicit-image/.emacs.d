@@ -20,17 +20,16 @@
   :custom
   (indent-bars-prefer-character t)
   :hook
-  ((c-mode nwscript-mode tsx-ts-mode c-ts-mode js2-mode css-mode rust-ts-mode) . indent-bars-mode))
+  ((c-mode gleam-ts-mode java-ts-mode js2-ts-mode nwscript-mode tsx-ts-mode c-ts-mode js2-mode css-mode rust-ts-mode) . indent-bars-mode))
 
 (use-package whitespace
-  :demand
   :custom-face
   (whitespace-space ((t (:foreground "#4a4a4a"))))
   (whitespace-empty ((t (:foreground "#4a4a4a"))))
   :config
   (setq whitespace-style '(face))
   :hook
-  (prog-mod . whitespace-mode)
+  ((prog-mode) . whitespace-mode)
   (before-save . whitespace-cleanup)
   (before-save . delete-trailing-whitespace))
 
