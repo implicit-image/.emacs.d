@@ -31,6 +31,8 @@
   (setq prefix-help-command #'embark-prefix-help-command))
 
 (use-package consult
+  :autoload
+  (consult--read)
   :custom
   (xref-show-xrefs-function 'consult-xref)
   :config

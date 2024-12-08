@@ -30,23 +30,25 @@
 (defun +utils/consult-set-font-family ()
   "Set font family in all frames to selected one."
   (interactive)
-  (let ((fg-color (doom-color 'strings))
-	(bg-color (doom-color 'bg)))
-    (consult--read (delete-dups (font-family-list))
-		   :prompt "Font family: "
-		   :annotate (lambda (font)
-			       `(,(propertize
-				   (concat font " ")
-				   'face 'font-lock-keyword-face)
-				 "Family: "
-				 ,(propertize
-				   "The quick brown fox jumps over the lazy dog."
-				   'face `(:family ,font :foreground ,fg-color :background ,bg-color))))
-		   :require-match t
-		   :history 'consult-set-font-family-history
-		   :lookup (lambda (selected-font &rest args)
-			     (interactive)
-			     (set-frame-font selected-font t t t)))))
+  (if (display-graphic-p)
+      (let ((fg-color (doom-color 'strings))
+	    (bg-color (doom-color 'bg)))
+	(consult--read (delete-dups (font-family-list))
+		       :prompt "Font family: "
+		       :annotate (lambda (font)
+				   `(,(propertize
+				       (concat font " ")
+				       'face 'font-lock-keyword-face)
+				     "Family: "
+				     ,(propertize
+				       "The quick brown fox jumps over the lazy dog."
+				       'face `(:family ,font :foreground ,fg-color :background ,bg-color))))
+		       :require-match t
+		       :history 'consult-set-font-family-history
+		       :lookup (lambda (selected-font &rest args)
+				 (interactive)
+				 (set-frame-font selected-font t t t))))
+    (message "Cant change font family on tty")))
 
 (defun +utils-whole-buffer-as-string (buffer)
   (with-current-buffer buffer
