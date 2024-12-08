@@ -14,9 +14,10 @@
 		      (interactive)
 		      (pcase client
 			("lsp-mode" ((lsp-deferred)))
-			("eglot" ((lsp-deferred)))
+			("eglot" ((eglot)))
 			("lsp-bridge" ((lsp-bridge-mode +1)))
-			("none" ((ignore)))))))
+			("lspce" ((lspce-mode +1)))
+			("none" ((message "No LSP client chosen.")))))))
 
 
 (provide 'init-lsp)
