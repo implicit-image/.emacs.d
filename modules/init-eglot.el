@@ -7,6 +7,9 @@
 	eglot-extend-to-xref t)
   (+windows-cfg '(("\*eldoc\*")
 		  :regexp t :height 0.3 :position bottom :dedicated nil))
+  :config
+  (add-to-list 'eglot-server-programs
+		'(haskell-ts-mode . ("haskell-language-server-wrapper" "--lsp")))
   :hook
   (eglot-mode . (lambda ()
 		  (interactive)
