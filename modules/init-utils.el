@@ -11,23 +11,6 @@
       (funcall-interactively mode -1)
     (funcall-interactively mode -1)))
 
-
-(defun +utils/counsel-toggle-minor-mode ()
-  "Toggle the selected minor mode"
-  (interactive)
-  (ivy-read "Minor mode: " (delete-dups minor-mode-list)
-	    :preselect 0
-	    :require-match t
-	    :history 'counsel-toggle-minor-mode-history
-	    :action (lambda (minor-mode)
-		      (interactive)
-		      (let ((minor-mode-var (intern minor-mode)))
-			(if (symbol-value minor-mode-var)
-			    (funcall-interactively minor-mode-var -1)
-			  (funcall-interactively minor-mode-var +1))))
-	    :caller '+utils/counsel-toggle-minor-mode))
-
-
 (defun +utils-nth-wrapped (n list)
   "Returnd nth element of `list'. If `n' is greater than length of `list' takes `(mod n (length list))' instead."
   (nth (mod (length list) n) list))
@@ -35,6 +18,7 @@
 
 ;;;###autoload
 (defun +utils/delete-visited-file ()
+  "Delete the file visited by current buffer."
   (interactive)
   (let* ((curr-buf (current-buffer))
 	 (curr-name (buffer-file-name curr-buf)))
@@ -43,20 +27,26 @@
       (delete-file curr-name))))
 
 ;;;###autoload
-(defun +utils/counsel-set-font ()
+(defun +utils/consult-set-font-family ()
+  "Set font family in all frames to selected one."
   (interactive)
-  (let ((current-font
-         (symbol-name (font-get (face-attribute 'default :font) :family)))
-	(current-font-size
-	 (font-get (face-attribute 'default :font) :size)))
-    (ivy-read "Font: " (delete-dups (font-family-list))
-              :preselect current-font
-              :require-match t
-              :history 'counsel-set-font-history
-              :action (lambda (selected-font)
-			(interactive)
-			(set-frame-font selected-font t t t))
-              :caller 'counsel-set-font)))
+  (let ((fg-color (doom-color 'strings))
+	(bg-color (doom-color 'bg)))
+    (consult--read (delete-dups (font-family-list))
+		   :prompt "Font family: "
+		   :annotate (lambda (font)
+			       `(,(propertize
+				   (concat font " ")
+				   'face 'font-lock-keyword-face)
+				 "Family: "
+				 ,(propertize
+				   "The quick brown fox jumps over the lazy dog."
+				   'face `(:family ,font :foreground ,fg-color :background ,bg-color))))
+		   :require-match t
+		   :history 'consult-set-font-family-history
+		   :lookup (lambda (selected-font &rest args)
+			     (interactive)
+			     (set-frame-font selected-font t t t)))))
 
 (defun +utils-whole-buffer-as-string (buffer)
   (with-current-buffer buffer
@@ -80,7 +70,6 @@
   "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
   "t c" '("Colorize color strings" . rainbow-mode)
   "t I" '("Select input method" . set-input-method)
-  "t m" '("Toggle minor mode" . +utils/counsel-toggle-minor-mode)
   "t v" '("Visual line mode" . visual-line-mode))
 
 (provide 'init-utils)

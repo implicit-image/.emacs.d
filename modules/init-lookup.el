@@ -93,14 +93,6 @@
   :init
   (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
 
-(use-package ivy-xref
-  :after ivy
-  :init
-  (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)
-  :general
-  (+leader-keys
-    "c r" '("Goto references" . xref-find-references)))
-
 ;; TODO: add :dash to use-package language mode declarations
 (use-package dash-docs)
 

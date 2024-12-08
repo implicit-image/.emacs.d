@@ -1,129 +1,78 @@
 ;;; -*- lexical-binding: t -*-
-(use-package company
-  :disabled t)
-
-;; disable loading company if something tries
-(defalias 'company-mode 'ignore)
-
-(use-package ivy
-  :custom-face
-  (ivy-current-match ((t (:background ,(doom-lighten (doom-color 'selection) 0.1)))))
-  :init
-  (setq ivy-height 15
-	ivy-fixed-height-minibuffer t
-	ivy-use-virtual-buffers t
-	enable-recursive-minibuffers t
-	ivy-initial-inputs-alist '())
-  :config
-  (ivy-mode)
-  :hook (after-init . ivy-mode))
-
-(use-package counsel
-  :config
-  ;; dont use package.el at all
-  (defalias 'counsel-package 'ignore)
-  :general
-  (+leader-keys
-    ":" '("Execute command" . counsel-M-x)
-    "." '("Find file in cwd" . counsel-find-file)
-    "/" '("Search project" . counsel-rg)
-    ;; buffer
-    "b b" '("Find buffer" . counsel-switch-buffer)
-    ;; code
-    "c c" '("Compile" . counsel-compile)
-    ;; file
-    "f r" '("Recent files" . counsel-recentf)
-    ;; help
-    "h l" '("Load library" . counsel-load-library)
-    "h F" '("Describe face" . counsel-faces)
-    "h s" '("Describe symbol" . counsel-describe-symbol)
-    "h t" '("Load theme" . counsel-load-theme)
-    ;; insert
-    "i u" '("Unicode char" . counsel-unicode-char)
-    "i c" '("Color hexstring" . counsel-colors-web)
-    ;; search
-    "s i" '("imenu" . counsel-imenu))
-  (general-def general-override-mode-map
-    :states '(normal visual emacs insert)
-    "M-x" 'counsel-M-x))
-
-(use-package swiper
-  :general
-  (+leader-keys
-    "s b" '("Swiper" . swiper)
-    "s B" '("swiper thing at point" . swiper-thing-at-point)))
 
 (use-package marginalia
-  :demand
   :init
   (setq marginalia-align 'center
 	marginalia-align-offset -3)
-  :config
-  (marginalia-mode +1))
-
-;;################################################################
-;; Embark + consult + vertico stack
-;; disabled for now
-;; NOTE: maybe replace ivy+counsel in the future
-(use-package embark
-  :disabled
-  :init
-  ;; Optionally replace the key help with a completing-read interface
-  (setq prefix-help-command #'embark-prefix-help-command)
-  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
-  ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
-  :config
-  ;; Hide the mode line of the Embark live/completions buffers
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none)))))
-
-
-(use-package consult
-  :disabled
-  :config
-  :general
-  (+leader-keys
-    ":" '("Execute command" . execute-extended-command)
-    "." '("Find file in cwd" . find-file)
-    "/" '("Search project" . consult-)
-    ;; buffer
-    "b b" '("Find buffer" . counsel-switch-buffer)
-    ;; code
-    "c c" '("Compile" . counsel-compile)
-    ;; file
-    "f r" '("Recent files" . counsel-recentf)
-    ;; help
-    "h l" '("Load library" . counsel-load-library)
-    "h F" '("Describe face" . counsel-faces)
-    "h s" '("Describe symbol" . counsel-describe-symbol)
-    "h t" '("Load theme" . counsel-load-theme)
-    ;; insert
-    "i u" '("Unicode char" . counsel-unicode-char)
-    "i c" '("Color hexstring" . counsel-colors-web)
-    ;; search
-    "s i" '("imenu" . counsel-imenu))
-  (general-def general-override-mode-map
-    :states '(normal visual emacs insert)
-    "M-x" 'counsel-M-x))
+  :hook
+  (after-init . marginalia-mode))
 
 (use-package vertico
-  :disabled
   :custom
-  (vertico-count 13)                    ; Number of candidates to display
-  (vertico-resize t)
-  (vertico-cycle nil) ; Go from last to first candidate and first to last (cycle)?
-  :config
-  (vertico-mode))
+  (vertico-count 15)
+  (vertico-resize nil)
+  (vertico-cycle t)
+  (vertico-preselect 'first)
+  :init
+  (setq vertico-scroll-margin 5)
+  :hook
+  (marginalia-mode . vertico-mode))
 
+(use-package embark
+  :custom
+  (embark-mixed-indicator-delay 0.3)
+  :init
+  (+windows-cfg '(("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*")
+		  :regexp t
+		  :position bottom
+		  :height 0.3
+		  :dedicated nil
+		  :noselect nil))
+  (setq prefix-help-command #'embark-prefix-help-command))
+
+(use-package consult
+  :custom
+  (xref-show-xrefs-function 'consult-xref)
+  :config
+  (consult-customize
+   consult-grep consult-ripgrep consult-git-grep
+   :initial "")
+  :general
+  (org-mode-map
+   :states '(normal visual)
+   :prefix "SPC"
+   :global-prefix "M-SPC"
+   "s i" '("Org heading" . consult-org-heading)
+   "s o" '("Outline" . consult-outline))
+  (markdown-mode-map
+   :states '(normal visual)
+   :prefix "SPC"
+   :global-prefix "M-SPC"
+   "s o" '("Outline" . consult-outline))
+  (+leader-keys
+    "m :" '("Run active mode command" . consult-mode-command)
+    "/" '("Search directory" . consult-ripgrep)
+    ;; buffer
+    "b b" '("Find buffer" . consult-buffer)
+    "c e" '("Compile errors" . consult-compile-error)
+    ;; file
+    "f r" '("Recent files" . consult-recent-file)
+    "h i" '("Emacs Info" . consult-info)
+    "o b" '("Bookmarks" . consult-bookmark)
+    ;; search
+    "s b" '("Search buffer" . consult-line)
+    "s B" '("Search all buffers" . consult-line-mullti)
+    "s i" '("imenu" . consult-imenu)
+    "s I" '("imenu everywhere" . consult-imenu-multi)
+    "t m" '("Toggle minor mode" . consult-minor-mode-menu)))
 
 (use-package embark-consult
-  :disabled
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-;; #########################################################
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic)))
 
 ;; in-buffer completion
 
@@ -185,5 +134,14 @@
 
 (general-def global-map
   "C-SPC" 'completion-at-point)
+
+(+leader-keys
+  ":" '("Execute command" . execute-extended-command)
+  "." '("Find file in cwd" . find-file)
+  "c c" '("Compile" . compile)
+  "h l" '("Load library" . load-library)
+  "h F" '("Describe face" . describe-face)
+  "h s" '("Describe symbol" . describe-symbol)
+  "h t" '("Load theme" . load-theme))
 
 (provide 'init-completion)

@@ -6,20 +6,17 @@
 ;;;###autoload
 (defun +lsp/init-choose-client ()
   (interactive)
-  (ivy-read "LSP Client: " '("lsp-mode" "lsp-bridge" "eglot" "none")
-	    :preselect 0
+  (consult--read '("lsp-mode" "lsp-bridge" "eglot" "none")
+	    :prompt "LSP client: "
 	    :require-match t
 	    :history '+lsp/choose-client-history
-	    :caller '+lsp/choose-client
-	    :action (lambda (client)
+	    :lookup (lambda (client)
 		      (interactive)
 		      (pcase client
 			("lsp-mode" ((lsp-deferred)))
-			("lsp-bridge" ((lsp-bridge-mode +1)))))))
+			("eglot" ((lsp-deferred)))
+			("lsp-bridge" ((lsp-bridge-mode +1)))
+			("none" ((ignore)))))))
 
-(+leader-keys
-  "t a" '("Toggle autocompletion" . (lambda ()
-				      (interactive)
-				      (setq lsp-bridge-complete-manually (not lsp-bridge-complete-manually)))))
 
 (provide 'init-lsp)

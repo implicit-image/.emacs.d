@@ -16,7 +16,7 @@
   (string-join `(,vterm-buffer-name ,default-directory)))
 
 (defun +terminal--get-dwim-command (&optional new-window)
-  "Open terminal. If NEW-WINDOW is not `nil' open it in new window instead of the current one. Tries to detect current project"
+  "Open terminal. If NEW-WINDOW is not `nil' open it in new window instead of the current one. Tries to detect current project."
   (let* ((command-suffix (if (and (boundp 'new-window) new-window)
 			     "other-window"
 			   ""))
@@ -30,14 +30,15 @@
 
 ;;;###autoload
 (defun +terminal/popup (&optional create-new)
-  "Popup an exiisting terminal or a new one."
+  "Popup an existing terminal or a new one."
   (interactive)
-  (ivy-read "Popup vterm" (+terminal--get-buffers)
-	    :preselect 1
-	    :require-match nil
-	    :action (lambda (buffer)
-		      (popwin:popup-buffer buffer))
-	    :caller '+terminal/popup))
+  (consult--read (mapcar 'buffer-name (+terminal--get-buffers))
+		 :prompt "Popup vterm"
+		 :default 0
+		 :require-match nil
+		 :lookup (lambda (buffer &rest args)
+			   (interactive)
+			   (popwin:popup-buffer buffer))))
 
 ;;;###autoload
 (defun +terminal/open (&optional other-window)
@@ -55,34 +56,35 @@
 (defun +terminal/run-command (&optional )
   "Run COMMAND in vterm terminal."
   (interactive)
-  (ivy-read "run in vterm: " (if (boundp '+terminal/run-command-history)
-				 +terminal/run-command-history
-			       '())
-	    :preselect 0
-	    :require-match nil
-	    :history '+terminal/run-command-history
-	    :caller '+terminal/run-command
-	    :action (lambda (command)
-		      (interactive)
-		      (let ((buffer (funcall (+terminal--get-dwim-command t))))
-			(with-current-buffer buffer
-			  (interactive)
-			  (when (not (eq evil-state 'insert))
-			    (evil-insert-state))
-			  (read-only-mode -1)
-			  (vterm-send-string command)
-			  (vterm-send-return))))))
+  (consult--read (if (boundp '+terminal/run-command-history)
+		     +terminal/run-command-history
+		   '())
+		 :prompt "Run in Vterm: "
+		 :default 0
+		 :require-match nil
+		 :history '+terminal/run-command-history
+		 :lookup (lambda (command &rest args)
+			   (interactive)
+			   (let ((buffer (funcall (+terminal--get-dwim-command t))))
+			     (with-current-buffer buffer
+			       (interactive)
+			       (when (not (eq evil-state 'insert))
+				 (evil-insert-state))
+			       (read-only-mode -1)
+			       (vterm-send-string command)
+			       (vterm-send-return))))))
 
 ;;;###autoload
-(defun +terminal/counsel-vterm ()
+(defun +terminal/consult-vterm ()
   (interactive)
-  (ivy-read "Vterm:" (mapcar #'buffer-name (+terminal--get-buffers))
-	    :preselect 0
-	    :require-match t
-	    :history '+terminal/counsel-vterm-history
-	    :action (lambda (buffer)
-		      (switch-to-buffer buffer nil nil))
-	    :caller '+terminal/counsel-vterm))
+  (consult--read (mapcar #'buffer-name (+terminal--get-buffers))
+		 :prompt "Vterm: "
+		 :annotate 'marginalia-annotate-buffer
+		 :default 1
+		 :require-match t
+		 :lookup (lambda (buffer &rest args)
+			   (switch-to-buffer buffer nil nil))))
+
 
 
 (use-package vterm

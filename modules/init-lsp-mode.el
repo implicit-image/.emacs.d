@@ -16,18 +16,6 @@
 (defun +lsp/install-servers (&optional force)
   "Install all servers in `+lsp/servers-to-install'")
 
-(defun +lsp/counsel-code-actions ()
-  (interactive)
-  (ivy-read "Execute code action: "
-	    (mapcar (lambda (action)
-		      (plist-get action :title))
-		    lsp-ui-sideline--code-actions)
-	    :keymap counsel-describe-map
-	    :require-match t
-	    :caller '+lsp/counsel-ccode-actions
-	    :action #'lsp-execute-code-action))
-
-
 (defun lsp-booster--advice-json-parse (old-fn &rest args)
   "Try to parse bytecode instead of json."
   (or
@@ -243,17 +231,19 @@
    "k" 'lsp-ui-peek--select-prev))
 
 
-(use-package lsp-ivy
-  :commands
-  (lsp-ivy-workspace-symbol lsp-ivy-global-workspace-symbol)
+(use-package consult-lsp
+  :config
+  (consult-customize
+   consult-lsp-symbols
+   consult-lsp-file-symbols
+   consult-lsp-diagnostics :initial "")
   :general
   (lsp-mode-map
    :states '(normal visual)
    :prefix "SPC"
    :global-prefix "M-SPC"
-   "c s" '("Search LSP symbol" . lsp-ivy-workspace-symbol)
-   "c S" '("Search LSP symbol" . lsp-ivy-global-workspace-symbol)))
-
-
+   "c s" '("Local LSP symbols" . consult-lsp-file-symbols)
+   "c S" '("Workspace LSP symbols" . consult-lsp-symbols)
+   "c e" '("LSP diagnostics" . consult-lsp-diagnostics)))
 
 (provide 'init-lsp-mode)
