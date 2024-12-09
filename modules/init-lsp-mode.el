@@ -74,8 +74,8 @@
 	lsp-signature-auto-activate '(:on-trigger-char
 				      :on-server-request
 				      :after-completion)
-	lsp-signature-render-documentation nil
-	lsp-signature-doc-lines nil
+	lsp-signature-render-documentation t
+	lsp-signature-doc-lines 0
 	lsp-signature-cycle t
 	;; completion
 	lsp-completion-show-kind nil
@@ -184,7 +184,7 @@
 	lsp-ui-sideline-enable t
 	;; docs
 	lsp-ui-doc-enable t
-	lsp-ui-doc-use-childframe nil
+	lsp-ui-doc-use-childframe t
 	lsp-ui-doc-alignment 'frame
 	lsp-ui-doc-max-width 20
 	lsp-ui-doc-max-height 20
