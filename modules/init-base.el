@@ -6,7 +6,7 @@
   :init
   (setq +base/font-family "Comic Code" ;; "Iosevka Comfy Fixed"
         +base/font-weight 'semi-light
-        +base/font-size 19
+        +base/font-size 17
         +base/font-spec (font-spec :family +base/font-family
                                    :weight +base/font-weight
                                    :size +base/font-size)
