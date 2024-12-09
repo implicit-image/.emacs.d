@@ -108,7 +108,7 @@
 
 (+leader-keys
   "o t" '(:ignore t :which-key "Terminal")
-  "o t c" '("Switch to other" . +terminal/counsel-vterm)
+  "o t c" '("Switch to other" . +terminal/consult-vterm)
   "o t p" '("Popup terminal" . +terminal/popup)
   "o t r" '("Run command" . +terminal/run-command)
   "o T" '("Popup terminal" . +terminal/open))
