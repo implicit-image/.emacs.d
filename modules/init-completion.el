@@ -37,7 +37,7 @@
   (xref-show-xrefs-function 'consult-xref)
   :config
   (consult-customize
-   consult-grep consult-ripgrep consult-git-grep
+   consult-grep consult-ripgrep consult-git-grep consult-line-multi
    :initial "")
   :general
   (org-mode-map
@@ -63,7 +63,7 @@
     "o b" '("Bookmarks" . consult-bookmark)
     ;; search
     "s b" '("Search buffer" . consult-line)
-    "s B" '("Search all buffers" . consult-line-mullti)
+    "s B" '("Search all buffers" . consult-line-multi)
     "s i" '("imenu" . consult-imenu)
     "s I" '("imenu everywhere" . consult-imenu-multi)
     "t m" '("Toggle minor mode" . consult-minor-mode-menu)))
