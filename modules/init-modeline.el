@@ -12,7 +12,12 @@
     "s r" '("Query replace" . anzu-query-replace)
     "s R" '("Query replace regexp" . anzu-query-replace-regexp)))
 
-(use-package hide-mode-line)
+(use-package hide-mode-line
+  :hook
+  ((calibredb-search-mode
+    calibredb-edit-annotation-mode
+    calibredb-show-mode)
+   . hide-mode-line-mode))
 
 (use-package mood-line
   :custom-face
