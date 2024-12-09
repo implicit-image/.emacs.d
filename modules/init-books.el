@@ -4,6 +4,8 @@
   :init
   (evil-set-initial-state 'calibredb-search-mode 'normal)
   (evil-set-initial-state 'calibredb-show-mode 'normal)
+  ;; (+windows-cfg '((calibredb-show-mode)
+  ;; 		  :position right :width 0.5 :dedicated t :noselect nil :stick nil))
   :config
   (setq calibredb-root-dir "~/library"
 	calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir)
@@ -84,12 +86,11 @@
    "ESC" 'calibredb-entry-quit
    "s" 'calibredb-set-metadata-dispatch
    "y" 'calibredb-yank-dispatch
-   "M-/" 'calibredb-rga
-   "M-A" 'calibredb-set-metadata--authors
-   "M-T" 'calibredb-set-metadata--title
-   "M-a" 'calibredb-set-metadata--author_sort
-   "M-c" 'calibredb-set-metadata--comments
-   "M-t" 'calibredb-set-metadata--tags))
+   "C-c s A" 'calibredb-set-metadata--authors
+   "c-c s T" 'calibredb-set-metadata--title
+   "C-c s a" 'calibredb-set-metadata--author_sort
+   "C-c s c" 'calibredb-set-metadata--comments
+   "C-c s t" 'calibredb-set-metadata--tags))
 
 (use-package org-noter
   :init
