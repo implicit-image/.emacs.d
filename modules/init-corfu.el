@@ -17,7 +17,8 @@
 	corfu-doc-delay 0.0
 	corfu-echo-delay '(0.3 . 0.15)
 	corfu-auto-delay 0.0
-	corfu-preselect 'first
+	corfu-preselect 'prompt
+	corfu-preview-current nil
 	corfu-auto nil
 	corfu-popupinfo-delay '(0.3 . 0.15)
 	corfu-left-margin-width 3
@@ -33,6 +34,9 @@
 		  (corfu-echo-mode +1)
 		  (corfu-history-mode +1)
 		  (corfu-popupinfo-mode +1)))
+  (company-mode . (lambda ()
+		    (interactive)
+		    (corfu-mode -1)))
   (lsp-bridge . (lambda ()
 		  (corfu-mode -1)))
   (after-init . global-corfu-mode)
@@ -53,7 +57,7 @@
   (use-package corfu-terminal
     :init
     (setq corfu-terminal-enable-on-minibuffer nil
-	  corfu-terminal-disable-on-gui t
+	  corfu-terminal-disable-on-gui nil
 	  corfu-terminal-position-right-margin 5)
     :hook
     (tty-setup . corfu-terminal-mode))
@@ -63,7 +67,7 @@
     :straight (corfu-doc-terminal :type git
 				  :repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git")
     :hook
-    (tty-setup . corfu-doc-terminal-mode)))
+    (corfu-terminal-mode . corfu-doc-terminal-mode)))
 
 (use-package corfu-candidate-overlay
   :custom-face
