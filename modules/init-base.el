@@ -28,7 +28,7 @@
 	create-lockfiles nil
 	backup-directory-alist `(("." . ,(f-join user-emacs-directory "backups")))
 	;; increase garbage collector limit
-	gc-cons-threshold (* 1024 1024 1024)
+	gc-cons-threshold (* 1024 1024 10)
 	;; scrollling
 	scroll-step 1
 	scroll-margin 15)
@@ -70,7 +70,9 @@
 (use-package exec-path-from-shell
   :demand
   :commands exec-path-from-shell-initialize
-  :init (setq exec-path-from-shell-variables '("PATH" "MANPATH" "JAVA_HOME"))
-  :config (exec-path-from-shell-initialize))
+  :init
+  (setq exec-path-from-shell-variables '("PATH" "MANPATH" "JAVA_HOME"))
+  :config
+  (exec-path-from-shell-initialize))
 
 (provide 'init-base)

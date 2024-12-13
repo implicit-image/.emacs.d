@@ -2,9 +2,7 @@
 
 (use-package ement)
 
-(use-package mastodon
-  :init
-  (setq mastodon-active-user ))
+(use-package mastodon)
 
 (use-package rcirc
   :straight nil)

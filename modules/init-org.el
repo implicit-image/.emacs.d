@@ -5,8 +5,8 @@
 (use-package ox-rss)
 (use-package org-roam-ui)
 
-;; (use-package org-appear
-;;   :hook (org-mode . org-appear-mode))
+(use-package org-appear
+  :hook (org-mode . org-appear-mode))
 
 (use-package org-pretty-table
   :straight (org-pretty-table :type git
@@ -15,8 +15,23 @@
   :hook
   (org-mode . org-pretty-table-mode))
 
-(use-package org-fragtog
-  :hook (org-mode . org-fragtog-mode))
+(use-package el-easydraw
+  :straight (el-easydraw :type git
+			 :host github
+			 :repo "misohena/el-easydraw")
+  :functions
+  (edraw-org-setup-default edraw-org-setup-exporter)
+  :config
+  (with-eval-after-load "ox"
+    (require 'edraw-org)
+    (edraw-org-setup-exporter))
+  :hook
+  (org-mode . edraw-org-setup-default))
+
+(use-package org-xopp
+  :straight (org-xopp :type git
+		      :host github
+		      :repo "mahmoodsh36/org-xopp"))
 
 (use-package toc-org
   :hook

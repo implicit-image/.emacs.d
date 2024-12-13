@@ -91,7 +91,7 @@
 	;; lenses
 	lsp-lens-enable nil
 	;; eldoc
-	lsp-eldoc-enable-hover nil
+	lsp-eldoc-enable-hover t
 	lsp-eldoc-render-all nil
 	;; deno
 	lsp-clients-deno-config "./tsconfig.json"

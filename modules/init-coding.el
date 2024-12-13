@@ -1,10 +1,8 @@
 ;;; -*-lexical-binding:t-*-
 
-(require 'anzu)
-(require 'f)
-
 (use-package yasnippet
   :config
+  (require 'f)
   (setq yas-snippet-dirs (append yas-snippet-dirs
 				 `(,(f-join user-emacs-directory "straight" straight-build-dir "doom-snippets")
 				   ,(f-join user-emacs-directory "snippets")
@@ -53,8 +51,13 @@
 			 (eldoc-mode +1)))))
 
 (use-package dap-mode
-  :after lsp-mode
   :config (dap-auto-configure-mode))
+
+(use-package dape
+  :init
+  (setq dape-key-prefix "C-x D")
+  :config
+  (setq dape-buffer-window-arrangement 'right))
 
 (use-package compile
   :straight nil
