@@ -96,6 +96,8 @@
 ;; TODO: add :dash to use-package language mode declarations
 (use-package dash-docs)
 
+(use-package devdocs)
+
 (use-package info
   :straight nil
   :init
