@@ -45,11 +45,10 @@
   (global-evil-vimish-fold-mode 1))
 
 (use-package evil-org
-  :after org
-  :hook (org-mode . (lambda () (evil-org-mode)))
   :config
-  (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
+  (evil-org-agenda-set-keys)
+  :hook
+  ((org-mode org-agenda-mode) . evil-org-mode))
 
 (use-package treemacs-evil
   :demand
