@@ -111,5 +111,3 @@
 ;; apps
 (require 'init-socials)
 (require 'init-emms)
-;; website export config
-(require 'init-implicit-image-dot-github-dot-io)
