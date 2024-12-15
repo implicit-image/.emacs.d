@@ -101,6 +101,8 @@
   :hook
   (after-init . global-origami-mode))
 
+(use-package symbol-overlay)
+
 ;; (use-package combobulate
 ;;   :straight (combobulate :type git
 ;; 			 :host github
