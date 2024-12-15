@@ -21,11 +21,7 @@
   :hook
   (calibredb-search-mode . (lambda ()
 			     (interactive)
-			     (display-line-numbers-mode -1)
 			     (blink-cursor-mode -1)))
-  (calibredb-show-mode . (lambda ()
-			   (interactive)
-			   (display-line-numbers-mode -1)))
   :general
   (+leader-keys
     "a c" '("Open calibre" . calibredb))
@@ -108,10 +104,6 @@
   :init
   (evil-set-initial-state 'pdf-view-mode 'normal)
   (add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
-  :hook
-  (pdf-view-mode . (lambda ()
-		     (interactive)
-		     (display-line-numbers-mode -1)))
   :general
   (pdf-view-mode-map
    :states '(normal)

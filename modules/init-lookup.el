@@ -101,10 +101,7 @@
 (use-package info
   :straight nil
   :init
-  (evil-set-initial-state 'Info-mode 'normal)
-  :hook (Info-mode . (lambda ()
-		       (interactive)
-		       (display-line-numbers-mode -1))))
+  (evil-set-initial-state 'Info-mode 'normal))
 
 (use-package helpful
   :init
@@ -113,8 +110,6 @@
   (+windows-cfg
    '(("\*helpful*")
      :regexp t :height 0.3 :position bottom :dedicated nil :stick nil :noselect nil))
-  :hook
-  (helpful-mode . (lambda () (display-line-numbers-mode -1)))
   :general
   (+leader-keys
     "h v" '("Describe variable" . helpful-variable)
@@ -129,10 +124,7 @@
   :init
   (+windows-cfg '(("\*Dictionary\*")
 		  :position bottom :height 0.3))
-  (setq dictionary-server "dict.org")
-  :hook
-  (dictionary-mode . (lambda ()
-		       (display-line-numbers-mode -1))))
+  (setq dictionary-server "dict.org"))
 
 (+leader-keys
   "h b" '("Describe bindings" . describe-bindings)

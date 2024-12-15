@@ -1,10 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-(defun +utils/disable-line-numbers ()
-  "Disable `display-line-numbers-mode' in current buffer."
-  (interactive)
-  (display-line-numbers-mode -1))
-
 (defun +utils/toggle-mode (mode)
   (interactive)
   (if (symbol-value mode)
@@ -15,6 +10,11 @@
   "Returnd nth element of `list'. If `n' is greater than length of `list' takes `(mod n (length list))' instead."
   (nth (mod (length list) n) list))
 
+;; (defun +utils/open-in-chromium (&optional thing-at-point)
+;;   (interactive)
+;;   (let ((url (if thing-at-point
+;; 		 (thing-at-point-url-at-point)
+;; 	       ()))))
 
 ;;;###autoload
 (defun +utils/delete-visited-file ()

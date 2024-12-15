@@ -34,9 +34,6 @@
 					   (interactive)
 					   (let ((tap  (thing-at-point 'symbol t)))
 					     (slime-documentation tap)))))
-  :hook
-  (lisp-repl-mode . (lambda ()
-		      (display-line-numbers-mode -1)))
   :general
   (slime-popup-buffer-mode-map
    :states '(normal)

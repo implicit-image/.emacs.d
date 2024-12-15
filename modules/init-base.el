@@ -39,8 +39,6 @@
   (tool-bar-mode 0)
   (menu-bar-mode 0)
   (indent-tabs-mode -1)
-  ;; line numbers
-  (global-display-line-numbers-mode 1)
   ;; remove scroll bar
   (toggle-scroll-bar -1)
   ;; highlight matching parens
@@ -64,7 +62,7 @@
     (load custom-file 'noerror))
   :hook
   (prog-mode . (lambda () (toggle-truncate-lines 1)))
-  (minibuffer-mode . (lambda () (display-line-numbers-mode -1))))
+  ((prog-mode) . display-line-numbers-mode))
 
 ;; load $PATH from shell
 (use-package exec-path-from-shell

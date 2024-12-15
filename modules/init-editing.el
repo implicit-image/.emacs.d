@@ -74,8 +74,6 @@
      :width 0.2 :position right))
   :config
   (global-undo-tree-mode +1)
-  :hook (undo-tree-visualizer-mode . (lambda ()
-				       (display-line-numbers-mode -1)))
   :general
   (+leader-keys
     "o u" '("Undo tree" . undo-tree-visualize)))

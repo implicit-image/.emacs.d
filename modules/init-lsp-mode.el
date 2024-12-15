@@ -108,10 +108,6 @@
 	lsp-typescript-suggest-auto-imports t
 	lsp-typescript-auto-closing-tags t)
   :hook
-  ;; default lsp-mode setup
-  ((lsp-help-mode) . (lambda ()
-		       (interactive)
-		       (display-line-numbers-mode -1)))
   ((rust-ts-mode
     gleam-ts-mode
     idris-mode
@@ -204,8 +200,6 @@
 		(lsp-ui-mode +1)
 		(lsp-ui-doc-mode +1)
 		(lsp-ui-sideline-mode +1)))
-  (lsp-ui-imenu-mode . (lambda ()
-			 (display-line-numbers-mode -1)))
   :general
   (+leader-keys
     "t s" '("Sideline" . lsp-ui-sideline-mode))

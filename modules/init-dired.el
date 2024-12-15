@@ -24,7 +24,6 @@
 	dired-create-destination-dirs 'ask)
   :hook ((dired-mode) . (lambda ()
 			  (interactive)
-			  (display-line-numbers-mode -1)
 			  (toggle-truncate-lines +1))))
 
 (use-package diredfl

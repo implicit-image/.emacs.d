@@ -89,14 +89,11 @@
 
 (use-package vterm
   :init
-  (evil-set-initial-state 'vterm-mode 'insert)
-  :hook (vterm-mode . (lambda () (display-line-numbers-mode -1))))
+  (evil-set-initial-state 'vterm-mode 'insert))
 
 (use-package eat
   :init
-  (evil-set-initial-state 'eat-mode 'insert)
-  :hook
-  (eat-mode . (lambda () (display-line-numbers-mode -1))))
+  (evil-set-initial-state 'eat-mode 'insert))
 
 (use-package eee
   :straight (eee :type git
