@@ -1,11 +1,8 @@
 ;;; -*- lexical-binding: t -*-
 
-(require 'eieio)
-(require 'doom-themes)
-
 (use-package evil-anzu
-  :demand
-  :config (global-anzu-mode +1)
+  :config
+  (global-anzu-mode +1)
   :general
   (+leader-keys
     "c R" '("Rename" . anzu-query-replace)
@@ -16,16 +13,13 @@
   :hook
   ((calibredb-search-mode
     calibredb-edit-annotation-mode
-    calibredb-show-mode)
+    calibredb-show-mode
+    helpful-mode
+    help-mode)
    . hide-mode-line-mode))
 
 (use-package mood-line
-  :custom-face
-  (mode-line ((t (:background ,(doom-color 'base4)))))
-  (mode-line-inactive ((t (:background ,(doom-color 'base3)))))
-  (mode-line-active ((t (:background ,(doom-color 'base4)))))
   :demand
-  ;; Enable mood-line
   :config
   (setq mood-line-format
 	(mood-line-defformat
@@ -37,14 +31,36 @@
 	   . "/")
 	  ((mood-line-segment-buffer-status) . ":")
 	  ((mood-line-segment-buffer-name) . " ")
-	  ((mood-line-segment-cursor-position) . " ")
+	  ((format-mode-line "L%l") . " ")
+	  ((format-mode-line "%o") . " ")
 	  ((mood-line-segment-multiple-cursors) . ""))
 	 :right
 	 (((mood-line-segment-misc-info) . " ")
 	  ((mood-line-segment-checker) . " ")
 	  ((mood-line-segment-vc) . " ")
-	  ((mood-line-segment-misc-info) . " ")
 	  ((mood-line-segment-major-mode) . " "))))
   (mood-line-mode))
+
+
+;; (setq-default mode-line-format
+;; 	      `("%e"
+;; 		;; ,+modeline/evil-state
+;; 		" evil "
+;; 		;; ,+modeline/project
+;; 		(:eval (or (projectile-project-root)
+;; 			   (project-root)
+;; 			   (vc-root-dir)
+;; 			   default-directory))
+;; 		;; buffer name
+;; 		" %b "
+;; 		;; line ending and encoding
+;; 		" %Z "
+;; 		;; point position
+;; 		" %l : %o : %I"
+;; 		;; checkers info
+;; 		;; vc info
+;; 		;; major-mode
+;; 		))
+
 
 (provide 'init-modeline)

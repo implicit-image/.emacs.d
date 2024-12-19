@@ -1,37 +1,52 @@
 ;;; -*- lexical-binding: t -*-
 
-(require 'f)
 
-(defun +eye-candy/load-theme (theme)
-  ""
+;;;###autoload
+(defun +eye-candy/insert-doom-color ()
+  "Insert the rgb value of a doom theme color."
   (interactive)
-  (require 'solaire-mode)
-  (load-theme theme t)
-  (solaire-global-mode +1))
-
-(use-package solaire-mode
-  :after doom-themes)
+  (consult--read doom-themes--colors
+		 :prompt "Doom theme color: "
+		 :lookup (lambda (color-entry &rest props)
+			   (insert (-second-item color-entry)))))
 
 (use-package doom-themes
   :demand
-  :config
-  (add-to-list 'custom-theme-load-path (f-join straight-base-dir
-                                               "straight"
-                                               straight-build-dir
-                                               "doom-gruber-darker-theme/"))
-  (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t
-	doom-themes-treemacs-enable-variable-pitch nil
-	doom-themes-treemacs-theme "doom-atom")
-  (doom-themes-visual-bell-config)
-  (doom-themes-neotree-config)
-  (doom-themes-treemacs-config)
-  (doom-themes-org-config)
-  (+eye-candy/load-theme +base/theme)
+  :init
+  (defun +eye-candy/setup-doom-themes ()
+    (progn
+      (require 'doom-themes)
+      (require 'f)
+      (add-to-list 'custom-theme-load-path (f-join straight-base-dir
+						   "straight"
+						   straight-build-dir
+						   "doom-gruber-darker-theme/"))
+      (setq doom-themes-enable-bold t
+	    doom-themes-enable-italic t
+	    doom-themes-treemacs-enable-variable-pitch nil
+	    doom-themes-treemacs-theme "doom-atom")
+      (doom-themes-visual-bell-config)
+      (doom-themes-neotree-config)
+      (doom-themes-treemacs-config)
+      (doom-themes-org-config)
+      (+eye-candy/load-theme +base/theme)))
   :hook
+  (after-init . +eye-candy/setup-doom-themes)
   (tty-setup . (lambda ()
 		 (interactive)
 		 (+eye-candy/load-theme +base/theme))))
+
+(use-package ef-themes)
+
+(use-package solaire-mode
+  :demand
+  :config
+  (defun +eye-candy/load-theme (theme)
+    ""
+    (interactive)
+    (require 'solaire-mode)
+    (load-theme theme t)
+    (solaire-global-mode +1)))
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -42,8 +57,6 @@
     "i i" '("Insert unicode icon" . nerd-icons-insert)))
 
 (use-package rainbow-delimiters
-  :custom-face
-  (rainbow-delimiters-depth-8-face ((t (:foreground ,(doom-color 'teal)))))
   :hook ((prog-mode emacs-lisp-mode) . rainbow-delimiters-mode))
 
 (use-package rainbow-mode
@@ -58,21 +71,21 @@
   :init
   (setq hl-todo-keyword-faces
 	`(("HOLD" . "#d0bf8f")
-	  ("TODO" . "#cc9393")
+	  ("TODO" . ,(doom-color 'green))
 	  ("NEXT" . "#dca3a3")
 	  ("THEM" . "#dc8cc3")
-	  ("PROG" . "#7cb8bb")
-	  ("OKAY" . "#7cb8bb")
+	  ("PROG" . ,(doom-color 'teal))
+	  ("OKAY" . ,(doom-color 'teal))
 	  ("DONT" . "#5f7f5f")
-	  ("FAIL" . "#8c5353")
+	  ("FAIL" . compilation-error)
 	  ("DONE" . "#afd8af")
 	  ("NOTE" . "#d0bf8f")
 	  ("MAYBE" . "#d0bf8f")
-	  ("KLUDGE" . "#d0bf8f")
-	  ("HACK" . "#d0bf8f")
-	  ("TEMP" . "#d0bf8f")
-	  ("FIXME" . "#cc9393")
-	  ("XXXX*" . "#cc9393")))
+	  ("KLUDGE" . warning)
+	  ("HACK" . warning)
+	  ("TEMP" . warning)
+	  ("FIXME" . compilation-error)
+	  ("XXXX*" . compilation-error)))
   :hook
   (after-init . global-hl-todo-mode))
 

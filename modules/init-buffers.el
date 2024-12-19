@@ -33,9 +33,8 @@
 
 (use-package recentf
   :straight t
-  :demand
-  :config
-  (recentf-mode 1))
+  :hook
+  (after-init . recentf-mode))
 
 
 (+leader-keys
@@ -47,9 +46,9 @@
   "o x" '("Scratch buffer" . scratch-buffer))
 
 (general-def global-map
-    "C-=" 'text-scale-increase
-    "C--" 'text-scale-decrease
-    "C-x k" 'kill-this-buffer)
+  "C-=" 'text-scale-increase
+  "C--" 'text-scale-decrease
+  "C-x k" 'kill-this-buffer)
 
 
 (provide 'init-buffers)

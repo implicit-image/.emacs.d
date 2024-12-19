@@ -5,13 +5,24 @@
   lispy-mode
   :init
   (add-to-list '+editing/evil-mc-incompatible-modes 'lispy-mode)
-  :hook ((emacs-lisp-mode common-lisp-mode) . lispy-mode)
+  (defun +lisp/slurp-or-barf-left (&optional times)
+    ""
+    (interactive "p")
+    (lispy-left 1)
+    (lispy-slurp-or-barf-left times))
+  (defun +lisp/slurp-or-barf-right (&optional times)
+    ""
+    (interactive "p")
+    (lispy-right 1)
+    (lispy-slurp-or-barf-right times))
+  :hook
+  ((emacs-lisp-mode common-lisp-mode scheme-mode racket-mode dune-mode) . lispy-mode)
   :general
   (lispy-mode-map
-   :states '(insert)
-   "M-<" 'lispy-move-left
-   "M->" 'lispy-move-right
-   "M-k" 'lispy-kill-sentence))
+   :states '(insert normal visual)
+   :prefix "C-c"
+   ">" '+lisp/slurp-or-barf-left
+   "<" '+lisp/slurp-or-barf-right))
 
 ;; emacs lisp
 (use-package emacs-lisp-mode
@@ -21,23 +32,20 @@
 		  '(emacs-lisp-mode . helpful-at-point)
 		  '(lisp-interaction-mode . helpful-at-point)))
 
-;; common lisp
-(use-package common-lisp-snippets)
-
 ;; racket
 (use-package racket-mode)
 
-(use-package slime
+;; scheme
+(use-package geiser)
+
+;; common-lisp
+(use-package sly
   :init
-  (setq inferior-lisp-program "sbcl")
-  (+lookup-set-fn 'buffer '(lisp-mode . (lambda ()
-					   (interactive)
-					   (let ((tap  (thing-at-point 'symbol t)))
-					     (slime-documentation tap)))))
-  :general
-  (slime-popup-buffer-mode-map
-   :states '(normal)
-   "q" 'quit-window))
+  (+windows-cfg '((sly-repl-mode)
+		  :position bottom :height 0.3 :noselect nil :dedicated t :stick nil))
+  (setq inferior-lisp-program "sbcl"))
+
+(use-package common-lisp-snippets)
 
 (use-package lisp-mode
   :straight nil

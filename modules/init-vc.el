@@ -18,11 +18,6 @@
      :regexp t :height 0.5 :position bottom :dedicated nil)))
 
 (use-package diff-hl
-  :demand
-  :custom-face
-  (diff-hl-margin-insert ((t (:background ,(doom-color 'bg)))))
-  (diff-hl-margin-delete ((t (:background ,(doom-color 'bg)))))
-  (diff-hl-margin-change ((t (:background ,(doom-color 'bg)))))
   :init
   (setq diff-hl-show-hunk-function 'diff-hl-show-hunk-inline-popup
 	diff-hl-draw-borders t
@@ -32,11 +27,12 @@
 				       (unknown . "?")
 				       (ignored . "i"))
 	diff-hl-reference-revision "HEAD^")
-  :config
-  (diff-hl-margin-mode +1)
-  (global-diff-hl-mode +1)
   :hook
   (dired-mode . diff-hl-dired-mode)
+  (after-init . (lambda ()
+		  (interactive)
+		  (diff-hl-margin-mode +1)
+		  (global-diff-hl-mode +1)))
   :general
   (diff-hl-mode-map
    :states '(normal visual)

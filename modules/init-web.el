@@ -1,7 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-(require 'rx)
-
 (use-package js2-mode)
 
 (use-package js-ts-mode

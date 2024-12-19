@@ -131,7 +131,8 @@
   "h d" '("Dictionary" . dictionary-search)
   "h m" '("Describe keymap"   . describe-keymap)
   "h M" '("Describe mode"     . describe-mode)
-  "h p" '("Describe package"  . describe-package))
+  "h p" '("Describe package"  . describe-package)
+  "h c" '("Describe character" . describe-char))
 
 
 (with-eval-after-load 'init-windows

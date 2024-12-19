@@ -25,9 +25,10 @@
    "C-TAB" 'evil-jump-forward))
 
 (use-package evil-collection
-  :demand
-  :config
-  (evil-collection-init evil-collection-mode-list))
+  :hook
+  (evil-mode . (lambda ()
+		 (interactive)
+		 (evil-collection-init evil-collection-mode-list))))
 
 (use-package evil-goggles
   :config

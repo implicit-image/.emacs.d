@@ -40,6 +40,11 @@
 (require 'init-keybindings)
 (require 'init-evil)
 (require 'init-modules)
+;; org mode
+(require 'init-org)
+(require 'init-org-agenda)
+(require 'init-org-roam)
+(require 'init-org-babel)
 ;; ui
 (require 'init-eye-candy)
 (require 'init-windows)
@@ -56,7 +61,6 @@
 (require 'init-eglot)
 (require 'init-lsp)
 (require 'init-lsp-mode)
-;(require 'init-lsp-bridge)
 ;; management
 (require 'init-remote)
 (require 'init-treemacs)
@@ -103,11 +107,6 @@
 (require 'init-conf)
 (require 'init-cuda)
 (require 'init-misc-langs)
-;; org mode
-(require 'init-org)
-(require 'init-org-agenda)
-(require 'init-org-roam)
-(require 'init-org-babel)
 ;; apps
 (require 'init-socials)
-(require 'init-emms)
+(require 'init-media)

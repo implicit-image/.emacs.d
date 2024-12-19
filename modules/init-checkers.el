@@ -6,11 +6,12 @@
   :custom
   (flycheck-indication-mode nil)
   (flycheck-highlighting-mode 'symbols)
+  (flycheck-idle-check-delay 1.0)
   :init
   (+windows-cfg '((flycheck-mode-major-mode)
 		  :position bottom :height 0.3 ))
   :hook
-  ((lsp-mode emacs-lisp-mode) . flycheck-mode)
+  ((lsp-mode emacs-lisp-mode merlin-mode) . flycheck-mode)
   :general
   (flycheck-mode-map
    :states '(normal visual insert)

@@ -37,4 +37,13 @@
 	persp-reset-windows-on-nil-window-conf
 	persp-nil-hidden t))
 
+(use-package desktop
+  :straight nil
+  :init
+  (setq desktop-restore-frames t
+	desktop-restore-eager t
+	desktop-restore-reuses-frames t)
+  :hook
+  (after-init . desktop-save-mode))
+
 (provide 'init-projects)

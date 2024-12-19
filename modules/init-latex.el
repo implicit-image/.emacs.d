@@ -7,4 +7,6 @@
   (LaTeX-mode . turn-on-cdlatex)
   (org-mode . org-cdlatex-mode))
 
+(use-package xenops)
+
 (provide 'init-latex)

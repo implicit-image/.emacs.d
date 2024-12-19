@@ -1,17 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package corfu
-  :custom-face
-  (corfu-border ((t (:background ,(doom-color 'base5)))))
-  (corfu-current ((t (:background
-		      ,(doom-darken (doom-color 'base4) 0.2)
-		      :foreground unspecified))))
-  (corfu-default ((t (:background
-		      ,(doom-color 'base0)
-		      :foreground unspecified))))
-  (corfu-popupinfo ((t (:box nil
-			     :background ,(doom-color 'base1)))))
-  (corfu-echo ((t (:foreground ,(doom-color 'fg-alt)))))
   :init
   (setq corfu-cycle t
 	corfu-doc-delay 0.0
@@ -74,6 +63,7 @@
     (corfu-terminal-mode . corfu-doc-terminal-mode)))
 
 (use-package corfu-candidate-overlay
+  :disabled
   :custom-face
   (corfu-candidate-overlay-face ((t (:foreground ,(doom-color 'doc-comments)))))
   :hook

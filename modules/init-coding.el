@@ -29,22 +29,18 @@
 
 (use-package eldoc
   :init
-  (setq eldoc-echo-area-prefer-doc-buffer t
+  (setq eldoc-echo-area-prefer-doc-buffer nil
 	eldoc-idle-delay 0.1
 	eldoc-echo-area-use-multiline-p nil))
 
 
 (use-package eldoc-box
-  :custom-face
-  (eldoc-box-body ((t (:box nil))))
-  (eldoc-box-border ((t (:width narrow :background ,(doom-color 'fg-alt)))))
-  ;; TODO: maybe remove some prettify functions from eldoc-box-buffer-hook, it looks wonky
   :init
   (setq eldoc-box-clear-with-C-g t)
   :config
   (set-face-attribute 'eldoc-box-body nil :inherit 'corfu-default)
   :hook
-  (lsp-mode . eldoc-box-hover-at-point-mode)
+  ((lsp-mode merlin-mode) . eldoc-box-hover-at-point-mode)
   (emacs-lisp-mode . (lambda ()
 		       (if (display-graphic-p)
 			   (eldoc-box-hover-at-point-mode +1)

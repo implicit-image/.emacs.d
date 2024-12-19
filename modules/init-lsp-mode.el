@@ -156,12 +156,6 @@
     (add-to-list 'lsp-tailwindcss-major-modes tw-major-mode)))
 
 (use-package lsp-ui
-  :custom-face
-  (child-frame-border ((t (:background ,(doom-color 'fg)))))
-  (lsp-ui-peek-header ((t (:background ,(doom-color 'base6)))))
-  (lsp-ui-peek-footer ((t (:background ,(doom-color 'base6)))))
-  (lsp-ui-peek-peek ((t (:background ,(doom-lighten (doom-color 'bg) 0.1)))))
-  (lsp-ui-peek-list ((t (:background ,(doom-lighten (doom-color 'bg) 0.1)))))
   :config
   (+windows-cfg '((lsp-ui-imenu-mode)
 		  :position bottom
@@ -173,25 +167,25 @@
 	lsp-ui-peek-peek-height 15
 	lsp-ui-peek-show-directory nil
 	;; sideline
+	lsp-ui-sideline-enable t
 	lsp-ui-sideline-show-code-actions t
 	lsp-ui-sideline-show-diagnostics t
 	lsp-ui-sideline-show-code-actions t
 	lsp-ui-sideline-ignore-duplicate t
-	lsp-ui-sideline-enable t
+ 	lsp-ui-sideline-show-hover t
+	lsp-ui-sideline-show-symbol t
 	;; docs
 	lsp-ui-doc-enable t
-	lsp-ui-doc-use-childframe t
+	lsp-ui-doc-use-childframe nil
 	lsp-ui-doc-alignment 'frame
-	lsp-ui-doc-max-width 20
-	lsp-ui-doc-max-height 20
+	lsp-ui-doc-max-width 40
+	lsp-ui-doc-max-height 40
 	lsp-ui-doc-header nil
-	lsp-ui-doc-max-height 20
-	lsp-ui-doc-max-width 30
 	lsp-ui-doc-include-signature t
 	lsp-ui-doc-show-with-cursor t
 	lsp-ui-doc-show-with-mouse t
 	lsp-ui-doc-position 'at-point
-	lsp-ui-doc-delay 0.1
+	lsp-ui-doc-delay 0.5
 	lsp-ui-imenu-enable t
 	lsp-ui-imenu-buffer-position 'right)
   :hook

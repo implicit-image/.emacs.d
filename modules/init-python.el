@@ -6,9 +6,11 @@
   :init
   (setq lsp-pyright-auto-import-completions t))
 
-(use-package python
+(use-package python-ts-mode
+  :straight nil
   :init
-  (setq python-indent-offset 4)
-  :straight nil)
+  (setq python-indent-offset 4))
+
+(use-package pyvenv)
 
 (provide 'init-python)

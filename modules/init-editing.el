@@ -7,13 +7,6 @@
 (defvar-local +editing/evil-mc-disabled-modes '()
   "Temporarily disabled modes in current buffer.")
 
-
-(defvar +editing/input-methods '()
-  "Input methods to cycle betweem using `+editing/cycle-input-method'.")
-
-(defvar-local +editing--current-method-index 0
-  "Index of currently selected input method.")
-
 (defun +editing/evil-mc-turn-off-incompatible-modes ()
   (interactive)
   (mapc (lambda (mode-symbol)
@@ -31,14 +24,6 @@
 	  (funcall-interactively mode-symbol +1))
 	+editing/evil-mc-disabled-modes))
 
-(defun +editing/cycle-input-method (&optional arg)
-  (interactive "p")
-  (let* ((arg (+ (or arg 1) +editing--current-method-index))
-	 (method (+utils-nth-wrapped arg +editing/input-methods)))
-    (set-input-method method)))
-
-(setq +editing/input-methods '())
-
 (use-package evil-mc
   :init
   (add-hook
@@ -49,9 +34,8 @@
    '+editing/evil-mc-turn-on-incompatible-modes)
   :hook
   (after-init . (lambda ()
-		 (interactive)
-		 (global-evil-mc-mode 1))))
-
+		  (interactive)
+		  (global-evil-mc-mode 1))))
 
 (use-package evil-nerd-commenter
   :general
@@ -59,10 +43,13 @@
    :states '(visual normal)
    "g c" 'evilnc-comment-or-uncomment-lines))
 
+(use-package evil-surround
+  :hook
+  (after-init . global-evil-surround-mode))
+
 (use-package editorconfig
-  :demand
-  :config
-  (editorconfig-mode 1))
+  :hook
+  (after-init . editorconfig-mode))
 
 (use-package undo-tree
   :demand
@@ -81,12 +68,6 @@
 (use-package paren
   :straight nil
   :after evil
-  :custom-face
-  (show-paren-match ((t (:background ,(doom-color 'red) :foreground unspecified))))
-  (show-paren-match-expression ((t (:box
-				    (:line-width -1 :color ,(doom-color 'base6) :style released-button)
-				    :foreground
-				    unspecified))))
   :init
   (setq show-paren-style 'parenthesis
 	show-paren-when-point-inside-paren t
@@ -99,13 +80,24 @@
   :hook
   (after-init . global-origami-mode))
 
-(use-package symbol-overlay)
+(use-package symbol-overlay
+  :custom
+  (symbol-overlay-idle-timer 0.3)
+  :config
+  :hook
+  ((prog-mode) . symbol-overlay-mode))
 
-;; (use-package combobulate
-;;   :straight (combobulate :type git
-;; 			 :host github
-;; 			 :repo "mickeynp/combobulate")
-;;   :custom
-;;   (combobulate-key-prefix "C-c o"))
+(use-package combobulate
+  :straight (combobulate :type git
+			 :host github
+			 :repo "mickeynp/combobulate")
+  :functions
+  (combobulate-mode)
+  :custom
+  (combobulate-key-prefix "C-c o"))
+
+(use-package apheleia
+  :hook
+  (after-init . apheleia-global-mode))
 
 (provide 'init-editing)

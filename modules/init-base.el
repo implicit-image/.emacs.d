@@ -1,9 +1,9 @@
 ;;; -*- lexical-binding: t -*-
-(require 'f)
 
 (use-package emacs
   :demand
   :init
+  (require 'f)
   (setq +base/font-family "Comic Code" ;; "Iosevka Comfy Fixed"
         +base/font-weight 'semi-light
         +base/font-size 17
@@ -19,7 +19,7 @@
 	;;startup screen
 	inhibit-startup-screen t
 	visible-bell nil
-	;; debug-on-error t
+	debug-on-error nil
 	;; lines
 	display-line-numbers-type 'relative
 	truncate-lines t
@@ -31,7 +31,8 @@
 	gc-cons-threshold (* 1024 1024 10)
 	;; scrollling
 	scroll-step 1
-	scroll-margin 15)
+	scroll-margin 15
+	find-file-wildcards nil)
   :config
   ;; always use short user input prompts
   (defalias 'yes-or-no-p 'y-or-n-p)
@@ -62,15 +63,23 @@
     (load custom-file 'noerror))
   :hook
   (prog-mode . (lambda () (toggle-truncate-lines 1)))
-  ((prog-mode) . display-line-numbers-mode))
+  ((prog-mode
+    markdown-mode
+    org-mode
+    latex-mode
+    org-roam-mode
+    gfm-mode
+    text-mode
+    conf-mode
+    tuareg-mode)
+   . display-line-numbers-mode))
 
 ;; load $PATH from shell
 (use-package exec-path-from-shell
-  :demand
   :commands exec-path-from-shell-initialize
   :init
   (setq exec-path-from-shell-variables '("PATH" "MANPATH" "JAVA_HOME"))
-  :config
-  (exec-path-from-shell-initialize))
+  :hook
+  (after-init . exec-path-from-shell-initialize))
 
 (provide 'init-base)

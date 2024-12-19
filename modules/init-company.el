@@ -1,9 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package company
-  :custom-face
-  (company-tooltip-common ((t (:foreground ,(doom-color 'fg) :underline t  :background ,(doom-darken (doom-color 'bg) 0.2)))))
-  (company-tooltip ((t (:foreground ,(doom-color 'fg) :background ,(doom-darken (doom-color 'bg) 0.2)))))
   :init
   (setq company-idle-delay nil
 	company-backends '(company-cmake company-capf company-clang company-files

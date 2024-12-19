@@ -64,8 +64,8 @@
 (use-package sideline)
 
 (use-package ready-player
-  :config
-  (ready-player-mode +1))
+  :hook
+  (after-init . ready-player-mode))
 
 (+leader-keys
   "f D" '("Delete current file" . +utils/delete-visited-file)

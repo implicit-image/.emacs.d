@@ -94,11 +94,61 @@
 	org-noter-notes-search-path '("~/org/booknotes")
 	org-noter-default-heading-title  "page $p$"
 	org-noter-auto-save-last-location t
+	org-noter-kill-frame-at-session-end nil
+	org-noter-always-create-frame nil
 	org-noter-insert-selected-text-inside-note t)
+  (defun +books/org-noter-init-session (&optional local-elem)
+    "Select a document from calibre and start org-noter sesion with it."
+    (interactive)
+    (if (not (eq major-mode 'org-mode))
+	(message "Org noter has to be activated in Org mode buffer.")
+      (require 'org-noter)
+      (require 'calibredb)
+      (if (bound-and-true-p local-elem)
+	  (org-up-element)
+	(goto-line 1))
+      (when (not (org-entry-get nil org-noter-property-doc-file))
+	(consult--read (mapcar
+			(lambda (cand)
+			  (let ((prop-list (cadr cand)))
+			    `(,(format (s-join " " `("%s"
+						     ,(propertize ":file"
+								  'face 'font-lock-builtin-face)
+						     "%s"))
+				       (or (car (alist-get :book-name prop-list))
+					   "")
+				       (or (car (alist-get :file-path prop-list))
+					   "")))))
+			(calibredb-candidates))
+		       :prompt "File to annotate: "
+		       :lookup (lambda (cand &rest args)
+				 (org-set-property org-noter-property-doc-file (string-trim-left cand ".*\:file ")))))
+
+      (save-buffer)
+      (org-noter)))
   :general
   (pdf-view-mode-map
    :states '(normal)
-   "g n" 'org-noter))
+   "g n" 'org-noter)
+  (org-noter-doc-mode-map
+   :states '(normal visual)
+   "i" 'org-noter-insert-note
+   "I" 'org-noter-insert-precise-note)
+  (org-noter-doc-map
+   :states '(normal visual)
+   :prefix "SPC m"
+   :global-prefix "M-SPC m"
+   "q" 'org-noter-kill-session
+   "q" 'org-noter-kill-session)
+  (org-noter-notes-mode-map
+   :states '(normal visual)
+   "C-c n q" 'org-noter-kill-session
+   "SPC m q" 'org-noter-kill-session)
+  (org-mode-map
+   :states '(normal visual)
+   :prefix "SPC m"
+   :global-prefix "M-SPC m"
+   "n" '("Start Org Noter session" . +books/org-noter-init-session)))
 
 (use-package pdf-tools
   :init
@@ -109,8 +159,8 @@
    :states '(normal)
    "] ]" 'pdf-view-next-page
    "[ [" 'pdf-view-previous-page
-   "j" 'pdf-view-scroll-up-or-next-page
-   "k" 'pdf-view-scroll-down-or-previous-page
+   "j" 'pdf-view-next-line-or-next-page
+   "k" 'pdf-view-previous-line-or-previous-page
    "=" 'pdf-view-enlarge
    "-" 'pdf-view-shrink
    "C-=" 'pdf-view-center-in-window

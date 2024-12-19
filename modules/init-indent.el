@@ -2,8 +2,8 @@
 
 (use-package indent-bars
   :straight (indent-bars :type git
-			  :host github
-			  :repo "jdtsmith/indent-bars")
+			 :host github
+			 :repo "jdtsmith/indent-bars")
   :commands
   indent-bars-mode
   :config
@@ -16,7 +16,6 @@
 	indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1) ; blend=1: blend with BG only
 	indent-bars-highlight-current-depth '(:blend 0.5) ; pump up the BG blend on current
 	indent-bars-display-on-blank-lines t)
-
   :custom
   (indent-bars-prefer-character t)
   :hook
@@ -27,7 +26,18 @@
   (whitespace-space ((t (:foreground "#4a4a4a"))))
   (whitespace-empty ((t (:foreground "#4a4a4a"))))
   :config
-  (setq whitespace-style '(face))
+  (setq whitespace-style '(face indentation tabs spaces tab-mark space-mark)
+	whitespace-display-mappings ((space-mark 32
+						 [183]
+						 [46])
+				     (space-mark 160
+						 [164]
+						 [95])
+				     (newline-mark 10
+						   [36 10])
+				     (tab-mark 9
+					       [187 9]
+					       [92 9])))
   :hook
   ((prog-mode) . whitespace-mode)
   (before-save . whitespace-cleanup)

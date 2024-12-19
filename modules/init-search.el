@@ -5,7 +5,11 @@
 (defun +search/rg-thing-at-point ()
   (interactive)
   (let ((s (symbol-at-point)))
-    (counsel-rg (if (eq s nil) "" (symbol-name s)))))
+    (consult-ripgrep
+     (cond ((bound-and-true-p projectile-project-root) (projectile-project-root))
+	   ((bound-and-true-p project-root) (project-root))
+	   (t default-directory))
+     (if (eq s nil) "" (symbol-name s)))))
 
 (use-package imenu
   :straight nil
