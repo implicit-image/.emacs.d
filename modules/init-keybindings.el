@@ -1,5 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
+;;;; packages for setting and exploring keybindings.
+
 (use-package hydra)
 
 (use-package which-key
@@ -11,27 +13,31 @@
 	which-key-max-display-columns 5
 	which-key-add-column-padding 10
 	which-key-min-display-lines 5)
+  ;; display `which-key' window on bottom side of the frame
   (which-key-setup-side-window-bottom)
   :config
   (which-key-mode)
   :hook
+  ;; load after loading user init
   (after-init . which-key-mode))
 
 (use-package general
   :demand
   :config
   (general-evil-setup)
+
+  ;;;; key definer for global leader keys
   (general-create-definer +leader-keys
     :states '(normal insert visual emacs)
     :keymaps 'override
     :prefix "SPC"
     :global-prefix "M-SPC")
+  ;;;; key definer for local leader keys
   (general-create-definer +local-leader-keys
     :states '(normal insert visual emacs)
-    :keymaps 'override
     :prefix "SPC m"
     :global-prefix "M-SPC m")
-  ;; setup key categories
+  ;;;; key categories
   (+leader-keys
     "a" '(:ignore t :which-key "applications")
     "b" '(:ignore t :which-key "buffer")

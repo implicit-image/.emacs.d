@@ -3,8 +3,7 @@
 (use-package js2-mode)
 
 (use-package js-ts-mode
-  :straight nil
-  :init (add-to-list '+lsp/servers-to-install 'ts-ls))
+  :straight nil)
 
 (use-package rjsx-mode)
 
@@ -20,8 +19,7 @@
   :straight nil)
 
 (use-package json-ts-mode
-  :mode "\\.json\\'"
-  :init (add-to-list '+lsp/servers-to-install 'json-ls))
+  :mode "\\.json\\'")
 
 (use-package tide
   :init
@@ -51,5 +49,24 @@
   :hook ((php-mode)) . #'composer)
 
 (use-package know-your-http-well)
+
+(use-package lsp-tailwindcss
+  :straight (lsp-tailwindcss :type git
+			     :host github
+			     :repo "merrickluo/lsp-tailwindcss")
+  :after lsp-mode
+  :init
+  (setq lsp-tailwindcss-addon-mode t)
+  :config
+  (dolist (tw-major-mode
+	   '(css-mode
+	     css-ts-mode
+	     typescript-mode
+	     typescript-ts-mode
+	     tsx-ts-mode
+	     js2-mode
+	     js-ts-mode
+	     clojure-mode))
+    (add-to-list 'lsp-tailwindcss-major-modes tw-major-mode)))
 
 (provide 'init-web)

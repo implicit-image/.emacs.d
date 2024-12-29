@@ -1,7 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-(use-package flyspell)
-
 (use-package flycheck
   :custom
   (flycheck-indication-mode nil)
@@ -36,8 +34,10 @@
    :states '(normal visual)
    :prefix "SPC"
    :global-prefix "M-SPC"
-    "s e" '("Flycheck errors" . consult-flycheck)))
+   "s e" '("Flycheck errors" . consult-flycheck)))
 
 (use-package flymake)
+
+(use-package flyspell)
 
 (provide 'init-checkers)

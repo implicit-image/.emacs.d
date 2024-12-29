@@ -13,7 +13,7 @@
 (use-package doom-themes
   :demand
   :init
-  (defun +eye-candy/setup-doom-themes ()
+  (defun +colors/setup-doom-themes ()
     (progn
       (require 'doom-themes)
       (require 'f)
@@ -29,19 +29,19 @@
       (doom-themes-neotree-config)
       (doom-themes-treemacs-config)
       (doom-themes-org-config)
-      (+eye-candy/load-theme +base/theme)))
+      (+colors/load-theme +base/theme)))
   :hook
-  (after-init . +eye-candy/setup-doom-themes)
+  (after-init . +colors/setup-doom-themes)
   (tty-setup . (lambda ()
 		 (interactive)
-		 (+eye-candy/load-theme +base/theme))))
+		 (+colors/load-theme +base/theme))))
 
 (use-package ef-themes)
 
 (use-package solaire-mode
   :demand
   :config
-  (defun +eye-candy/load-theme (theme)
+  (defun +colors/load-theme (theme)
     ""
     (interactive)
     (require 'solaire-mode)
@@ -93,15 +93,29 @@
 
 (use-package doom-gruber-darker-theme
   :straight (doom-gruber-darker-theme :type git
-                                      :host github
-                                      :repo "implicit-image/doom-gruber-darker-theme"))
+				      :host github
+				      :repo "implicit-image/doom-gruber-darker-theme"))
 
 ;; font ligatures
 (use-package ligature
   :config
   (ligature-set-ligatures 'haskell-mode '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
-				      "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" "<=>" "<==>" "<===>" "<====>" "<!---"
-				      "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
-		      ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++")))
+					  "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" "<=>" "<==>" "<===>" "<====>" "<!---"
+					  "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
+					  ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++")))
 
-(provide 'init-eye-candy)
+
+(use-package face-remap
+  :straight nil
+  :general
+  (global-map
+   "C-=" 'text-scale-increase
+   "C--" 'text-scale-decrease))
+
+(use-package custom
+  :straight nil
+  :general
+  (+leader-keys
+    "h t" '("Load theme" . load-theme)))
+
+(provide 'init-appearance)

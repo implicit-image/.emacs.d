@@ -1,7 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-(require 'projectile)
-
 (defun +terminal--get-buffers (&rest preds)
   (match-buffers `(or . ,(append '((major-mode . vterm-mode))
 				 preds))))
@@ -99,8 +97,8 @@
   :straight (eee :type git
 		 :host github
 		 :repo "eval-exec/eee.el"
-                 :files (:defaults "*.el" "*.sh"))
-  :init
+		 :files (:defaults "*.el" "*.sh"))
+  :config
   (setq ee-terminal-command (exec-path-from-shell-getenv "TERM")))
 
 (+leader-keys

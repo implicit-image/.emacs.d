@@ -1,5 +1,8 @@
 ;;; -*- lexical-binding: t -*-
 
+;;;; packages for evil emulation
+
+
 (use-package evil
   :demand
   :init
@@ -24,12 +27,14 @@
   (global-map
    "C-TAB" 'evil-jump-forward))
 
+;;;; collection of evil bindings for popular modes
 (use-package evil-collection
   :hook
-  (evil-mode . (lambda ()
-		 (interactive)
-		 (evil-collection-init evil-collection-mode-list))))
+  (after-init . (lambda ()
+		  (interactive)
+		  (evil-collection-init evil-collection-mode-list))))
 
+;;;; highlight the AOE of vim motions
 (use-package evil-goggles
   :config
   (evil-goggles-mode)
@@ -38,6 +43,7 @@
 (use-package vimish-fold
   :after evil)
 
+;;;; vim-like code folding
 (use-package evil-vimish-fold
   :after vimish-fold
   :init
@@ -45,12 +51,14 @@
   :config
   (global-evil-vimish-fold-mode 1))
 
+;;;; evil bindings for org-mode
 (use-package evil-org
   :config
   (evil-org-agenda-set-keys)
   :hook
   ((org-mode org-agenda-mode) . evil-org-mode))
 
+;;;; evil bindings for treemacs
 (use-package treemacs-evil
   :demand
   :after treemacs

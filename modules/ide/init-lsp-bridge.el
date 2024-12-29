@@ -1,7 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package lsp-bridge
-  :demand
   :straight (lsp-bridge :type git
 			:host github
 			:repo "manateelazycat/lsp-bridge"

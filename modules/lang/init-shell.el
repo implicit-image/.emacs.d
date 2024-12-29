@@ -5,4 +5,6 @@
 
 (use-package nushell-mode)
 
+(use-package powershell)
+
 (provide 'init-shell)

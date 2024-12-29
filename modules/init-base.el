@@ -4,17 +4,24 @@
   :demand
   :init
   (require 'f)
+
+  ;;;; Custom global options
   (setq +base/font-family "Comic Code" ;; "Iosevka Comfy Fixed"
-        +base/font-weight 'semi-light
-        +base/font-size 17
-        +base/font-spec (font-spec :family +base/font-family
-                                   :weight +base/font-weight
-                                   :size +base/font-size)
+	+base/font-weight 'semi-light
+	+base/font-size 17
+	+base/font-spec (font-spec :family +base/font-family
+				   :weight +base/font-weight
+				   :size +base/font-size)
 	+base/theme 'doom-gruber-darker)
-  ;; (set-frame-font +base/font-spec nil t)
+
+  ;;;; set default font.
+  ;;;; setting `default-frame-alist' entry makes sure that emacsclient loads the correct font
   (add-to-list 'default-frame-alist `(font . ,(string-join `(,+base/font-family ,(number-to-string +base/font-size)) "-")))
+
+  ;;;; built-in global options.
   (setq user-full-name "Błażej Niewiadomski"
 	user-mail-address "blaz.nie@protonmail.com"
+	;; raised to allow better lsp speeds
 	read-process-output-max (* 1024 16)
 	;;startup screen
 	inhibit-startup-screen t
@@ -26,12 +33,19 @@
 	truncate-partial-width-windows t
 	;;tempfiles
 	create-lockfiles nil
+	;; put backups in a shared directory
 	backup-directory-alist `(("." . ,(f-join user-emacs-directory "backups")))
 	;; increase garbage collector limit
+	;; this increases the time emacs can run w/o running garbage collector,
+	;; but also increases time the garbage collection takes when it is needed
+	;; 10 MB is a nice in-between value
 	gc-cons-threshold (* 1024 1024 10)
+	;; enable recursive minibuffers for vertico
+	enable-recursive-minibuffers t
 	;; scrollling
 	scroll-step 1
 	scroll-margin 15
+	;; TODO: find useful wildard settings
 	find-file-wildcards nil)
   :config
   ;; always use short user input prompts
@@ -48,21 +62,26 @@
   (electric-pair-mode 1)
   ;; highlight current line
   (global-hl-line-mode 1)
-  ;; show borders between windows
+  ;; show borders between emacs windows
   (window-divider-mode 1)
-;;;  auto revert all buffers
+  ;; dont auto-revert buffers
   (global-auto-revert-mode nil)
+  ;; dont show scroll-bars
   (add-to-list 'default-frame-alist
-               '(vertical-scroll-bars . nil))
+	       '(vertical-scroll-bars . nil))
   ;; write customizations to seperate file
   (let ((customization-file
-         (expand-file-name "custom.el" user-emacs-directory)))
+	 (expand-file-name "custom.el" user-emacs-directory)))
     (unless (file-exists-p customization-file)
       (write-region "" nil customization-file))
     (setq custom-file customization-file)
     (load custom-file 'noerror))
+
   :hook
+  ;; truncate lines in modes derived from prog-mode
+  ;; better to see all of the code
   (prog-mode . (lambda () (toggle-truncate-lines 1)))
+  ;; display line numbers in text-editing modes
   ((prog-mode
     markdown-mode
     org-mode
@@ -81,5 +100,16 @@
   (setq exec-path-from-shell-variables '("PATH" "MANPATH" "JAVA_HOME"))
   :hook
   (after-init . exec-path-from-shell-initialize))
+
+(use-package mule
+  :straight nil
+  :general
+  (+leader-keys
+    "t I" '("Select input method" . set-input-method)))
+
+(use-package restart-emacs
+  :general
+  (+leader-keys
+    "q r" '("Restart emacs" . restart-emacs)))
 
 (provide 'init-base)

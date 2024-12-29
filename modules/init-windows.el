@@ -1,16 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-(defun +windows-cfg (&rest popwin-cfg-forms)
-  "Each one of POPWIN-CFG-FORMS is (BUFFER-NAMES . POPWIN-OPTIONS-PLIST)."
-  (require 'popwin)
-  (mapc (lambda (cfg-form)
-	  (let ((buffers (car cfg-form))
-		(cfg-opts (cdr cfg-form)))
-            (mapc (lambda (buffer)
-		    (add-to-list 'popwin:special-display-config
-				 (append (list buffer) cfg-opts)))
-		  buffers)))
-	popwin-cfg-forms))
 
 (use-package frame
   :straight nil
@@ -29,10 +18,21 @@
     "w w" '("Switch" . ace-window))
   (global-map
    "<remap> <evil-window-next>" 'ace-window
-    "C-x w" 'ace-window
-   ))
+   "C-x w" 'ace-window))
 
 (use-package popwin
+  :init
+  (defun +windows-cfg (&rest popwin-cfg-forms)
+    "Each one of POPWIN-CFG-FORMS is (BUFFER-NAMES . POPWIN-OPTIONS-PLIST)."
+    (require 'popwin)
+    (mapc (lambda (cfg-form)
+	    (let ((buffers (car cfg-form))
+		  (cfg-opts (cdr cfg-form)))
+	      (mapc (lambda (buffer)
+		      (add-to-list 'popwin:special-display-config
+				   (append (list buffer) cfg-opts)))
+		    buffers)))
+	  popwin-cfg-forms))
   :config
   (+windows-cfg
    '(("\*Warnings\*" "\*Warnings\**" "\*scratch\*" shell-mode help-mode)

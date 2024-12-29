@@ -3,9 +3,7 @@
 ;; TODO: complete dotnet config
 (use-package csharp-mode
   :straight nil
-  :mode "\\.cs\\'"
-  :init
-  (add-to-list '+lsp/servers-to-install 'omnisharp))
+  :mode "\\.cs\\'")
 
 (use-package csproj-mode)
 

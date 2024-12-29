@@ -47,9 +47,6 @@
   :hook
   (after-init . global-evil-surround-mode))
 
-(use-package editorconfig
-  :hook
-  (after-init . editorconfig-mode))
 
 (use-package undo-tree
   :demand
@@ -96,8 +93,5 @@
   :custom
   (combobulate-key-prefix "C-c o"))
 
-(use-package apheleia
-  :hook
-  (after-init . apheleia-global-mode))
 
-(provide 'init-editing)
+(provide 'init-edit)

@@ -12,4 +12,4 @@
 
 (use-package nasm-mode)
 
-(provide 'init-assembly)
+(provide 'init-asm)

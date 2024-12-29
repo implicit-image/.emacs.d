@@ -14,7 +14,10 @@
 	     :files ("aider.el"))
   :config
   ;; Use claude-3-5-sonnet cause it is best in aider benchmark
-  (setq aider-args '("--model" "anthropic/claude-3-5-sonnet-20241022")))
+  (setq aider-args '("--model" "anthropic/claude-3-5-sonnet-20241022"))
+  :general
+  (+leader-keys
+    "a a" '("[AI]der menu" . aider-transient-menu)))
 
 (use-package codeium
   :straight
@@ -24,7 +27,7 @@
 
 (use-package elysium
   :straight (elysium :type git
-	     :host github
+		     :host github
 		     :repo "lanceberge/elysium"
 		     :branch "main"
 		     :files ("*.el"))

@@ -16,7 +16,12 @@
   :init
   (setq vertico-scroll-margin 5)
   :hook
-  (marginalia-mode . vertico-mode))
+  (marginalia-mode . vertico-mode)
+  :general
+  (vertico-map
+   "C-c ." '("Repeat last vertico session" . vertico-repeat)
+   "C-c i" '("Insert candidate" . vertico-insert)
+   "C-c s" '("Suspend current session" . vertico-suspend)))
 
 (use-package embark
   :custom
@@ -76,26 +81,8 @@
   :custom
   (completion-styles '(orderless basic)))
 
-;; in-buffer completion
-
-(use-package yasnippet-capf
-  :after doom-snippets
-  :config
-  (add-hook 'completion-at-point-functions #'yasnippet-capf))
-
-(use-package tempel
-  :after cape)
-
-(use-package tempel-collection
-  :after tempel)
-
 (+leader-keys
   ":" '("Execute command" . execute-extended-command)
-  "." '("Find file in cwd" . find-file)
-  "c c" '("Compile" . compile)
-  "h l" '("Load library" . load-library)
-  "h F" '("Describe face" . describe-face)
-  "h s" '("Describe symbol" . describe-symbol)
-  "h t" '("Load theme" . load-theme))
+  "h l" '("Load library" . load-library))
 
 (provide 'init-completion)

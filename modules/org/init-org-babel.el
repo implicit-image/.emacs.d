@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
-(use-package org
+(use-package ob
+  :straight nil
   :init
   (setq org-src-tab-acts-natively t
 	org-edit-src-content-indentation 0
@@ -47,5 +48,10 @@
   (org-mode . (lambda ()
 		(require 'ob-jupyter)
 		(org-babel-jupyter-override-src-block "haskell"))))
+
+(use-package ob-rust
+  :after org)
+
+(use-package ob-sql-mode)
 
 (provide 'init-org-babel)

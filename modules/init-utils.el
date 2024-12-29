@@ -56,16 +56,7 @@
       (widen)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
-(use-package restart-emacs
-  :general
-  (+leader-keys
-    "q r" '("Restart emacs" . restart-emacs)))
 
-(use-package sideline)
-
-(use-package ready-player
-  :hook
-  (after-init . ready-player-mode))
 
 (+leader-keys
   "f D" '("Delete current file" . +utils/delete-visited-file)

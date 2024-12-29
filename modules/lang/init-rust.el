@@ -14,8 +14,6 @@
 	;; formatting
 	rustic-format-trigger 'on-save))
 
-(use-package ob-rust
-  :after org)
 
 (use-package rust-ts-mode
   :init

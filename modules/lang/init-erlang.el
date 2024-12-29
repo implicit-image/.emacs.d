@@ -5,4 +5,6 @@
 
 (use-package otp)
 
+(use-package edts)
+
 (provide 'init-erlang)

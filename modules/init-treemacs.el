@@ -4,6 +4,7 @@
   :init
   (+windows-cfg '((treemacs-mode) :position left :width 0.18 :noselect t :stick t :dedicated t))
   (setq treemacs-indent-guide-style 'line
+	treemacs-no-png-images t
 	treemacs-eldoc-display 'detailed
 	treemacs-indentation 1)
   :config

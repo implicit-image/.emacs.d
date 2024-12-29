@@ -46,8 +46,6 @@
   "o x" '("Scratch buffer" . scratch-buffer))
 
 (general-def global-map
-  "C-=" 'text-scale-increase
-  "C--" 'text-scale-decrease
   "C-x k" 'kill-this-buffer)
 
 
