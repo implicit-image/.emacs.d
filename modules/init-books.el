@@ -8,22 +8,23 @@
   ;; 		  :position right :width 0.5 :dedicated t :noselect nil :stick nil))
   :config
   (setq calibredb-root-dir "~/library"
-	calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir)
-	calibredb-library-alist '(("~/library"))
-	calibredb-search-page-max-rows 50
-	calibredb-virtual-library-alist '(("Economics" . "economics")
-					  ("Theory" . "theory")
-					  ("Maths" . "maths")
-					  ("Computer Science" . "cs"))
-	calibredb-format-all-the-icons t
-	calibredb-format-icons-in-terminal t
-	calibredb-format-character-icons t)
+        calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir)
+        calibredb-library-alist '(("~/library"))
+        calibredb-search-page-max-rows 50
+        calibredb-virtual-library-alist '(("Economics" . "economics")
+                                          ("Theory" . "theory")
+                                          ("Maths" . "maths")
+                                          ("Computer Science" . "cs"))
+        calibredb-format-all-the-icons t
+        calibredb-format-icons-in-terminal t
+        calibredb-format-character-icons t)
   :hook
   (calibredb-search-mode . (lambda ()
-			     (interactive)
-			     (blink-cursor-mode -1)))
+                             (interactive)
+                             (blink-cursor-mode -1)))
   :general
   (+leader-keys
+    "a C" '("Open calibre book" . calibredb-consult-read)
     "a c" '("Open calibre" . calibredb))
   (calibredb-search-mode-map
    :states '(normal visual)
@@ -91,39 +92,40 @@
 (use-package org-noter
   :init
   (setq org-noter-default-notes-file-names '("booknotes.org" "notes.org")
-	org-noter-notes-search-path '("~/org/booknotes")
-	org-noter-default-heading-title  "page $p$"
-	org-noter-auto-save-last-location t
-	org-noter-kill-frame-at-session-end nil
-	org-noter-always-create-frame nil
-	org-noter-insert-selected-text-inside-note t)
+        org-noter-notes-search-path '("~/org/booknotes")
+        org-noter-default-heading-title  "page $p$"
+        org-noter-auto-save-last-location t
+        org-noter-kill-frame-at-session-end nil
+        org-noter-always-create-frame nil
+        org-noter-insert-selected-text-inside-note t)
+
   (defun +books/org-noter-init-session (&optional local-elem)
     "Select a document from calibre and start org-noter sesion with it."
     (interactive)
     (if (not (eq major-mode 'org-mode))
-	(message "Org noter has to be activated in Org mode buffer.")
+        (message "Org noter has to be activated in Org mode buffer.")
       (require 'org-noter)
       (require 'calibredb)
       (if (bound-and-true-p local-elem)
-	  (org-up-element)
-	(goto-line 1))
+          (org-up-element)
+        (goto-line 1))
       (when (not (org-entry-get nil org-noter-property-doc-file))
-	(consult--read (mapcar
-			(lambda (cand)
-			  (let ((prop-list (cadr cand)))
-			    `(,(format (s-join " " `("%s"
-						     ,(propertize ":file"
-								  'face 'font-lock-builtin-face)
-						     "%s"))
-				       (or (car (alist-get :book-name prop-list))
-					   "")
-				       (or (car (alist-get :file-path prop-list))
-					   "")))))
-			(calibredb-candidates))
-		       :prompt "File to annotate: "
-		       :lookup (lambda (cand &rest args)
-				 (org-set-property org-noter-property-doc-file (string-trim-left cand ".*\:file ")))))
-
+        (consult--read (mapcar
+                        (lambda (cand)
+                          (let ((prop-list (cadr cand)))
+                            `(,(format (s-join " " `("%s"
+                                                     ,(propertize ":file"
+                                                                  'face 'font-lock-builtin-face)
+                                                     "%s"))
+                                       (or (car (alist-get :book-name prop-list))
+                                           "")
+                                       (or (car (alist-get :file-path prop-list))
+                                           "")))))
+                        (calibredb-candidates))
+                       :prompt "File to annotate: "
+                       :lookup (lambda (cand &rest args)
+                                 (org-set-property org-noter-property-doc-file
+                                                   (string-trim-left cand ".*\:file ")))))
       (save-buffer)
       (org-noter)))
   :general

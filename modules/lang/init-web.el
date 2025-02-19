@@ -23,16 +23,16 @@
 
 (use-package tide
   :init
-  (+windows-cfg '(("\*tide-documenation\*") :position bottom :height 0.3))
+  (+windows-cfg '(("\*tide-documentation\*") :position bottom :height 0.3))
   (+lookup-set-fn 'buffer '(typescript-ts-mode . tide-documentation-at-point))
   :config
   (setq tide-enable-xref t
-	tide-imenu-flatten t
-	tide-completion-detailed t)
+        tide-imenu-flatten t
+        tide-completion-detailed t)
   :hook ((typescript-ts-mode) . (lambda ()
-				  (interactive)
-				  (tide-setup)
-				  (tide-hl-identifier-mode +1))))
+                                  (interactive)
+                                  (tide-setup)
+                                  (tide-hl-identifier-mode +1))))
 
 (use-package web-mode
   :mode "\\.html\\'"
@@ -52,21 +52,21 @@
 
 (use-package lsp-tailwindcss
   :straight (lsp-tailwindcss :type git
-			     :host github
-			     :repo "merrickluo/lsp-tailwindcss")
+                             :host github
+                             :repo "merrickluo/lsp-tailwindcss")
   :after lsp-mode
   :init
   (setq lsp-tailwindcss-addon-mode t)
   :config
   (dolist (tw-major-mode
-	   '(css-mode
-	     css-ts-mode
-	     typescript-mode
-	     typescript-ts-mode
-	     tsx-ts-mode
-	     js2-mode
-	     js-ts-mode
-	     clojure-mode))
+           '(css-mode
+             css-ts-mode
+             typescript-mode
+             typescript-ts-mode
+             tsx-ts-mode
+             js2-mode
+             js-ts-mode
+             clojure-mode))
     (add-to-list 'lsp-tailwindcss-major-modes tw-major-mode)))
 
 (provide 'init-web)

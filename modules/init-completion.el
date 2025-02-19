@@ -1,9 +1,14 @@
 ;;; -*- lexical-binding: t -*-
 
+(use-package minibuffer
+  :straight nil
+  :hook
+  (minibuffer-mode . visual-line-mode))
+
 (use-package marginalia
   :init
   (setq marginalia-align 'center
-	marginalia-align-offset -3)
+        marginalia-align-offset -3)
   :hook
   (after-init . marginalia-mode))
 
@@ -28,11 +33,11 @@
   (embark-mixed-indicator-delay 0.3)
   :init
   (+windows-cfg '(("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*")
-		  :regexp t
-		  :position bottom
-		  :height 0.3
-		  :dedicated nil
-		  :noselect nil))
+                  :regexp t
+                  :position bottom
+                  :height 0.3
+                  :dedicated nil
+                  :noselect nil))
   (setq prefix-help-command #'embark-prefix-help-command))
 
 (use-package consult
@@ -58,7 +63,7 @@
    "s o" '("Outline" . consult-outline))
   (+leader-keys
     "m :" '("Run active mode command" . consult-mode-command)
-    "/" '("Search directory" . consult-ripgrep)
+    "/" '("Grep directory" . consult-ripgrep)
     ;; buffer
     "b b" '("Find buffer" . consult-buffer)
     "c e" '("Compile errors" . consult-compile-error)

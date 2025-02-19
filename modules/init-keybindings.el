@@ -9,10 +9,10 @@
   (which-key-setup-side-window-bottom)
   :init
   (setq which-key-popup-type 'minibuffer
-	which-key-idle-delay 0.1
-	which-key-max-display-columns 5
-	which-key-add-column-padding 10
-	which-key-min-display-lines 5)
+        which-key-idle-delay 0.1
+        which-key-max-display-columns 5
+        which-key-add-column-padding 10
+        which-key-min-display-lines 5)
   ;; display `which-key' window on bottom side of the frame
   (which-key-setup-side-window-bottom)
   :config
@@ -37,6 +37,13 @@
     :states '(normal insert visual emacs)
     :prefix "SPC m"
     :global-prefix "M-SPC m")
+
+  (general-create-definer +mode-keys
+    :states '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "M-SPC"
+    :non-normal-prefix "C-c")
+
   ;;;; key categories
   (+leader-keys
     "a" '(:ignore t :which-key "applications")

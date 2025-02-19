@@ -7,9 +7,9 @@
   :demand
   :init
   (setq evil-want-integration t
-	evil-want-keybinding nil
-	evil-undo-system 'undo-tree
-	evil-lookup-func 'woman)
+        evil-want-keybinding nil
+        evil-undo-system 'undo-tree
+        evil-lookup-func 'woman)
   :config
   (evil-mode 1)
   :general
@@ -25,14 +25,15 @@
    "C-k" 'evil-window-up
    "C-l" 'evil-window-right)
   (global-map
-   "C-TAB" 'evil-jump-forward))
+   "C-TAB" 'evil-jump-forward
+   "C-<tab>" 'evil-jump-forward))
 
 ;;;; collection of evil bindings for popular modes
 (use-package evil-collection
   :hook
   (after-init . (lambda ()
-		  (interactive)
-		  (evil-collection-init evil-collection-mode-list))))
+                  (interactive)
+                  (evil-collection-init evil-collection-mode-list))))
 
 ;;;; highlight the AOE of vim motions
 (use-package evil-goggles
@@ -55,8 +56,11 @@
 (use-package evil-org
   :config
   (evil-org-agenda-set-keys)
+  (evil-org-set-key-theme)
   :hook
-  ((org-mode org-agenda-mode) . evil-org-mode))
+  ((org-mode) . evil-org-mode)
+  ((org-agenda) . (lambda ()
+                    (require 'evil-org-agenda))))
 
 ;;;; evil bindings for treemacs
 (use-package treemacs-evil

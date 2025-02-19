@@ -1,10 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 (require 'f)
 
-(setq +modules/lang-path (f-join +modules/path "lang/"))
-
-(add-to-list 'load-path +modules/lang-path)
-
 (require 'init-c)
 (require 'init-web)
 (require 'init-python)
@@ -41,14 +37,16 @@
 (require 'init-lean)
 (require 'init-sql)
 (require 'init-hdl)
+(require 'init-solidity)
+(require 'init-plantuml)
 
 ;;;; languages for nand2tetris course
 (use-package init-nand2tetris
   :commands
   (jack-mode hdl-mode tst-mode vm-mode)
   :straight (init-nand2tetris :type git
-			      :host github
-			      :repo "Deng-Li3/emacs-nand2tetris"))
+                              :host github
+                              :repo "Deng-Li3/emacs-nand2tetris"))
 
 ;;;; ml family languages
 (require 'init-ml)

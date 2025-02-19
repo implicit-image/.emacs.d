@@ -7,37 +7,46 @@
   (flycheck-idle-check-delay 1.0)
   :init
   (+windows-cfg '((flycheck-mode-major-mode)
-		  :position bottom :height 0.3 ))
+                  :position bottom :height 0.3))
+  (+windows-cfg '((flycheck-error-list-mode)
+                  :position bottom :height 0.4 :noselect nil))
   :hook
   ((lsp-mode emacs-lisp-mode merlin-mode) . flycheck-mode)
+  (flycheck-error-list-mode . visual-line-mode)
   :general
-  (flycheck-mode-map
-   :states '(normal visual insert)
-   "C-c ]" 'flycheck-next-error
-   "C-c [" 'flycheck-previous-error))
+  (+mode-keys
+    :keymaps 'flycheck-mode-map
+    "]" 'flycheck-next-error
+    "[" 'flycheck-previous-error))
 
 (use-package sideline-flycheck
   :after flycheck
   :init
   (setq sideline-backends-right '(sideline-flycheck)
-	sideline-flycheck-max-lines 2)
+        sideline-flycheck-max-lines 2)
   :hook
   (flycheck-mode . sideline-mode)
   (flycheck-mode . sideline-flycheck-setup))
 
 (use-package consult-flycheck
   :straight (consult-flycheck :type git
-			      :host github
-			      :repo "minad/consult-flycheck")
+                              :host github
+                              :repo "minad/consult-flycheck")
   :general
   (flycheck-mode-map
    :states '(normal visual)
    :prefix "SPC"
    :global-prefix "M-SPC"
-   "s e" '("Flycheck errors" . consult-flycheck)))
+   "s e" '("Consult errors" . consult-flycheck)))
 
 (use-package flymake)
 
-(use-package flyspell)
+(use-package flyspell
+  :straight nil
+  :init
+  (setq ispell-program-name "hunspell")
+  :hook
+  ((prog-mode emacs-lisp-mode) . flyspell-prog-mode)
+  ((org-mode markdown-mode vterm-mode shell-mode shell-command-mode) . flyspell-mode))
 
 (provide 'init-checkers)

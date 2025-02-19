@@ -10,19 +10,19 @@
 (defun +editing/evil-mc-turn-off-incompatible-modes ()
   (interactive)
   (mapc (lambda (mode-symbol)
-	  (when (symbol-value mode-symbol)
-	    (progn
-	      ;; disable enabled mode
-	      (funcall-interactively mode-symbol -1)
-	      ;;  save what was disabled
-	      (add-to-list '+editing/evil-mc-disabled-modes mode-symbol))))
-	+editing/evil-mc-incompatible-modes))
+          (when (symbol-value mode-symbol)
+            (progn
+              ;; disable enabled mode
+              (funcall-interactively mode-symbol -1)
+              ;;  save what was disabled
+              (add-to-list '+editing/evil-mc-disabled-modes mode-symbol))))
+        +editing/evil-mc-incompatible-modes))
 
 (defun +editing/evil-mc-turn-on-incompatible-modes ()
   (interactive)
   (mapc (lambda (mode-symbol)
-	  (funcall-interactively mode-symbol +1))
-	+editing/evil-mc-disabled-modes))
+          (funcall-interactively mode-symbol +1))
+        +editing/evil-mc-disabled-modes))
 
 (use-package evil-mc
   :init
@@ -34,8 +34,8 @@
    '+editing/evil-mc-turn-on-incompatible-modes)
   :hook
   (after-init . (lambda ()
-		  (interactive)
-		  (global-evil-mc-mode 1))))
+                  (interactive)
+                  (global-evil-mc-mode 1))))
 
 (use-package evil-nerd-commenter
   :general
@@ -67,17 +67,19 @@
   :after evil
   :init
   (setq show-paren-style 'parenthesis
-	show-paren-when-point-inside-paren t
-	show-paren-when-point-in-periphery t))
+        show-paren-when-point-inside-paren t
+        show-paren-when-point-in-periphery t))
 
 (use-package origami
   :straight (origami :type git
-		     :host github
-		     :repo "elp-revive/origami.el")
+                     :host github
+                     :repo "elp-revive/origami.el")
   :hook
   (after-init . global-origami-mode))
 
 (use-package symbol-overlay
+  :custom-face
+  (symbol-overlay-default-face ((t (:box (:line-width -1)))))
   :custom
   (symbol-overlay-idle-timer 0.3)
   :config
@@ -86,8 +88,8 @@
 
 (use-package combobulate
   :straight (combobulate :type git
-			 :host github
-			 :repo "mickeynp/combobulate")
+                         :host github
+                         :repo "mickeynp/combobulate")
   :functions
   (combobulate-mode)
   :custom

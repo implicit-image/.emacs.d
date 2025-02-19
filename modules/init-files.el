@@ -9,6 +9,11 @@
     "h l" '("Load library" . load-library)
     "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)))
 
+(use-package autorevert
+  :straight nil
+  :hook
+  (dired-mode . auto-revert-mode))
+
 (use-package ready-player
   :hook
   (after-init . ready-player-mode))

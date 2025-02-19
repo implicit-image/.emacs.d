@@ -1,5 +1,11 @@
 ;;; -*- lexical-binding: t -*-
 
+
+(defmacro +setq! (&rest symbols)
+  "Set SYMBOLS to associated values while taking care of setting default options."
+  `(dolist (binding ,( symbols))))
+
+
 (defun +utils/toggle-mode (mode)
   (interactive)
   (if (symbol-value mode)
@@ -21,7 +27,7 @@
   "Delete the file visited by current buffer."
   (interactive)
   (let* ((curr-buf (current-buffer))
-	 (curr-name (buffer-file-name curr-buf)))
+         (curr-name (buffer-file-name curr-buf)))
     (when (yes-or-no-p (string-join `("Delete " ,curr-name " file?")))
       (kill-buffer curr-buf)
       (delete-file curr-name))))
@@ -32,22 +38,22 @@
   (interactive)
   (if (display-graphic-p)
       (let ((fg-color (doom-color 'strings))
-	    (bg-color (doom-color 'bg)))
-	(consult--read (delete-dups (font-family-list))
-		       :prompt "Font family: "
-		       :annotate (lambda (font)
-				   `(,(propertize
-				       (concat font " ")
-				       'face 'font-lock-keyword-face)
-				     "Family: "
-				     ,(propertize
-				       "The quick brown fox jumps over the lazy dog."
-				       'face `(:family ,font :foreground ,fg-color :background ,bg-color))))
-		       :require-match t
-		       :history 'consult-set-font-family-history
-		       :lookup (lambda (selected-font &rest args)
-				 (interactive)
-				 (set-frame-font selected-font t t t))))
+            (bg-color (doom-color 'bg)))
+        (consult--read (delete-dups (font-family-list))
+                       :prompt "Font family: "
+                       :annotate (lambda (font)
+                                   `(,(propertize
+                                       (concat font " ")
+                                       'face 'font-lock-keyword-face)
+                                     "Family: "
+                                     ,(propertize
+                                       "The quick brown fox jumps over the lazy dog."
+                                       'face `(:family ,font :foreground ,fg-color :background ,bg-color))))
+                       :require-match t
+                       :history 'consult-set-font-family-history
+                       :lookup (lambda (selected-font &rest args)
+                                 (interactive)
+                                 (set-frame-font selected-font t t t))))
     (message "Cant change font family on tty")))
 
 (defun +utils-whole-buffer-as-string (buffer)
@@ -56,6 +62,12 @@
       (widen)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
+
+
+(use-package simple
+  :straight nil
+  :hook
+  ((help-mode helpful-mode lsp-ui-doc-mode) . visual-line-mode))
 
 
 (+leader-keys

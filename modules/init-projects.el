@@ -1,6 +1,22 @@
 ;;; -*- lexical-binding: t -*-
 
+
 (use-package projectile
+  :init
+
+  (defun +projects/revert-buffers (&optional choose-project)
+    "Reverts all buffers asociated wit current project. If CHOOSE-PROJECT is t\
+query for known project and revert its buffers instead."
+    (interactive)
+    (require 'projectile)
+    (let ((project (if choose-project
+                       (completing-read "Revert buffers:"
+                                        projectile-known-projects)
+                     (projectile-project-root))))
+      (dolist (buff (projectile-project-buffers project))
+        (if (buffer-file-name buff)
+            (revert-buffer-quick buff)))))
+
   :config
   (projectile-mode +1)
   :general
@@ -27,23 +43,31 @@
     "p r" '("Find recent project files"   . projectile-recentf-files)
     "p R" '("Run project"                 . projectile-run-project)
     "p s" '("Save project files"          . projectile-save-project-buffers)
-    "p T" '("Project terminal"            . projectile-run-vterm))
+    "p T" '("Project terminal"            . projectile-run-vterm)
+    "b R" '("Revert project buffers"      . +projects/revert-buffers))
   (global-map
    "C-c p" '("Projectile commands" . projectile-command-map)))
 
 (use-package persp-mode
   :config
   (setq persp-autokill-buffer-on-remove 'kill-weak
-	persp-reset-windows-on-nil-window-conf
-	persp-nil-hidden t))
+        persp-reset-windows-on-nil-window-conf
+        persp-nil-hidden t))
 
 (use-package desktop
   :straight nil
   :init
   (setq desktop-restore-frames t
-	desktop-restore-eager t
-	desktop-restore-reuses-frames t)
+        desktop-restore-eager t
+        desktop-restore-reuses-frames t)
   :hook
   (after-init . desktop-save-mode))
+
+(use-package direnv
+  :init
+  (setq direnv-always-show-summary nil
+        direnv-show-paths-in-summary nil)
+  :hook
+  (after-init . direnv-mode))
 
 (provide 'init-projects)

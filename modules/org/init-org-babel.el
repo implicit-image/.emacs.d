@@ -4,8 +4,8 @@
   :straight nil
   :init
   (setq org-src-tab-acts-natively t
-	org-edit-src-content-indentation 0
-	org-src-preserve-indentation nil)
+        org-edit-src-content-indentation 0
+        org-src-preserve-indentation nil)
   :config
   (+windows-cfg
    '(("\*Org-Babel\**" "\*Org Src\**")
@@ -17,7 +17,7 @@
      (python . t)
      (shell . t)
      (emacs-lisp . t)
-     (rust . t)
+     ;; (rust . t)
      (awk . t)
      (calc . t)
      (clojure . t)
@@ -46,11 +46,12 @@
 (use-package jupyter
   :hook
   (org-mode . (lambda ()
-		(require 'ob-jupyter)
-		(org-babel-jupyter-override-src-block "haskell"))))
+                (require 'ob-jupyter)
+                (org-babel-jupyter-override-src-block "haskell"))))
 
-(use-package ob-rust
-  :after org)
+;; (use-package ob-rust
+;;   :hook
+;;   ())
 
 (use-package ob-sql-mode)
 

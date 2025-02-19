@@ -20,5 +20,9 @@
 (setq package-enable-at-startup nil
       evil-want-keybinding nil)
 
+(when (member "--light" command-line-args)
+  (message "light detected")
+  (setq load-light-init t)
+  (setq command-line-args (delete "--light" command-line-args)))
 
 ;;; early-init.el ends here

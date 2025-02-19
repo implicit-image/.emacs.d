@@ -24,16 +24,16 @@
 (defun +lookup-set-fn (type &rest forms)
   ""
   (let ((fn-list (pcase type
-		   ('popup '+lookup/popup-functions-alist)
-		   ('buffer '+lookup/buffer-functions-alist)
-		   ('ref '+lookup/find-ref-functions-alist)
-		   ('def '+lookup/find-def-functions-alist)
-		   ('impl '+lookup/find-impl-functions-alist)
-		   (_ nil))))
+                   ('popup '+lookup/popup-functions-alist)
+                   ('buffer '+lookup/buffer-functions-alist)
+                   ('ref '+lookup/find-ref-functions-alist)
+                   ('def '+lookup/find-def-functions-alist)
+                   ('impl '+lookup/find-impl-functions-alist)
+                   (_ nil))))
     (when fn-list
       (mapc (lambda (form)
-	      (add-to-list fn-list form))
-	    forms))))
+              (add-to-list fn-list form))
+            forms))))
 
 ;;;###autoload
 (defun +lookup/popup ()
@@ -41,9 +41,9 @@
   (interactive)
   (let ((lookup-function (alist-get major-mode +lookup/popup-functions-alist)))
     (cond (lookup-function (funcall-interactively lookup-function))
-	  ((memq 'lsp-ui-mode local-minor-modes) (lsp-ui-doc-glance))
-	  ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation))
-	  (t (message "No documentation function found")))))
+          ((memq 'lsp-ui-mode local-minor-modes) (lsp-ui-doc-glance))
+          ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation))
+          (t (message "No documentation function found")))))
 
 ;;;###autoload
 (defun +lookup/in-buffer ()
@@ -51,9 +51,9 @@
   (interactive)
   (let ((lookup-function (alist-get major-mode +lookup/buffer-functions-alist)))
     (cond (lookup-function (funcall-interactively lookup-function))
-	  ((memq 'lsp-mode local-minor-modes) (lsp-describe-thing-at-point))
-	  ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation-buffer))
-	  (t (message "No documentation function found")))))
+          ((memq 'lsp-mode local-minor-modes) (lsp-describe-thing-at-point))
+          ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation-buffer))
+          (t (message "No documentation function found")))))
 
 
 ;;;###autoload
@@ -61,19 +61,19 @@
   "Lookup documentation for symbol at point."
   (interactive)
   (let ((buffer-lookup-function (alist-get major-mode +lookup/buffer-functions-alist))
-	(popup-lookup-function (alist-get major-mode +lookup/popup-functions-alist)))
+        (popup-lookup-function (alist-get major-mode +lookup/popup-functions-alist)))
     (cond ((and popup-lookup-function
-		(display-graphic-p))
-	   (funcall-interactively popup-lookup-function))
-	  (buffer-lookup-function
-	   (funcall-interactively buffer-lookup-function))
-	  ((memq 'lsp-ui-mode local-minor-modes)
-	   (if (display-graphic-p)
-	       (lsp-ui-doc-show)
-	     (lsp-describe-thing-at-point)))
-	  ((memq 'lsp-bridge-mode local-minor-modes)
-	   (lsp-bridge-show-documentation))
-	  (t (message "No documentation function found")))))
+                (display-graphic-p))
+           (funcall-interactively popup-lookup-function))
+          (buffer-lookup-function
+           (funcall-interactively buffer-lookup-function))
+          ((memq 'lsp-ui-mode local-minor-modes)
+           (if (display-graphic-p)
+               (lsp-ui-doc-show)
+             (lsp-describe-thing-at-point)))
+          ((memq 'lsp-bridge-mode local-minor-modes)
+           (lsp-bridge-show-documentation))
+          (t (message "No documentation function found")))))
 
 ;;;###autoload
 (defun +lookup/find-references ()
@@ -104,10 +104,10 @@
   (interactive)
   (if org-mode
       (let ((block-major-mode
-	     (intern (concat
-		      (-first (org-babel-get-src-block-info))
-		      "-mode"))))
-	(+lookup--local-documentation block-major-mode))
+             (intern (concat
+                      (-first (org-babel-get-src-block-info))
+                      "-mode"))))
+        (+lookup--local-documentation block-major-mode))
     (message "Not in org mode")))
 
 (use-package dumb-jump
@@ -134,11 +134,11 @@
   :straight nil
   :init
   (+windows-cfg '((help-mode)
-		  :height 0.3
-		  :position bottom
-		  :dedicated nil
-		  :stick nil
-		  :noselect nil))
+                  :height 0.3
+                  :position bottom
+                  :dedicated nil
+                  :stick nil
+                  :noselect nil))
   :general
   (help-mode-map
    :states '(normal)
@@ -166,7 +166,7 @@
   :straight nil
   :init
   (+windows-cfg '(("\*Dictionary\*")
-		  :position bottom :height 0.3))
+                  :position bottom :height 0.3))
   (setq dictionary-server "dict.org")
   :general
   (+leader-keys
@@ -186,8 +186,8 @@
 (use-package eldoc
   :init
   (setq eldoc-echo-area-prefer-doc-buffer nil
-	eldoc-idle-delay 0.1
-	eldoc-echo-area-use-multiline-p nil))
+        eldoc-idle-delay 0.1
+        eldoc-echo-area-use-multiline-p nil))
 
 (use-package eldoc-box
   :init
@@ -197,9 +197,9 @@
   :hook
   ((lsp-mode merlin-mode) . eldoc-box-hover-at-point-mode)
   (emacs-lisp-mode . (lambda ()
-		       (if (display-graphic-p)
-			   (eldoc-box-hover-at-point-mode +1)
-			 (eldoc-mode +1)))))
+                       (if (display-graphic-p)
+                           (eldoc-box-hover-at-point-mode +1)
+                         (eldoc-mode +1)))))
 
 (general-defs
   global-map

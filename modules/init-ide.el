@@ -1,9 +1,5 @@
 (require 'f)
 
-(setq +modules/ide-path (f-join +modules/path "ide"))
-
-(add-to-list 'load-path +modules/ide-path)
-
 (require 'init-indent)
 
 (require 'init-format)
@@ -23,7 +19,7 @@
 (require 'init-compile)
 
 ;;;; in-buffer completion
-(require 'init-corfu)
+(require 'init-company)
 
 ;;;; custom LSP integration and utils
 (require 'init-lsp)
