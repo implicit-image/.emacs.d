@@ -121,4 +121,5 @@
   (require 'init-socials)
   (require 'init-media)
 ;;; start server
-  (server-start))
+  (when (not (server-running-p))
+    (server-start)))
