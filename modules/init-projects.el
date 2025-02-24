@@ -63,7 +63,9 @@ query for known project and revert its buffers instead."
   :hook
   (after-init . desktop-save-mode))
 
+
 (use-package direnv
+  :if (+os/is-linux-p)
   :init
   (setq direnv-always-show-summary nil
         direnv-show-paths-in-summary nil)

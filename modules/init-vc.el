@@ -19,16 +19,6 @@
   :straight (consult-gh :type git
                         :host github
                         :repo "armindarvish/consult-gh")
-  :hook
-  (vertico-mode . (lambda ()
-                    (interactive)
-                    (require 'consult-gh)
-                    ;; (require 'consult-gh-transient)
-                    ;; (require 'consult-gh-embark)
-                    ;; (require 'consult-gh-forge)
-                    ;; (consult-gh-embark-mode +1)
-                    ;; (consult-gh-forge-mode +1)
-                    ))
   :general
   (+leader-keys
     "g i" '(:ignore t :which-key "[I]ssue")

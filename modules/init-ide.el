@@ -19,7 +19,10 @@
 (require 'init-compile)
 
 ;;;; in-buffer completion
-(require 'init-company)
+
+(if (string-equal (system-name) "nixos")
+    (require 'init-company)
+  (require 'init-corfu))
 
 ;;;; custom LSP integration and utils
 (require 'init-lsp)
@@ -28,10 +31,10 @@
 (require 'init-lsp-mode)
 
 ;;;; fastest lsp client, uses external
-(require 'init-lsp-bridge)
+;; (require 'init-lsp-bridge)
 
 ;;;; simple LSP client implemented as an emacs module.
-(require 'init-lspce)
+;; (require 'init-lspce)
 
 (require 'init-ui)
 

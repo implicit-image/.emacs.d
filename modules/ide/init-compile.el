@@ -3,9 +3,11 @@
   :straight nil
   :init
   (+windows-cfg '((compilation-mode)
-		  :position bottom :height 0.3 :noselect nil :dedicated t))
+                  :position bottom :height 0.3 :noselect nil :dedicated t))
   :config
   (setq compilation-scroll-output t)
+  :hook
+  (compilation-mode . visual-line-mode)
   :general
   (+leader-keys
     "c c" '("Compile" . compile)))

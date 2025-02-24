@@ -6,9 +6,11 @@
   (require 'f)
 
   ;;;; Custom global options
-  (setq +base/font-family "FantasqueSansM Nerd Font Mono";
+  (setq +base/font-family "FantasqueSansM Nerd Font Mono"
         +base/font-weight 'semi-light
-        +base/font-size 17
+        +base/font-size (pcase system-type
+                          ('windows-nt 15)
+                          (t 17))
         +base/font-spec (font-spec :family +base/font-family
                                    :weight +base/font-weight
                                    :size +base/font-size)
@@ -25,8 +27,9 @@
         read-process-output-max (* 1024 16)
         ;;startup screen
         inhibit-startup-screen t
+        debug-on-error t
         visible-bell nil
-        debug-on-error nil
+        ring-bell-function 'ignore
         ;; lines
         display-line-numbers-type 'relative
         truncate-lines t
@@ -95,9 +98,10 @@
 ;; load $PATH from shell
 (use-package exec-path-from-shell
   :commands exec-path-from-shell-initialize
+  :if (+os/is-linux-p)
   :init
   (setq exec-path-from-shell-variables '("PATH" "MANPATH" "JAVA_HOME")
-        exec-path-from-shell-shell-name "zsh")
+        exec-path-from-shell-shell-name "bash")
   :hook
   (after-init . exec-path-from-shell-initialize))
 

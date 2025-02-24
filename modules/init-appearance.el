@@ -1,5 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
+(setq custom-theme-directory (f-join user-emacs-directory "straight" "build" "doom-gruber-darker"))
 
 ;;;###autoload
 (defun +eye-candy/insert-doom-color ()
@@ -14,6 +15,7 @@
   :demand
   :init
   (defun +colors/setup-doom-themes ()
+    (interactive)
     (progn
       (require 'doom-themes)
       (require 'f)
@@ -29,27 +31,26 @@
       (doom-themes-neotree-config)
       (doom-themes-treemacs-config)
       (doom-themes-org-config)
-      (+colors/load-theme +base/theme)
-      ))
+      (load-theme +base/theme t)))
   :hook
   (after-init . +colors/setup-doom-themes)
   (tty-setup . (lambda ()
                  (interactive)
-                 (+colors/load-theme +base/theme))))
+                 (load-theme +base/theme t))))
 
 (use-package ef-themes)
 
-(use-package solaire-mode
-  :demand
-  :custom-face
-  (solaire-default-face ((t (:background ,(doom-darken 'solaire-default-face 0.1)))))
-  :config
-  (defun +colors/load-theme (theme)
-    ""
-    (interactive)
-    (require 'solaire-mode)
-    (load-theme theme t)
-    (solaire-global-mode +1)))
+;; (use-package solaire-mode
+;;   :demand
+;;   :custom-face
+;;   (solaire-default-face ((t (:background ,(doom-darken 'solaire-default-face 0.1)))))
+;;   :config
+;;   (defun +colors/load-theme (theme)
+;;     ""
+;;     (interactive)
+;;     (require 'solaire-mode)
+;;     (load-theme theme t)
+;;     (solaire-global-mode +1)))
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -71,7 +72,7 @@
 (use-package hl-todo
   :commands
   global-hl-todo-mode
-  :init
+  :config
   (setq hl-todo-keyword-faces
         `(("HOLD" . "#d0bf8f")
           ("TODO" . ,(doom-color 'green))

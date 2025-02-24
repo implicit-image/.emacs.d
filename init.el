@@ -53,11 +53,13 @@
 
 (if (bound-and-true-p load-light-init)
     (progn (require 'init-modules (format "%smodules/init-modules.el" user-emacs-directory))
+           (require 'init-os)
            (require 'init-elisp-libs)
            (require 'init-keybindings)
            (require 'init-base)
            (require 'init-evil)
            (require 'init-utils)
+           (require 'init-search)
            (require 'init-appearance)
            (require 'init-windows)
            (require 'init-lookup)
@@ -70,6 +72,7 @@
            (require 'init-modeline))
 
   (require 'init-modules (format "%smodules/init-modules.el" user-emacs-directory))
+  (require 'init-os)
   (require 'init-elisp-libs)
   (require 'init-keybindings)
   (require 'init-base)
@@ -77,6 +80,8 @@
 
   (require 'init-treesitter)
   (require 'init-utils)
+
+  (require 'init-search)
 
 ;;;; appearance
   (require 'init-appearance)
@@ -121,5 +126,6 @@
   (require 'init-socials)
   (require 'init-media)
 ;;; start server
+  (require 'server)
   (when (not (server-running-p))
     (server-start)))

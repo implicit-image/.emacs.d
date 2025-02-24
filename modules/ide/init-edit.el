@@ -54,7 +54,7 @@
   (require 'f)
   (setq undo-tree-history-directory-alist `(("." . ,(f-join user-emacs-directory "undo-tree/"))))
   (+windows-cfg
-   '((" *undo-tree*")
+   '((undo-tree-visualizer-mode)
      :width 0.2 :position right))
   :config
   (global-undo-tree-mode +1)
@@ -86,14 +86,14 @@
   :hook
   ((prog-mode) . symbol-overlay-mode))
 
-(use-package combobulate
-  :straight (combobulate :type git
-                         :host github
-                         :repo "mickeynp/combobulate")
-  :functions
-  (combobulate-mode)
-  :custom
-  (combobulate-key-prefix "C-c o"))
+;; (use-package combobulate
+;;   :straight (combobulate :type git
+;;                          :host github
+;;                          :repo "mickeynp/combobulate")
+;;   :functions
+;;   (combobulate-mode)
+;;   :custom
+;;   (combobulate-key-prefix "C-c o"))
 
 
 (provide 'init-edit)

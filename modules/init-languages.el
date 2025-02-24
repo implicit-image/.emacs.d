@@ -37,8 +37,8 @@
 (require 'init-lean)
 (require 'init-sql)
 (require 'init-hdl)
-(require 'init-solidity)
-(require 'init-plantuml)
+;; (require 'init-solidity)
+;; (require 'init-plantuml)
 
 ;;;; languages for nand2tetris course
 (use-package init-nand2tetris
@@ -66,6 +66,7 @@
 ;;;; Bioware's Neverwinter Script support
 (require 'init-nwscript)
 
+(require 'init-csv)
 
 
 (provide 'init-languages)

@@ -33,7 +33,9 @@
   :hook
   (after-init . (lambda ()
                   (interactive)
-                  (evil-collection-init evil-collection-mode-list))))
+                  (evil-collection-init)
+                  ;; (evil-collection-init evil-collection-mode-list)
+                  )))
 
 ;;;; highlight the AOE of vim motions
 (use-package evil-goggles
