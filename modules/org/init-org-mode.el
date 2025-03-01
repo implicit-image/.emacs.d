@@ -118,6 +118,7 @@
    :states '(normal visual)
    :prefix "SPC"
    :global-prefix "M-SPC"
+   "s i" '("Navigate Org headings" . consult-org-heading)
    "t l" '("Toggle latex preview" . org-latex-preview)
    "t p" '("Toggle pretty symbols" . org-toggle-pretty-entities)
    "m i t" '("Create table" . org-table-create-or-convert-from-region)

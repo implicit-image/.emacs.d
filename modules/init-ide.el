@@ -20,10 +20,7 @@
 
 ;;;; in-buffer completion
 
-(if (string-equal (system-name) "nixos")
-    (require 'init-company)
-  (require 'init-corfu))
-
+(require 'init-corfu)
 ;;;; custom LSP integration and utils
 (require 'init-lsp)
 

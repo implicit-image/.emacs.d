@@ -43,10 +43,8 @@
 
 (use-package flyspell
   :straight nil
-  :init
-  (setq ispell-program-name "hunspell")
   :hook
   ((prog-mode emacs-lisp-mode) . flyspell-prog-mode)
-  ((org-mode markdown-mode vterm-mode shell-mode shell-command-mode) . flyspell-mode))
+  ((org-mode markdown-mode text-mode) . flyspell-mode))
 
 (provide 'init-checkers)

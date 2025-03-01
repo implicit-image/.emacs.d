@@ -57,12 +57,12 @@
 ;;;; evil bindings for org-mode
 (use-package evil-org
   :config
-  (evil-org-agenda-set-keys)
   (evil-org-set-key-theme)
   :hook
   ((org-mode) . evil-org-mode)
   ((org-agenda) . (lambda ()
-                    (require 'evil-org-agenda))))
+                    (require 'evil-org-agenda)
+                    (evil-org-agenda-set-keys))))
 
 ;;;; evil bindings for treemacs
 (use-package treemacs-evil

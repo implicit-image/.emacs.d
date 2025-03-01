@@ -38,7 +38,7 @@
                             ((mood-line-segment-multiple-cursors) . ""))
                            :right
                            (((mood-line-segment-misc-info) . " ")
-                            ((mood-line-segment-checker) . " ")
+                            ;; ((mood-line-segment-checker) . " ")
                             ((mood-line-segment-vc) . " ")
                             ((mood-line-segment-major-mode) . " "))))
                     (mood-line-mode 1))))

@@ -45,6 +45,7 @@
    "<backtab>" 'corfu-previous
    "S-TAB" 'corfu-previous))
 
+
 ;; emacs 31 should add tty child frames
 (when (< (string-to-number emacs-version) 31)
   ;; for corfu terminal support

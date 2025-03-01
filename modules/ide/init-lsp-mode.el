@@ -1,51 +1,46 @@
 ;;; -*- lexical-binding: t -*-
 
-(defun +lsp/scroll-up-doc-popup (&optional count)
-  ""
-  (interactive)
-  (lsp-ui-doc-focus-frame)
-  (evil-scroll-up count)
-  (lsp-ui-doc-unfocus-frame))
-
 (defun +lsp/install-servers (&optional force)
   "Install all servers in `+lsp/servers-to-install'")
 
-(defun lsp-booster--advice-json-parse (old-fn &rest args)
-  "Try to parse bytecode instead of json."
-  (or
-   (when (equal (following-char) ?#)
-     (let ((bytecode (read (current-buffer))))
-       (when (byte-code-function-p bytecode)
-         (funcall bytecode))))
-   (apply old-fn args)))
-
-(advice-add (if (progn (require 'json)
-                       (fboundp 'json-parse-buffer))
-                'json-parse-buffer
-              'json-read)
-            :around
-            #'lsp-booster--advice-json-parse)
-
-(defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-  "Prepend emacs-lsp-booster command to lsp CMD."
-  (let ((orig-result (funcall old-fn cmd test?)))
-    (if (and (not test?)                             ;; for check lsp-server-present?
-             (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-             lsp-use-plists
-             (not (functionp 'json-rpc-connection))  ;; native json-rpc
-             (executable-find "emacs-lsp-booster"))
-        (progn
-          (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
-            (setcar orig-result command-from-exec-path))
-          (message "Using emacs-lsp-booster for %s!" orig-result)
-          (cons "emacs-lsp-booster" orig-result))
-      orig-result)))
-
-(advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 
 
 (use-package lsp-mode
   :config
+
+  (defun lsp-booster--advice-json-parse (old-fn &rest args)
+    "Try to parse bytecode instead of json."
+    (or
+     (when (equal (following-char) ?#)
+       (let ((bytecode (read (current-buffer))))
+         (when (byte-code-function-p bytecode)
+           (funcall bytecode))))
+     (apply old-fn args)))
+
+  (advice-add (if (progn (require 'json)
+                         (fboundp 'json-parse-buffer))
+                  'json-parse-buffer
+                'json-read)
+              :around
+              #'lsp-booster--advice-json-parse)
+
+  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+    "Prepend emacs-lsp-booster command to lsp CMD."
+    (let ((orig-result (funcall old-fn cmd test?)))
+      (if (and (not test?)                             ;; for check lsp-server-present?
+               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+               lsp-use-plists
+               (not (functionp 'json-rpc-connection))  ;; native json-rpc
+               (executable-find "emacs-lsp-booster"))
+          (progn
+            (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+              (setcar orig-result command-from-exec-path))
+            (message "Using emacs-lsp-booster for %s!" orig-result)
+            (cons "emacs-lsp-booster" orig-result))
+        orig-result)))
+
+  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+
   (+windows-cfg
    '(("\*lsp-help\**" "\*lsp-install*")
      :regexp t :height 0.35 :position bottom :dedicated nil))
@@ -88,7 +83,7 @@
         lsp-lens-enable t
         ;; eldoc
         lsp-eldoc-enable-hover t
-        lsp-eldoc-render-all nil
+        lsp-eldoc-render-all t
         ;; deno
         lsp-clients-deno-config "./tsconfig.json"
         lsp-clients-deno-enable-code-lens-implementations t
@@ -116,6 +111,7 @@
     c-ts-mode
     c++-ts-mode
     web-mode
+    python-mode
     rjsx-mode)
    . lsp-deferred)
   :general
@@ -157,13 +153,13 @@
         lsp-ui-doc-enable t
         lsp-ui-doc-use-childframe t
         lsp-ui-doc-alignment 'window
-        lsp-ui-doc-max-width 40
-        lsp-ui-doc-max-height 40
+        lsp-ui-doc-max-width 80
+        lsp-ui-doc-max-height 80
         lsp-ui-doc-header nil
         lsp-ui-doc-include-signature t
-        lsp-ui-doc-show-with-cursor nil
+        lsp-ui-doc-show-with-cursor t
         lsp-ui-doc-show-with-mouse t
-        lsp-ui-doc-position 'bottom
+        lsp-ui-doc-position 'at-point
         lsp-ui-doc-delay 0.5
         lsp-ui-imenu-enable t
         lsp-ui-imenu-buffer-position 'right)

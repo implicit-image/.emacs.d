@@ -6,11 +6,11 @@
   (require 'f)
 
   ;;;; Custom global options
-  (setq +base/font-family "FantasqueSansM Nerd Font Mono"
+  (setq +base/font-family "Comic Code"
         +base/font-weight 'semi-light
         +base/font-size (pcase system-type
                           ('windows-nt 15)
-                          (t 17))
+                          (t 15))
         +base/font-spec (font-spec :family +base/font-family
                                    :weight +base/font-weight
                                    :size +base/font-size)
@@ -27,7 +27,7 @@
         read-process-output-max (* 1024 16)
         ;;startup screen
         inhibit-startup-screen t
-        debug-on-error t
+        ;; debug-on-error t
         visible-bell nil
         ring-bell-function 'ignore
         ;; lines

@@ -16,6 +16,9 @@
   :straight (nwscript-mode :type git
                            :host github
                            :branch "master"
-                           :repo "implicit-image/nwscript-mode.el"))
+                           :repo "implicit-image/nwscript-mode.el")
+  :hook
+  (nwscript-mode . (lambda ()
+                     (setq-local case-fold-search nil))))
 
 (provide 'init-nwscript)

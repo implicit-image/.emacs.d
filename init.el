@@ -129,3 +129,4 @@
   (require 'server)
   (when (not (server-running-p))
     (server-start)))
+(put 'narrow-to-region 'disabled nil)
