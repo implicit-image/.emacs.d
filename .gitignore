@@ -1,9 +1,8 @@
 /*
-
 !/.gitignore
 !/early-init.el
 !/init.el
-!/modules
+!/modules/
 !/modules/**
+/modules/**/#*#
 /modules/#*#
-!/local/**
