@@ -20,6 +20,7 @@
         global-corfu-minibuffer nil)
   :hook
   (corfu-mode . (lambda ()
+                  (completion-preview-mode 1)
                   (corfu-echo-mode +1)
                   (corfu-history-mode +1)
                   (corfu-popupinfo-mode +1)))

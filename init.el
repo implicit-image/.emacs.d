@@ -125,13 +125,7 @@
 ;;; social media clients
   (require 'init-socials)
   (require 'init-media)
-<<<<<<< HEAD
 ;;; start server
-=======
-;;; start server\
-
->>>>>>> 3b16efb (update)
   (require 'server)
   (when (not (server-running-p))
     (server-start)))
-(put 'narrow-to-region 'disabled nil)

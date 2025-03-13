@@ -145,7 +145,7 @@
         lsp-ui-sideline-show-diagnostics t
         lsp-ui-sideline-show-code-actions t
         lsp-ui-sideline-ignore-duplicate t
-        lsp-ui-sideline-show-hover t
+        lsp-ui-sideline-show-hover nil
         lsp-ui-sideline-show-symbol t
         lsp-ui-sideline-update-mode 'point
         lsp-ui-sideline-diagnostic-max-line-length 200

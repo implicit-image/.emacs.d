@@ -17,6 +17,9 @@
 (setq +modules/lang-path (concat +modules/path "/lang"))
 (add-to-list 'load-path +modules/lang-path)
 
+(setq +modules/llm-path (concat +modules/path "/llm"))
+(add-to-list 'load-path +modules/llm-path)
+
 (defvar +modules/loaded-list '()
   "List of features loaded from modules.")
 

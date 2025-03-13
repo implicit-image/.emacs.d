@@ -32,6 +32,9 @@
              :host github
              :repo "tninja/aider.el"
              :files ("aider.el"))
+  :init
+  (+windows-cfg '(("*aider")
+                  :position right :width 0.5 :regexp t))
   :config
   (require 'init-aider)
 
@@ -39,6 +42,16 @@
   :general
   (+leader-keys
     "a a" '("[AI]der menu" . aider-transient-menu)))
+
+(use-package aidermacs
+  :config
+  (aidermacs-setup-minor-mode)
+  :custom
+  (aidermacs-use-architect-mode t)
+  (aidermacs-default-model "sonnet")
+  :general
+  (+leader-keys
+    "a A" '("Aidermacs menu." . aidermacs-transient-menu)))
 
 (use-package codeium
   :straight

@@ -86,14 +86,16 @@
   :hook
   ((prog-mode) . symbol-overlay-mode))
 
-;; (use-package combobulate
-;;   :straight (combobulate :type git
-;;                          :host github
-;;                          :repo "mickeynp/combobulate")
-;;   :functions
-;;   (combobulate-mode)
-;;   :custom
-;;   (combobulate-key-prefix "C-c o"))
-
+(use-package combobulate
+  :straight (combobulate :type git
+                         :host github
+                         :nonrecursive t
+                         :repo "mickeynp/combobulate")
+  :functions
+  (combobulate-mode)
+  :custom
+  (combobulate-key-prefix "C-c o")
+  :hook
+  (prog-mode . combobulate-mode))
 
 (provide 'init-edit)

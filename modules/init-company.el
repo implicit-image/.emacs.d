@@ -29,6 +29,9 @@
   (after-init . global-company-mode)
   (global-company-mode . company-quickhelp-mode)
   (global-company-mode . company-tng-mode)
+  (company-mode . (lambda ()
+                    (interactive)
+                    (completion-preview-mode 1)))
   (corfu-mode . (lambda ()
                   (interactive)
                   (when company-mode

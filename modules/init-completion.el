@@ -5,6 +5,14 @@
   :hook
   (minibuffer-mode . visual-line-mode))
 
+(use-package completion-preview
+  :straight nil
+  :general
+  (completion-preview-active-mode-map
+   :states '(insert emacs)
+   "C-n" 'completion-preview-next-candidate
+   "C-p" 'completion-preview-prev-candidate))
+
 (use-package marginalia
   :init
   (setq marginalia-align 'center
