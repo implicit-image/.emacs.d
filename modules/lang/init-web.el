@@ -10,16 +10,15 @@
 (use-package typescript-ts-mode
   :straight nil
   :init
-  (setq typescript-ts-mode-indent-offset 2)
-  :hook
-  (typescript-ts-mode . lsp)
-  (tsx-ts-mode . lsp))
+  (setq typescript-ts-mode-indent-offset 2))
 
 (use-package css-ts-mode
   :straight nil)
 
 (use-package json-ts-mode
-  :mode "\\.json\\'")
+  :mode "\\.json\\'"
+  :init
+  (add-to-list 'auto-mode-alist '("\\.cjs\\'" . json-ts-mode)))
 
 (use-package tide
   :init
@@ -54,7 +53,6 @@
   :straight (lsp-tailwindcss :type git
                              :host github
                              :repo "merrickluo/lsp-tailwindcss")
-  :after lsp-mode
   :init
   (setq lsp-tailwindcss-addon-mode t)
   :config

@@ -4,7 +4,6 @@
   :commands
   lispy-mode
   :init
-  (add-to-list '+editing/evil-mc-incompatible-modes 'lispy-mode)
   (defun +lisp/slurp-or-barf-left (&optional times)
     ""
     (interactive "p")
@@ -29,8 +28,8 @@
   :straight nil
   :init
   (+lookup-set-fn 'buffer
-		  '(emacs-lisp-mode . helpful-at-point)
-		  '(lisp-interaction-mode . helpful-at-point)))
+                  '(emacs-lisp-mode . helpful-at-point)
+                  '(lisp-interaction-mode . helpful-at-point)))
 
 ;; racket
 (use-package racket-mode)
@@ -42,7 +41,7 @@
 (use-package sly
   :init
   (+windows-cfg '((sly-repl-mode)
-		  :position bottom :height 0.3 :noselect nil :dedicated t :stick nil))
+                  :position bottom :height 0.3 :noselect nil :dedicated t :stick nil))
   (setq inferior-lisp-program "sbcl"))
 
 (use-package common-lisp-snippets)
@@ -51,7 +50,7 @@
   :straight nil
   :mode "\\.lisp\\'"
   :hook (common-lisp-mode . (lambda ()
-			      (interactive)
-			      (slime-mode +1))))
+                              (interactive)
+                              (slime-mode +1))))
 
 (provide 'init-lisp)

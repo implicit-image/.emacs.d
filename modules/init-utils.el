@@ -5,6 +5,8 @@
   "Set SYMBOLS to associated values while taking care of setting default options."
   `(dolist (binding ,( symbols))))
 
+(defun +toggle-var (var)
+  (set var (not (symbol-value var))))
 
 (defun +utils/toggle-mode (mode)
   (interactive)
@@ -31,6 +33,18 @@
     (when (yes-or-no-p (string-join `("Delete " ,curr-name " file?")))
       (kill-buffer curr-buf)
       (delete-file curr-name))))
+
+;;;###autoload
+(defun +utils/copy-visited-file ()
+  "Copy the visited file to another location."
+  (interactive)
+  (let* ((curr-buff (current-buffer))
+         (curr-name (buffer-file-name curr-buff)))
+    (if (not curr-name)
+        (message "This buffer is not visiting any file.")
+      (let ((dest (expand-file-name (read-file-name "Destination file: "))))
+        (copy-file curr-name dest)
+        (find-file dest)))))
 
 ;;;###autoload
 (defun +utils/consult-set-font-family ()
@@ -62,6 +76,18 @@
       (widen)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
+(defun +utils/insert-shell-command-output ()
+  "Insert output of shell command as string."
+  (interactive)
+  (insert (shell-command-to-string (concat (read-shell-command "Command: ") " &"))))
+
+(defun +utils/insert-shell-command-output-with-preview ()
+  "Insert output of shell command as string."
+  (interactive)
+  (let ((res (shell-command-to-string (concat (read-shell-command "Command: ")))))
+    (popon-create res `(1 . 1))))
+
+
 
 
 (use-package simple
@@ -72,9 +98,11 @@
 
 (+leader-keys
   "f D" '("Delete current file" . +utils/delete-visited-file)
+  "f C" '("Copy current file" . +utils/copy-visited-file)
   "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
   "t c" '("Colorize color strings" . rainbow-mode)
   "t I" '("Select input method" . set-input-method)
-  "t v" '("Visual line mode" . visual-line-mode))
+  "t v" '("Visual line mode" . visual-line-mode)
+  "i !" '("Shell command" . +utils/insert-shell-command-output))
 
 (provide 'init-utils)

@@ -1,6 +1,3 @@
-(require 'f)
-
-(require 'init-indent)
 
 (require 'init-format)
 
@@ -19,16 +16,16 @@
 (require 'init-compile)
 
 ;;;; in-buffer completion
-
-(require 'init-corfu)
+;; (require 'init-corfu)
 ;;;; custom LSP integration and utils
 (require 'init-lsp)
 
 ;;;; standard elisp lsp client
-(require 'init-lsp-mode)
-
-;;;; fastest lsp client, uses external
-;; (require 'init-lsp-bridge)
+;; (require 'init-lsp-mode)
+(require 'init-cape)
+(require 'init-corfu)
+;; fastest lsp client, uses external
+(require 'init-lsp-bridge)
 
 ;;;; simple LSP client implemented as an emacs module.
 ;; (require 'init-lspce)

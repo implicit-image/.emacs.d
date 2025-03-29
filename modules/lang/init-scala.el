@@ -2,7 +2,7 @@
 
 (use-package scala-mode
   :config
-  (setq scala-indent:step 2
+  (setq scala-indent:step 4
 	scala-indent:align-parameters t))
 
 (use-package sbt-mode)

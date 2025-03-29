@@ -1,5 +1,4 @@
 ;;; -*- lexical-binding: t -*-
-
 (use-package corfu
   :init
   (setq corfu-cycle t
@@ -7,9 +6,9 @@
         corfu-echo-delay '(0.3 . 0.15)
         corfu-auto-delay 0.2
         corfu-preselect 'prompt
-        corfu-preview-current nil
-        corfu-auto nil
-        corfu-popupinfo-delay '(0.3 . 0.15)
+        corfu-preview-current 'insert
+        corfu-auto t
+        corfu-popupinfo-delay '(0.1 . 0.1)
         corfu-left-margin-width 3
         corfu-right-margin-width 0
         corfu-bar-width 0
@@ -23,6 +22,7 @@
                   (completion-preview-mode 1)
                   (corfu-echo-mode +1)
                   (corfu-history-mode +1)
+                  (corfu-terminal-mode +1)
                   (corfu-popupinfo-mode +1)))
   (company-mode . (lambda ()
                     (interactive)
@@ -30,14 +30,14 @@
                       (corfu-mode -1))))
   (lsp-bridge . (lambda ()
                   (corfu-mode -1)))
-  (after-init . global-corfu-mode)
   :general
   (global-map
    :states 'insert
+   "C-TAB" 'completion-at-point
    "C-SPC" 'completion-at-point)
   (corfu-map
    :states 'insert
-   "M-h" 'corfu-info-documentation
+   "M-h" 'corfu-popupinfo-documentation
    "M-g" 'corfu-info-location
    [tab] 'corfu-next
    "<tab>" 'corfu-next
@@ -59,7 +59,6 @@
     (tty-setup . corfu-terminal-mode))
 
   (use-package corfu-doc-terminal
-    :after corfu-terminal
     :straight (corfu-doc-terminal :type git
                                   :repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git")
     :hook

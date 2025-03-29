@@ -7,6 +7,9 @@
 (use-package async
   :config
   (autoload 'dired-async-mode "dired-async.el" nil t)
-  (dired-async-mode 1))
+  :hook
+  (after-init . dired-async-mode))
+
+(use-package ov)
 
 (provide 'init-elisp-libs)

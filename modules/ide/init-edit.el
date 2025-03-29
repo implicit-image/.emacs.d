@@ -1,41 +1,11 @@
 ;;; -*- lexical-binding: t -*-
 
-(defvar +editing/evil-mc-incompatible-modes '()
-  "Modes not compatible with `evil-mc'.")
-
-
-(defvar-local +editing/evil-mc-disabled-modes '()
-  "Temporarily disabled modes in current buffer.")
-
-(defun +editing/evil-mc-turn-off-incompatible-modes ()
-  (interactive)
-  (mapc (lambda (mode-symbol)
-          (when (symbol-value mode-symbol)
-            (progn
-              ;; disable enabled mode
-              (funcall-interactively mode-symbol -1)
-              ;;  save what was disabled
-              (add-to-list '+editing/evil-mc-disabled-modes mode-symbol))))
-        +editing/evil-mc-incompatible-modes))
-
-(defun +editing/evil-mc-turn-on-incompatible-modes ()
-  (interactive)
-  (mapc (lambda (mode-symbol)
-          (funcall-interactively mode-symbol +1))
-        +editing/evil-mc-disabled-modes))
-
 (use-package evil-mc
-  :init
-  (add-hook
-   'evil-mc-before-cursors-created
-   '+editing/evil-mc-turn-off-incompatible-modes)
-  (add-hook
-   'evil-mc-after-cursors-deleted
-   '+editing/evil-mc-turn-on-incompatible-modes)
   :hook
   (after-init . (lambda ()
                   (interactive)
-                  (global-evil-mc-mode 1))))
+                  (global-evil-mc-mode 1)
+                  (add-to-list 'evil-mc-incompatible-minor-modes 'lispy-mode))))
 
 (use-package evil-nerd-commenter
   :general
@@ -47,20 +17,13 @@
   :hook
   (after-init . global-evil-surround-mode))
 
-
-(use-package undo-tree
-  :demand
-  :init
-  (require 'f)
-  (setq undo-tree-history-directory-alist `(("." . ,(f-join user-emacs-directory "undo-tree/"))))
-  (+windows-cfg
-   '((undo-tree-visualizer-mode)
-     :width 0.2 :position right))
+(use-package vundo
   :config
-  (global-undo-tree-mode +1)
+  (+windows-cfg '(()))
+  (vundo-popup-mode 1)
   :general
-  (+leader-keys
-    "o u" '("Undo tree" . undo-tree-visualize)))
+  (global-map
+   "C-x u" '("Visualize undo" . vundo)))
 
 (use-package paren
   :straight nil
@@ -97,5 +60,8 @@
   (combobulate-key-prefix "C-c o")
   :hook
   (prog-mode . combobulate-mode))
+
+(use-package vlf
+  :demand)
 
 (provide 'init-edit)

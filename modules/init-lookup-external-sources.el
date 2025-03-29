@@ -5,9 +5,10 @@
 
 (defmacro +lookup/def-src! (source arglist &rest body)
   ""
+  (declare (indent defun))
   `(progn (defun ,(intern (concat "+lookup--" source-name)) ,arglist
-	    ,body)
-	  (add-to-list +lookup/external-sources ,(intern (concat "+lookup--" source-name)))))
+            ,body)
+          (add-to-list +lookup/external-sources ,(intern (concat "+lookup--" source-name)))))
 
 
 (defun +lookup--consult-handler (source-name)
@@ -16,8 +17,8 @@
 (defun +lookup/external ()
   ""
   (consult--read (mapc 'car '+lookup/external-sources)
-		 :prompt "Source: "
-		 :require-match t
-		 :lookup '+lookup--consult-handler))
+                 :prompt "Source: "
+                 :require-match t
+                 :lookup '+lookup--consult-handler))
 
 (provide 'init-lookup-external-sources)

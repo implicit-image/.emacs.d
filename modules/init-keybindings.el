@@ -11,8 +11,11 @@
   (setq which-key-popup-type 'minibuffer
         which-key-idle-delay 0.1
         which-key-max-display-columns 5
-        which-key-add-column-padding 10
-        which-key-min-display-lines 5)
+	which-key-allow-evil-operators t
+        which-key-add-column-padding 5
+	which-key-show-remaining-keys t
+	which-key-min-display-lines 6
+        which-key-max-display-lines 6)
   ;; display `which-key' window on bottom side of the frame
   (which-key-setup-side-window-bottom)
   :config
@@ -31,18 +34,29 @@
     :states '(normal insert visual emacs)
     :keymaps 'override
     :prefix "SPC"
-    :global-prefix "M-SPC")
+    :non-normal-prefix "M-SPC"
+    :global-prefix "C-c SPC")
+
   ;;;; key definer for local leader keys
   (general-create-definer +local-leader-keys
     :states '(normal insert visual emacs)
     :prefix "SPC m"
-    :global-prefix "M-SPC m")
+    :non-normal-prefix "M-SPC m"
+    :global-prefix "C-c m")
 
   (general-create-definer +mode-keys
     :states '(normal insert visual emacs)
-    :prefix "SPC"
+    :prefix ""
     :global-prefix "M-SPC"
     :non-normal-prefix "C-c")
+
+  ;; (general-create-definer +mode-keys-normal)
+
+  ;; (general-create-definer +mode-keys-visual)
+
+  ;; (general-create-definer +mode-keys-insert)
+
+  ;; (general-create-definer +mode-keys-emacs)
 
   ;;;; key categories
   (+leader-keys

@@ -31,13 +31,16 @@
 (defun +terminal/popup (&optional create-new)
   "Popup an existing terminal or a new one."
   (interactive)
-  (consult--read (mapcar 'buffer-name (+terminal--get-buffers))
-                 :prompt "Popup vterm"
-                 :default 0
-                 :require-match nil
-                 :lookup (lambda (buffer &rest args)
-                           (interactive)
-                           (popwin:popup-buffer buffer))))
+  (let ((buffers (mapcar 'buffer-name (+terminal--get-buffers))))
+    (pcase (length buffers)
+      (1 (popwin:popup-buffer (-first-item buffers)))
+      (_ (consult--read buffers
+                        :prompt "Popup vterm"
+                        :default 0
+                        :require-match nil
+                        :lookup (lambda (buffer &rest args)
+                                  (interactive)
+                                  (popwin:popup-buffer buffer)))))))
 
 ;;;###autoload
 (defun +terminal/open (&optional other-window)

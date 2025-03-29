@@ -80,7 +80,6 @@
 
   (require 'init-treesitter)
   (require 'init-utils)
-
   (require 'init-search)
 
 ;;;; appearance

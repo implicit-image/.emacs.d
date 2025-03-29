@@ -19,6 +19,9 @@
                            :repo "implicit-image/nwscript-mode.el")
   :hook
   (nwscript-mode . (lambda ()
-                     (setq-local case-fold-search nil))))
+                     (setq-local case-fold-search nil)
+		     (lsp-bridge-mode -1)
+		     (require 'init-corfu)
+		     (corfu-mode 1))))
 
 (provide 'init-nwscript)

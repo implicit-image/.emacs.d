@@ -3,9 +3,9 @@
 (defun +lsp/install-servers (&optional force)
   "Install all servers in `+lsp/servers-to-install'")
 
-
-
 (use-package lsp-mode
+  :custom-face
+  (lsp-lens-face ((t (:size ,+base/font-size))))
   :config
 
   (defun lsp-booster--advice-json-parse (old-fn &rest args)
@@ -46,6 +46,7 @@
      :regexp t :height 0.35 :position bottom :dedicated nil))
   (setq lsp-auto-configure t
         ;; lsp-mode features
+        lsp-keymap-prefix "C-c l"
         lsp-enable-symbol-highlighting t
         lsp-enable-xref t
         lsp-enable-imenu t
@@ -69,18 +70,19 @@
         lsp-signature-doc-lines 0
         lsp-signature-cycle t
         ;; completion
-        lsp-completion-show-kind nil
+        lsp-completion-enable t
+        lsp-completion-show-kind t
         lsp-completion-show-detail nil
         lsp-completion-provider :none
-        lsp-completion-enable t
-        lsp-completion-show-label-description nil
+        lsp-completion-show-label-description t
+
         lsp-completion-default-behaviour :replace
         ;; headerline
-        lsp-headerline-breadcrumb-enable t
+        lsp-headerline-breadcrumb-enable nil
         lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols)
         lsp-headerline-breadcrumb-icons-enable nil
         ;; lenses
-        lsp-lens-enable t
+        lsp-lens-enable nil
         ;; eldoc
         lsp-eldoc-enable-hover t
         lsp-eldoc-render-all t
@@ -118,6 +120,9 @@
   (lsp-mode-map
    :states '(normal visual)
    "g r" 'lsp-find-references)
+  (lsp-signature-mode-map
+   :states '(insert emacs)
+   "M-a" 'lsp-signature-toggle-full-docs)
   (lsp-mode-map
    :states '(normal visual)
    :prefix "SPC"
@@ -130,6 +135,9 @@
 
 
 (use-package lsp-ui
+  :custom-face
+  (lsp-ui-peek-footer ((t (:background ,(doom-color 'bg)))))
+  (lsp-ui-peek-header ((t (:background ,(doom-color 'bg)))))
   :config
   (+windows-cfg '((lsp-ui-imenu-mode)
                   :position bottom
@@ -141,7 +149,7 @@
         lsp-ui-peek-peek-height 15
         lsp-ui-peek-show-directory nil
         ;; sideline
-        lsp-ui-sideline-enable t
+        lsp-ui-sideline-enable nil
         lsp-ui-sideline-show-diagnostics t
         lsp-ui-sideline-show-code-actions t
         lsp-ui-sideline-ignore-duplicate t
@@ -153,12 +161,12 @@
         lsp-ui-doc-enable t
         lsp-ui-doc-use-childframe t
         lsp-ui-doc-alignment 'window
-        lsp-ui-doc-max-width 80
-        lsp-ui-doc-max-height 80
+        lsp-ui-doc-max-width 70
+        lsp-ui-doc-max-height 30
         lsp-ui-doc-header nil
         lsp-ui-doc-include-signature t
-        lsp-ui-doc-show-with-cursor t
-        lsp-ui-doc-show-with-mouse t
+        lsp-ui-doc-show-with-cursor nil
+        lsp-ui-doc-show-with-mouse nil
         lsp-ui-doc-position 'at-point
         lsp-ui-doc-delay 0.5
         lsp-ui-imenu-enable t
@@ -167,11 +175,8 @@
   (lsp-mode . (lambda ()
                 (interactive)
                 (lsp-ui-mode +1)
-                (lsp-ui-doc-mode +1)
-                (lsp-ui-sideline-mode +1)))
+                (lsp-ui-doc-mode +1)))
   :general
-  (+leader-keys
-    "t s" '("Sideline" . lsp-ui-sideline-mode))
   (lsp-ui-mode-map
    :states '(normal visual insert)
    "C-c TAB" 'lsp-ui-doc-focus-frame)
@@ -179,9 +184,6 @@
    :states '(normal visual)
    :prefix "SPC"
    :global-prefix "M-SPC"
-   "t s" '("Toggle sideline display" . (lambda ()
-                                         (interactive)
-                                         (lsp-ui-sideline-mode)))
    "s i" '("LSP imenu" . lsp-ui-imenu)
    "c a" '("Apply code actions" . lsp-ui-sideline-apply-code-actions)
    "c p r" '("Peek references" . lsp-ui-peek-find-references)

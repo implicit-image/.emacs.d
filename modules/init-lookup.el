@@ -1,9 +1,9 @@
 ;;; -*- lexical-binding: t -*-
 
-(require 'init-lookup-external-sources)
+;; (require 'init-lookup-external-sources)
 
 ;;;; Alists of lookup functions
-;;;; each list conatins (MAJOR-MODE . LOOKUP-FUNCTION) pairs
+;;;; each list contains (MAJOR-MODE . LOOKUP-FUNCTION) pairs
 ;;;; if current mode is not found, the default lookup mechanism, `+lookup/' is used
 
 (defvar +lookup/buffer-functions-alist '()
@@ -43,6 +43,7 @@
     (cond (lookup-function (funcall-interactively lookup-function))
           ((memq 'lsp-ui-mode local-minor-modes) (lsp-ui-doc-glance))
           ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation))
+          (lspce-mode (lspce-help-at-point))
           (t (message "No documentation function found")))))
 
 ;;;###autoload
@@ -53,6 +54,7 @@
     (cond (lookup-function (funcall-interactively lookup-function))
           ((memq 'lsp-mode local-minor-modes) (lsp-describe-thing-at-point))
           ((memq 'lsp-bridge-mode local-minor-modes) (lsp-bridge-popup-documentation-buffer))
+          (lspce-mode (lspce-help-at-point))
           (t (message "No documentation function found")))))
 
 
@@ -72,32 +74,11 @@
                (lsp-ui-doc-show)
              (lsp-describe-thing-at-point)))
           ((memq 'lsp-bridge-mode local-minor-modes)
-           (lsp-bridge-show-documentation))
+	   (if (display-graphic-p)
+	       (lsp-bridge-popup-documentation)
+	     (lsp-bridge-show-documentation)))
+          (lspce-mode (lspce-help-at-point))
           (t (message "No documentation function found")))))
-
-;;;###autoload
-(defun +lookup/find-references ()
-  "Lookup references of symbol at point.")
-
-;;;###autoload
-(defun +lookup/find-definition ()
-  "Lookup definition of symbol at point.")
-
-;;;###autoload
-(defun +lookup/find-implementation ()
-  "Lookup implementation of symbol at point.")
-
-;;;###autoload
-(defun +lookup/peek-references ()
-  "Peek the references")
-
-;;;###autoload
-(defun +lookup/peek-definition ()
-  "Peek definition of symbol at point.")
-
-;;;###autoload
-(defun +lookup/peek-implementation ()
-  "Peek implementation of symbol at point.")
 
 (defun +lookup/org-get-function ()
   "Get lookup function for language in current source block."
@@ -109,6 +90,16 @@
                       "-mode"))))
         (+lookup--local-documentation block-major-mode))
     (message "Not in org mode")))
+
+(use-package apropos
+  :straight nil
+  :init
+  (+windows-cfg '((apropos-mode)
+                  :height 0.3
+                  :position bottom
+                  :dedicated nil
+                  :stick nil
+                  :noselect nil)))
 
 (use-package dumb-jump
   :init
@@ -147,10 +138,10 @@
 (use-package helpful
   :init
   (+lookup-set-fn 'buffer '(helpful-mode . helpful-at-point))
-  ;;popwin support
+  ;;popwin suppor
   (+windows-cfg
    '((helpful-mode)
-     :height 0.3 :position bottom :dedicated t :stick nil :noselect nil))
+     :height 0.3 :position bottom :dedicated t :stick t :noselect nil))
   :general
   (+leader-keys
     "h :" '("Describe command" . helpful-command)
@@ -160,7 +151,9 @@
     "h s" '("Describe symbol" . helpful-symbol))
   (helpful-mode-map
    :states 'normal
-   "q" 'quit-window))
+   "q" 'quit-window
+   "<esc>" 'quit-window
+   "ESC" 'quit-window))
 
 (use-package dictionary
   :straight nil
@@ -187,24 +180,24 @@
   :init
   (setq eldoc-echo-area-prefer-doc-buffer nil
         eldoc-idle-delay 0.1
-        eldoc-echo-area-use-multiline-p nil))
+        eldoc-echo-area-use-multiline-p 0.2)
+  :hook
+  (prog-mode . eldoc-mode))
 
 (use-package eldoc-box
   :init
-  (setq eldoc-box-clear-with-C-g t)
+  (setq eldoc-box-clear-with-C-g t
+        eldoc-box-offset '(10 10 10)
+        eldoc-box-only-multi-line nil
+        eldoc-box-position-function 'eldoc-box--default-upper-corner-position-function)
   :config
-  (set-face-attribute 'eldoc-box-body nil :inherit 'corfu-default)
-  :hook
-  ((lsp-mode merlin-mode) . eldoc-box-hover-at-point-mode)
-  (emacs-lisp-mode . (lambda ()
-                       (if (display-graphic-p)
-                           (eldoc-box-hover-at-point-mode +1)
-                         (eldoc-mode +1)))))
+  (set-face-attribute 'eldoc-box-body nil :inherit 'corfu-default))
 
 (general-defs
   global-map
   :states '(visual normal)
   "K" '+lookup/documentation
+  "C-k" '+lookup/in-buffer
   help-mode-map
   :states '(normal)
   "q" 'quit-window)

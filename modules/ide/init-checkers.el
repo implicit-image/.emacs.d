@@ -4,7 +4,7 @@
   :custom
   (flycheck-indication-mode nil)
   (flycheck-highlighting-mode 'symbols)
-  (flycheck-idle-check-delay 1.0)
+  (flycheck-idle-change-delay 0.5)
   :init
   (+windows-cfg '((flycheck-mode-major-mode)
                   :position bottom :height 0.3))
@@ -19,14 +19,6 @@
     "]" 'flycheck-next-error
     "[" 'flycheck-previous-error))
 
-(use-package sideline-flycheck
-  :after flycheck
-  :init
-  (setq sideline-backends-right '(sideline-flycheck)
-        sideline-flycheck-max-lines 2)
-  :hook
-  (flycheck-mode . sideline-mode)
-  (flycheck-mode . sideline-flycheck-setup))
 
 (use-package consult-flycheck
   :straight (consult-flycheck :type git
@@ -40,6 +32,8 @@
    "s e" '("Consult errors" . consult-flycheck)))
 
 (use-package flymake)
+
+(use-package flymake-collection)
 
 (use-package flyspell
   :straight nil

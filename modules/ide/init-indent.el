@@ -3,21 +3,13 @@
 
 ;;; Code:
 
-(defvar +indent/tab-jump-delims '(";" ")" "]" "}" ">" "|" "'" "`" "\""))
+(defvar +indent/tab-jump-delims '(?\; ?\) ?\] ?} ?> ?| ?' ?` ?\"))
 
-
-;; (defun +indent/tab-maybe-indent ()
-;;   (interactive)
-;;   (require 'dash)
-;;   (cond ((and (char-after)
-;;               (-contains? +indent/tab-jump-delims (char-to-string (char-after))))
-;;          (forward-char))
-;;         ((and ( (char-after) )
-;;               (char-before))
-;;          (forward-sexp))
-;;         (t (indent-for-tab-command))))
-
-
+(defun +indent/smart-tab ()
+  ""
+  (interactive)
+  (cond ((memq (char-after (point)) +indent/tab-jump-delims) (forward-char))
+        (t (indent-for-tab-command))))
 
 (use-package indent-bars
   :straight (indent-bars :type git
@@ -75,10 +67,5 @@
   ((prog-mode) . whitespace-mode)
   (before-save . whitespace-cleanup)
   (before-save . delete-trailing-whitespace))
-
-;; (general-def
-;;   global-map
-;;   "TAB" '+indent/tab-maybe-indent
-;;   "<tab>"'+indent/tab-maybe-indent)
 
 (provide 'init-indent)

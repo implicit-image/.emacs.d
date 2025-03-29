@@ -8,6 +8,7 @@
 
 (require 'init-org-roam)
 
+
 ;;; local storage management for org mode
 ;; (use-package org-local-store
 ;;   :straight nil

@@ -9,7 +9,7 @@
   :config
   ;; change sudo timeout
   (add-to-list 'tramp-connection-properties '(nil
-					      "session-timeout"
-					      "240")))
+                                              "session-timeout"
+                                              "240")))
 
 (provide 'init-remote)

@@ -10,10 +10,10 @@
 
 (use-package magit-todos)
 
-;; (use-package forge
-;;   :init
-;;   (with-eval-after-load 'magit
-;;     (require 'forge)))
+(use-package forge
+  :init
+  (with-eval-after-load 'magit
+    (require 'forge)))
 
 (use-package consult-gh
   :straight (consult-gh :type git
@@ -47,12 +47,13 @@
   :init
   (setq diff-hl-show-hunk-function 'diff-hl-show-hunk-inline-popup
         diff-hl-draw-borders t
+        diff-hl-update-async t
         diff-hl-margin-symbols-alist '((insert . "+")
                                        (delete . "-")
                                        (change . "=")
                                        (unknown . "?")
                                        (ignored . "i"))
-        diff-hl-reference-revision "HEAD^")
+        diff-hl-reference-revision nil)
   :hook
   (dired-mode . diff-hl-dired-mode)
   (after-init . (lambda ()
@@ -68,5 +69,23 @@
   (diff-hl-show-hunk-map
    :states '(normal visual)
    "]" 'diff-hl-show-hunk-posframe))
+
+(use-package blamer
+  :custom-face
+  (blamer-face ((t (:slant normal))))
+  (blamer-pretty-border-face ((t (:foreground ,(doom-color 'yellow)))))
+  :custom
+  (blamer-idle-time 10)
+  (blamer-min-offset 150)
+  (blamer-view 'overlay-right)
+  :init
+  (setq blamer-type 'margin-overlay
+        blamer-commit-formatter "❌ %s"
+        blamer--overlay-popup-position 'smart)
+  :general
+  (+mode-keys
+    :keymaps 'override
+    :states '(normal visual)
+    "g b" 'blamer-show-commit-info))
 
 (provide 'init-vc)

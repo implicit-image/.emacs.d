@@ -1,13 +1,15 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package lsp-bridge
-  :straight (lsp-bridge :type git
-			:host github
-			:repo "manateelazycat/lsp-bridge"
-			:files ("*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
-			;; do not perform byte compilation or native compilation for lsp-bridge
-			:build (:not compile))
-  ;; :custom-face
+  ;; :straight (lsp-bridge :type git
+  ;;                       :host github
+  ;;                       :repo "manateelazycat/lsp-bridge"
+  ;;                       :files ("*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+  ;;                       ;; do not perform byte compilation or native compilation for lsp-bridge
+  ;;                       :build (:not compile))
+  ;; NOTE: lsp-bridge installed with home-manager
+  :straight nil
+  ;; ;; :custom-face
   ;; (lsp-bridge-semantic-tokens-variable-face ((t (:family "Iosevka Comfy" :box (:color "#FFDD33" :line-width -1 :style nil)))))
   :init
   (+windows-cfg
@@ -15,32 +17,24 @@
      :regexp t :height 0.3 :position bottom :dedicated t :noselect nil))
   :config
   (setq lsp-bridge-enable-log t
-	lsp-bridge-complete-manually nil
-	lsp-bridge-enable-inlay-hint t
-	lsp-bridge-enable-hover-diagnostic t
-	lsp-bridge-enable-diagnostics t
-	lsp-bridge-enable-completion-in-minibuffer t
-	lsp-bridge-diagnostic-enable-overlays t
-	lsp-bridge-signature-show-function #'lsp-bridge-signature-show-with-frame
-	lsp-bridge-c-lsp-server "ccls"
-	acm-enable-icon t
-	acm-enable-yas t
-	acm-enable-tempel t
-	acm-enable-path t
-	acm-enable-capf t
-	acm-terminal-doc-max-width 50
-	acm-terminal-max-width 30)
+        lsp-bridge-complete-manually nil
+        lsp-bridge-enable-inlay-hint t
+        lsp-bridge-enable-hover-diagnostic t
+	lsp-bridge-symbols-enable-which-func t
+	lsp-bridge-enable-with-tramp t
+        lsp-bridge-enable-diagnostics t
+        lsp-bridge-enable-completion-in-minibuffer t
+        lsp-bridge-diagnostic-enable-overlays t
+	lsp-bridge-org-babel-lang-list nil
+	lsp-bridge-enable-signature-help t
+        lsp-bridge-signature-show-function #'lsp-bridge-signature-show-with-frame
+	lsp-bridge-signature-show-with-frame-position 'point
+        lsp-bridge-c-lsp-server "ccls"
+	lsp-bridge-nix-lsp-server "nixd"
+	lsp-bridge-python-lsp-server "basedpyright")
+  :hook
+  (after-init . global-lsp-bridge-mode)
   :general
-  (acm-mode-map
-   :states 'insert
-   "<tab>" 'acm-select-next
-   "M-j" 'acm-select-next
-   "<backtab>" 'acm-select-prev
-   "M-k" 'acm-select-prev
-   "C-<tab>" 'acm-complete
-   "C-f" 'acm-filter
-   "M-d" 'acm-doc-toggle
-   "<escape>" 'acm-hide)
   (lsp-bridge-mode-map
    :states '(insert)
    "C-SPC" 'lsp-bridge-popup-complete-menu)
@@ -72,6 +66,32 @@
    :states '(normal visual)
    "q" 'quit-window))
 
+(use-package acm
+  :straight nil
+  :init
+  (setq acm-enable-capf t
+	acm-enable-yas t
+	acm-enable-path t
+	;; acm-enable-elisp t
+	acm-enable-doc t
+	acm-enable-org-roam t
+	acm-enable-preview t
+	acm-backend-lsp-candidate-min-length 2)
+  :config
+  (add-to-list 'acm-backend-capf-mode-list 'org-mode)
+  (add-to-list 'acm-backend-capf-mode-list 'nwscript-mode)
+  :general
+  (acm-mode-map
+   :states 'insert
+   "<tab>" 'acm-select-next
+   "M-j" 'acm-select-next
+   "<backtab>" 'acm-select-prev
+   "M-k" 'acm-select-prev
+   "C-<tab>" 'acm-complete
+   "C-f" 'acm-filte;; r
+   "M-d" 'acm-doc-toggle
+   "<escape>" 'normal-mode
+   "C-SPC" 'acm-hide))
 
 (use-package popon)
 
@@ -80,11 +100,11 @@
   (use-package acm-terminal
     :custom-face
     (acm-terminal-default-face ((t (:background "#343434"))))
-    ;(acm-terminal-select-face ((t (:background "#111111" :box t))))
+                                        ;(acm-terminal-select-face ((t (:background "#111111" :box t))))
     :straight (acm-terminal :host github
-			    :repo "twlz0ne/acm-terminal")
+                            :repo "twlz0ne/acm-terminal")
     :hook
     (lsp-bridge-mode . (lambda ()
-			 (require 'acm-terminal)))))
+                         (require 'acm-terminal)))))
 
 (provide 'init-lsp-bridge)

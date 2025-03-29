@@ -28,6 +28,7 @@
 (use-package ellama)
 
 (use-package aider
+  :if nil
   :straight (aider
              :host github
              :repo "tninja/aider.el"
@@ -44,6 +45,10 @@
     "a a" '("[AI]der menu" . aider-transient-menu)))
 
 (use-package aidermacs
+  :straight (aidermacs :type git
+                       :host github
+                       :branch "main"
+                       :repo "MatthewZMD/aidermacs")
   :config
   (aidermacs-setup-minor-mode)
   :custom

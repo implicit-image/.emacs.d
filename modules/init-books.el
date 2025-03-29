@@ -124,8 +124,13 @@
                         (calibredb-candidates))
                        :prompt "File to annotate: "
                        :lookup (lambda (cand &rest args)
-                                 (org-set-property org-noter-property-doc-file
-                                                   (string-trim-left cand ".*\:file ")))))
+                                 (let* ((path (string-trim-left cand ".*\:file "))
+                                        (extensions (s-split "," (f-ext path)))
+                                        (path-sans-ext ())
+                                        (file (if (length= extensions 1)
+                                                  path
+                                                (completing-read "Choose file:" (mapcar (lambda (ext) (concat)))))))
+                                   (org-set-property org-noter-property-doc-file file)))))
       (save-buffer)
       (org-noter)))
   :general

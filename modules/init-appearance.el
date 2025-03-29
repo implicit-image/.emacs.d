@@ -40,18 +40,6 @@
 
 (use-package ef-themes)
 
-;; (use-package solaire-mode
-;;   :demand
-;;   :custom-face
-;;   (solaire-default-face ((t (:background ,(doom-darken 'solaire-default-face 0.1)))))
-;;   :config
-;;   (defun +colors/load-theme (theme)
-;;     ""
-;;     (interactive)
-;;     (require 'solaire-mode)
-;;     (load-theme theme t)
-;;     (solaire-global-mode +1)))
-
 (use-package all-the-icons
   :if (display-graphic-p))
 
@@ -78,8 +66,8 @@
           ("TODO" . ,(doom-color 'green))
           ("NEXT" . "#dca3a3")
           ("THEM" . "#dc8cc3")
-          ("PROG" . ,(doom-color 'teal))
-          ("OKAY" . ,(doom-color 'teal))
+          ("PROG" . ,(doom-color 'dark-blue))
+          ("OKAY" . ,(doom-color 'blue))
           ("DONT" . "#5f7f5f")
           ("FAIL" . compilation-error)
           ("DONE" . "#afd8af")

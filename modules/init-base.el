@@ -9,8 +9,8 @@
   (setq +base/font-family "Comic Code"
         +base/font-weight 'semi-light
         +base/font-size (pcase system-type
-                          ('windows-nt 15)
-                          (t 15))
+                          ('windows-nt 17)
+                          (t 17))
         +base/font-spec (font-spec :family +base/font-family
                                    :weight +base/font-weight
                                    :size +base/font-size)
@@ -82,7 +82,10 @@
   :hook
   ;; truncate lines in modes derived from prog-mode
   ;; better to see all of the code
-  (prog-mode . (lambda () (toggle-truncate-lines 1)))
+  (prog-mode . (lambda ()
+                 (interactive)
+                 (toggle-truncate-lines 1)
+                 (visual-wrap-prefix-mode 1)))
   ;; display line numbers in text-editing modes
   ((prog-mode
     markdown-mode
@@ -93,7 +96,8 @@
     text-mode
     conf-mode
     tuareg-mode)
-   . display-line-numbers-mode))
+   . display-line-numbers-mode)
+  (window-setup . toggle-frame-fullscreen))
 
 ;; load $PATH from shell
 (use-package exec-path-from-shell

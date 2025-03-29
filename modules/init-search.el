@@ -15,7 +15,7 @@
   :straight nil
   :config
   (setq imenu-auto-rescan t
-        imenu-use-popup-menu t))
+        imenu-use-popup-menu 'on-mouse))
 
 (use-package isearch
   :straight nil)

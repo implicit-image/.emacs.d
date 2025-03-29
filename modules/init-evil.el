@@ -8,7 +8,7 @@
   :init
   (setq evil-want-integration t
         evil-want-keybinding nil
-        evil-undo-system 'undo-tree
+        evil-undo-system 'undo-redo
         evil-lookup-func 'woman)
   :config
   (evil-mode 1)

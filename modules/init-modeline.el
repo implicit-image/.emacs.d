@@ -1,8 +1,8 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package evil-anzu
-  :config
-  (global-anzu-mode +1)
+  :hook
+  (after-init . global-anzu-mode)
   :general
   (+leader-keys
     "c R" '("Rename" . anzu-query-replace)
@@ -15,6 +15,7 @@
     calibredb-edit-annotation-mode
     calibredb-show-mode
     helpful-mode
+    fundamental-mode
     help-mode)
    . hide-mode-line-mode))
 
@@ -23,6 +24,8 @@
   (window-setup . (lambda ()
                     (interactive)
                     (require 'mood-line)
+                    (require 'mood-line-segment-checker)
+                    (require 'mood-line-segment-vc)
                     (setq mood-line-format
                           (mood-line-defformat
                            :left
@@ -33,12 +36,12 @@
                              . "/")
                             ((mood-line-segment-buffer-status) . ":")
                             ((mood-line-segment-buffer-name) . " ")
-                            ((format-mode-line "L%l") . " ")
+                            ((format-mode-line "L%l:%C") . " ")
                             ((format-mode-line "%o") . " ")
                             ((mood-line-segment-multiple-cursors) . ""))
                            :right
                            (((mood-line-segment-misc-info) . " ")
-                            ;; ((mood-line-segment-checker) . " ")
+                            ((mood-line-segment-checker) . " ")
                             ((mood-line-segment-vc) . " ")
                             ((mood-line-segment-major-mode) . " "))))
                     (mood-line-mode 1))))
