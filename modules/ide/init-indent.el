@@ -48,10 +48,15 @@
   :custom-face
   (whitespace-space ((t (:foreground "#4a4a4a"))))
   (whitespace-empty ((t (:foreground "#4a4a4a"))))
-  :config
-  ;; disable indenting with tabs
+  :init
+  (defun +whitespace-toggle-style ()
+    "Toggle whitespace mode display style."
+    (if (display-graphic-p)
+        (setq whitespace-style '(face indentation tabs spaces tab-mark space-mark))
+      (setq whitespace-style '(face line spaces tabs))))
+
   (setq-default indent-tabs-mode nil)
-  (setq whitespace-style '(face indentation tabs spaces tab-mark)
+  (setq whitespace-style '(face indentation tabs spaces tab-mark space-mark)
         whitespace-display-mappings '((space-mark 32
                                                   [183]
                                                   [46])
@@ -64,8 +69,9 @@
                                                 [187 9]
                                                 [92 9])))
   :hook
-  ((prog-mode) . whitespace-mode)
+  ((prog-mode emacs-lisp-mode nwscript-mode) . whitespace-mode)
   (before-save . whitespace-cleanup)
+  (whitespace-mode . +whitespace-toggle-style)
   (before-save . delete-trailing-whitespace))
 
 (provide 'init-indent)

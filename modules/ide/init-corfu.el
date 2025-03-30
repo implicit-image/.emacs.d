@@ -117,5 +117,4 @@
   :hook
   (global-corfu-mode . (lambda ()
                          (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))))
-
 (provide 'init-corfu)

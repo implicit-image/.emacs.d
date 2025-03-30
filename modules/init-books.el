@@ -161,6 +161,9 @@
   :init
   (evil-set-initial-state 'pdf-view-mode 'normal)
   (add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
+  (setq pdf-outline-imenu-use-flat-menus t)
+  (+windows-cfg '((pdf-outline-buffer-mode)
+		  :position left :width 0.2 :noselect nil :stick t :dedicated nil))
   :general
   (pdf-view-mode-map
    :states '(normal)
@@ -173,9 +176,9 @@
    "C-=" 'pdf-view-center-in-window
    "q" 'kill-this-buffer))
 
-
 (use-package nov
-  :init (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+  :init
+  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 
 (use-package djvu)
 

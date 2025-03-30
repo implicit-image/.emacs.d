@@ -20,8 +20,6 @@
   :hook
   (nwscript-mode . (lambda ()
                      (setq-local case-fold-search nil)
-		     (lsp-bridge-mode -1)
-		     (require 'init-corfu)
-		     (corfu-mode 1))))
+		     (indent-tabs-mode -1))))
 
 (provide 'init-nwscript)

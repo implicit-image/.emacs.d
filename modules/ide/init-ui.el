@@ -26,7 +26,6 @@
   :init
   (setq flycheck-overlay-use-theme-colors t
         flycheck-overlay-virtual-line-type 'line-no-arrow
-        sfs 2
         flycheck-overlay-show-at-eol nil
         flycheck-overlay-hide-checker-name t
         flycheck-overlay-show-virtual-line t
@@ -92,16 +91,16 @@
 
 (use-package which-func
   :custom-face
-  (header-line ((t (:background ,(doom-color 'bg-alt)))))
+  (header-line ((t (:background ,(doom-color 'bg-alt) :inherit nil))))
   :straight nil
   :init
   (setq which-func-display 'header
-	which-func-update-delay 0.2
-	which-func-format '("     ["
-			    (:propertize which-func-current
-					 face which-func mouse-face mode-line-highlight help-echo
-					 "Current function\nmouse-1: go to beginning\nmouse-2: toggle rest visibility\nmouse-3: go to end")
-			    "]"))
+        which-func-update-delay 0.2
+        which-func-format '("     "
+                            (:propertize which-func-current
+                                         face which-func mouse-face mode-line-highlight help-echo
+                                         "Current function\nmouse-1: go to beginning\nmouse-2: toggle rest visibility\nmouse-3: go to end")
+                            ""))
   (defun +which-func--setup ()
     (which-function-mode))
   :hook

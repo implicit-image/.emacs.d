@@ -19,7 +19,6 @@
 
 (use-package vundo
   :config
-  (+windows-cfg '(()))
   (vundo-popup-mode 1)
   :general
   (global-map

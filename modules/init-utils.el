@@ -87,8 +87,11 @@
   (let ((res (shell-command-to-string (concat (read-shell-command "Command: ")))))
     (popon-create res `(1 . 1))))
 
-
-
+(defun +default-directory ()
+  "Get a reasonable guess at a default directory."
+  (cond ((bound-and-true-p projectile-project-root) (projectile-project-root))
+        ((bound-and-true-p project-root) (project-root))
+        (t default-directory)))
 
 (use-package simple
   :straight nil

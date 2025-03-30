@@ -141,7 +141,7 @@
   ;;popwin suppor
   (+windows-cfg
    '((helpful-mode)
-     :height 0.3 :position bottom :dedicated t :stick t :noselect nil))
+     :height 0.3 :position bottom :dedicated nil :stick t :noselect nil))
   :general
   (+leader-keys
     "h :" '("Describe command" . helpful-command)

@@ -110,6 +110,7 @@
                  :repo "eval-exec/eee.el"
                  :files (:defaults "*.el" "*.sh"))
   :config
+  (require 'exec-path-from-shell)
   (setq ee-terminal-command (exec-path-from-shell-getenv "TERM")))
 
 (+leader-keys

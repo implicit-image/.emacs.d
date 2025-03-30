@@ -34,6 +34,10 @@
 	lsp-bridge-python-lsp-server "basedpyright")
   :hook
   (after-init . global-lsp-bridge-mode)
+  (lsp-bridge-mode . (lambda ()
+		       (interactive)
+		       (indent-tabs-mode -1)
+		       (apheleia-mode -1)))
   :general
   (lsp-bridge-mode-map
    :states '(insert)
@@ -88,9 +92,9 @@
    "<backtab>" 'acm-select-prev
    "M-k" 'acm-select-prev
    "C-<tab>" 'acm-complete
-   "C-f" 'acm-filte;; r
+   "C-f" 'acm-filter
    "M-d" 'acm-doc-toggle
-   "<escape>" 'normal-mode
+   "<escape>" 'evil-normal-state
    "C-SPC" 'acm-hide))
 
 (use-package popon)
@@ -100,11 +104,20 @@
   (use-package acm-terminal
     :custom-face
     (acm-terminal-default-face ((t (:background "#343434"))))
-                                        ;(acm-terminal-select-face ((t (:background "#111111" :box t))))
+					;(acm-terminal-select-face ((t (:background "#111111" :box t))))
     :straight (acm-terminal :host github
-                            :repo "twlz0ne/acm-terminal")
+			    :repo "twlz0ne/acm-terminal")
     :hook
     (lsp-bridge-mode . (lambda ()
-                         (require 'acm-terminal)))))
+			 (require 'acm-terminal)))
+    :general
+    (acm-mode-map
+     :states 'insert
+     "<tab>" 'acm-select-next
+     "TAB" 'acm-select-next
+     [tab] 'acm-select-next
+     "<backtab>" 'acm-select-prev
+     "S-TAB" 'acm-select-prev
+     [backtab] 'acm-select-prev)))
 
 (provide 'init-lsp-bridge)

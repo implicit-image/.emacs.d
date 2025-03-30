@@ -7,7 +7,8 @@
   "Setup faces for tty display."
   (progn (custom-set-faces `(vertical-border ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg-alt) :width narrow))))
 			   `(border ((t (:background ,(doom-color  'bg) :foreground ,(doom-color 'fg) :width narrow))))
-			   `(internal-border ((t (:background ,(doom-color 'bg) :width narrow)))))
+			   `(internal-border ((t (:background ,(doom-color 'bg) :width narrow))))
+                           `(whitespace-space ((t (:foreground ,(doom-color 'bg))))))
 	 (set-display-table-slot standard-display-table
 				 'vertical-border
 				 (make-glyph-code ?┃))))

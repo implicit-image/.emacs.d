@@ -9,6 +9,8 @@
 ;;;; inserting and managing snippets
 (require 'init-snippets)
 
+(require 'init-indent)
+
 ;;;; debugging code
 (require 'init-debug)
 
@@ -24,7 +26,7 @@
 ;; (require 'init-lsp-mode)
 (require 'init-cape)
 (require 'init-corfu)
-;; fastest lsp client, uses external
+;; fasss lsp client, uses external
 (require 'init-lsp-bridge)
 
 ;;;; simple LSP client implemented as an emacs module.
