@@ -1,4 +1,17 @@
 ;;; -*- lexical-binding: t -*-
+
+(defvar +auto-completion-modes '())
+
+(defun +auto-completion-setup ()
+  (when (memq major-mode +auto-completion-modes)
+    (when (bound-and-true-p corfu-mode) (setq-local corfu-auto t))
+    (when (bound-and-true-p company-mode) (setq-local company-idle-delay 0.1))
+    (when (bound-and-true-p lsp-bridge-mode) (setq-local lsp-bridge-complete-manually nil))))
+
+(add-hook 'lsp-bridge-mode-hook '+auto-completion-setup)
+(add-hook 'corfu-mode-hook '+auto-completion-setup)
+(add-hook 'company-mode-hook '+auto-completion-setup)
+
 (use-package corfu
   :init
   (setq corfu-cycle t
@@ -7,7 +20,7 @@
         corfu-auto-delay 0.2
         corfu-preselect 'prompt
         corfu-preview-current 'insert
-        corfu-auto t
+        corfu-auto nil
         corfu-popupinfo-delay '(0.1 . 0.1)
         corfu-left-margin-width 3
         corfu-right-margin-width 0
@@ -17,16 +30,19 @@
         corfu-quit-no-match t
         corfu-on-exact-match 'insert
         global-corfu-minibuffer nil)
+  (defun +corfu--setup ()
+    (interactive)
+    (completion-preview-mode 1)
+    (corfu-echo-mode +1)
+    (corfu-history-mode +1)
+    (corfu-terminal-mode +1)
+    (corfu-popupinfo-mode +1))
   :hook
-  (corfu-mode . (lambda ()
-                  (completion-preview-mode 1)
-                  (corfu-echo-mode +1)
-                  (corfu-history-mode +1)
-                  (corfu-terminal-mode +1)
-                  (corfu-popupinfo-mode +1)))
+  (nwscript-mode . corfu-mode)
+  (corfu-mode . +corfu--setup)
   (company-mode . (lambda ()
                     (interactive)
-                    (when corfu-mode
+                    (when (bound-and-true-p corfu-mode)
                       (corfu-mode -1))))
   (lsp-bridge . (lambda ()
                   (corfu-mode -1)))

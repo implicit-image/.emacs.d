@@ -32,6 +32,17 @@
       (doom-themes-treemacs-config)
       (doom-themes-org-config)
       (load-theme +base/theme t)))
+  :config
+
+  (defmacro +contrast-color! (color)
+    "Return a color contrasting well with COLOR."
+    `(apply
+      ,(if (< (color-distance color "#000000") 180000)
+           'doom-lighten
+         'doom-darken)
+      color
+      0.3
+      nil))
   :hook
   (after-init . +colors/setup-doom-themes)
   (tty-setup . (lambda ()
@@ -39,6 +50,10 @@
                  (load-theme +base/theme t))))
 
 (use-package ef-themes)
+
+(use-package solaire-mode
+  :hook
+  (after-init . solaire-global-mode))
 
 (use-package all-the-icons
   :if (display-graphic-p))

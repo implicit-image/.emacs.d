@@ -100,22 +100,6 @@
         ;; typescript
         lsp-typescript-suggest-auto-imports t
         lsp-typescript-auto-closing-tags t)
-  :hook
-  ((rust-ts-mode
-    gleam-ts-mode
-    idris-mode
-    tsx-ts-mode
-    ocaml-ts-mode
-    css-ts-mode
-    css-mode
-    typescript-ts-mode
-    js-ts-mode
-    c-ts-mode
-    c++-ts-mode
-    web-mode
-    python-mode
-    rjsx-mode)
-   . lsp-deferred)
   :general
   (lsp-mode-map
    :states '(normal visual)

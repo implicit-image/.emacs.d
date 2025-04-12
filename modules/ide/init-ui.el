@@ -96,7 +96,7 @@
   :init
   (setq which-func-display 'header
         which-func-update-delay 0.2
-        which-func-format '("     "
+        which-func-format '("      "
                             (:propertize which-func-current
                                          face which-func mouse-face mode-line-highlight help-echo
                                          "Current function\nmouse-1: go to beginning\nmouse-2: toggle rest visibility\nmouse-3: go to end")

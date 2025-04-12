@@ -20,24 +20,23 @@
         lsp-bridge-complete-manually nil
         lsp-bridge-enable-inlay-hint t
         lsp-bridge-enable-hover-diagnostic t
-	lsp-bridge-symbols-enable-which-func t
-	lsp-bridge-enable-with-tramp t
+        lsp-bridge-symbols-enable-which-func t
+        lsp-bridge-enable-with-tramp t
         lsp-bridge-enable-diagnostics t
         lsp-bridge-enable-completion-in-minibuffer t
         lsp-bridge-diagnostic-enable-overlays t
-	lsp-bridge-org-babel-lang-list nil
-	lsp-bridge-enable-signature-help t
+        lsp-bridge-org-babel-lang-list nil
+        lsp-bridge-enable-signature-help t
         lsp-bridge-signature-show-function #'lsp-bridge-signature-show-with-frame
-	lsp-bridge-signature-show-with-frame-position 'point
+        lsp-bridge-signature-show-with-frame-position 'point
         lsp-bridge-c-lsp-server "ccls"
-	lsp-bridge-nix-lsp-server "nixd"
-	lsp-bridge-python-lsp-server "basedpyright")
+        lsp-bridge-nix-lsp-server "nixd"
+        lsp-bridge-python-lsp-server "basedpyright")
   :hook
-  (after-init . global-lsp-bridge-mode)
   (lsp-bridge-mode . (lambda ()
-		       (interactive)
-		       (indent-tabs-mode -1)
-		       (apheleia-mode -1)))
+                       (interactive)
+                       (indent-tabs-mode -1)
+                       (apheleia-mode -1)))
   :general
   (lsp-bridge-mode-map
    :states '(insert)
@@ -74,13 +73,13 @@
   :straight nil
   :init
   (setq acm-enable-capf t
-	acm-enable-yas t
-	acm-enable-path t
-	;; acm-enable-elisp t
-	acm-enable-doc t
-	acm-enable-org-roam t
-	acm-enable-preview t
-	acm-backend-lsp-candidate-min-length 2)
+        acm-enable-yas t
+        acm-enable-path t
+        ;; acm-enable-elisp t
+        acm-enable-doc t
+        acm-enable-org-roam t
+        acm-enable-preview t
+        acm-backend-lsp-candidate-min-length 2)
   :config
   (add-to-list 'acm-backend-capf-mode-list 'org-mode)
   (add-to-list 'acm-backend-capf-mode-list 'nwscript-mode)
@@ -104,12 +103,12 @@
   (use-package acm-terminal
     :custom-face
     (acm-terminal-default-face ((t (:background "#343434"))))
-					;(acm-terminal-select-face ((t (:background "#111111" :box t))))
+                                        ;(acm-terminal-select-face ((t (:background "#111111" :box t))))
     :straight (acm-terminal :host github
-			    :repo "twlz0ne/acm-terminal")
+                            :repo "twlz0ne/acm-terminal")
     :hook
     (lsp-bridge-mode . (lambda ()
-			 (require 'acm-terminal)))
+                         (require 'acm-terminal)))
     :general
     (acm-mode-map
      :states 'insert

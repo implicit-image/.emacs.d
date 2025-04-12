@@ -30,15 +30,14 @@
    :states '(insert emacs)
    "C-SPC" 'company-complete)
   :hook
-  (after-init . global-company-mode)
-  (global-company-mode . company-quickhelp-mode)
   (global-company-mode . company-tng-mode)
   (company-mode . (lambda ()
                     (interactive)
+                    (company-quickhelp-local-mode 1)
                     (completion-preview-mode 1)))
   (corfu-mode . (lambda ()
                   (interactive)
-                  (when company-mode
+                  (when (bound-and-true-p company-mode)
                     (company-mode -1)))))
 
 (provide 'init-company)

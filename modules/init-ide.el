@@ -26,8 +26,9 @@
 ;; (require 'init-lsp-mode)
 (require 'init-cape)
 (require 'init-corfu)
-;; fasss lsp client, uses external
+(require 'init-company)
 (require 'init-lsp-bridge)
+(require 'init-lsp-mode)
 
 ;;;; simple LSP client implemented as an emacs module.
 ;; (require 'init-lspce)

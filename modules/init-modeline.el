@@ -3,6 +3,8 @@
 (use-package evil-anzu
   :hook
   (after-init . global-anzu-mode)
+  :init
+  (setq anzu-search-threshold 1500)
   :general
   (+leader-keys
     "c R" '("Rename" . anzu-query-replace)

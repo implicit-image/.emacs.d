@@ -65,39 +65,10 @@
   (defvar +completion/consult-prev-plist nil
     "alist of last recorder picker queries.")
 
-  ;; (defvar +completion/last-consult nil
-  ;;   "Last consult query.")
-
-  ;; (defun +completion/save-consult-query (table &rest args)
-  ;;   "Save consult info."
-  ;;   (interactive)
-  ;;   (plist-put +completion/consult-prev-plist
-  ;;              (plist-get arg :category))
-  ;;   (setq +completion/last-consult (plist-get args :category)
-  ;;         +completion/last-consult-list table))
-
-  ;; (defun +completion/show-last-consult ()
-  ;;   "Bring up last consult query."
-  ;;   (interactive)
-  ;;   )
-
-  ;; (advice-add 'consult--read :before '+completion/save-consult-query)
-
   (consult-customize
    consult-grep consult-ripgrep consult-git-grep consult-line-multi
    :initial "")
   :general
-  (org-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :global-prefix "M-SPC"
-   "s i" '("Org heading" . consult-org-heading)
-   "s o" '("Outline" . consult-outline))
-  (markdown-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :global-prefix "M-SPC"
-   "s o" '("Outline" . consult-outline))
   (+leader-keys
     "m :" '("Run active mode command" . consult-mode-command)
     "/" '("Grep directory" . consult-ripgrep)
@@ -112,13 +83,10 @@
     ;; search
     "s b" '("Search buffer" . consult-line)
     "s B" '("Search all buffers" . consult-line-multi)
-    "t m" '("Toggle minor mode" . consult-minor-mode-menu))
-  (prog-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :global-prefix "M-SPC"
    "s i" '("Imenu" . consult-imenu)
-   "s I" '("imenu everywhere" . consult-imenu-multi)))
+   "s I" '("imenu everywhere" . consult-imenu-multi)
+   "s o" '("Imenu outline" . consult-outline)
+   "t m" '("Toggle minor mode" . consult-minor-mode-menu)))
 
 (use-package embark-consult
   :hook

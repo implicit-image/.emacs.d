@@ -20,6 +20,9 @@
    "<remap> <evil-window-next>" 'ace-window
    "C-x w" 'ace-window))
 
+(use-package window
+  :straight nil)
+
 (use-package popwin
   :init
   (defun +windows-cfg (&rest popwin-cfg-forms)
@@ -46,5 +49,24 @@
   (after-init . (lambda ()
                   (interactive)
                   (popwin-mode 1))))
+
+(use-package popper
+  :init
+  (defun +popper-setup ()
+    "Set up popper"
+    (popper-mode 1)
+    (popper-echo-mode 1))
+
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          help-mode
+          compilation-mode))
+  :hook
+  (after-init . +popper-setup)
+  :general
+  (+leader-keys
+    "b TAB" '("Popup buffers" . popper-cycle)
+    "b <tab>" '("Popup buffers" . popper-cycle)))
 
 (provide 'init-windows)

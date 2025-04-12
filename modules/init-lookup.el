@@ -74,9 +74,9 @@
                (lsp-ui-doc-show)
              (lsp-describe-thing-at-point)))
           ((memq 'lsp-bridge-mode local-minor-modes)
-	   (if (display-graphic-p)
-	       (lsp-bridge-popup-documentation)
-	     (lsp-bridge-show-documentation)))
+           (if (display-graphic-p)
+               (lsp-bridge-popup-documentation)
+             (lsp-bridge-show-documentation)))
           (lspce-mode (lspce-help-at-point))
           (t (message "No documentation function found")))))
 
@@ -94,6 +94,7 @@
 (use-package apropos
   :straight nil
   :init
+  (add-to-list 'popper-reference-buffers 'apropos-mode)
   (+windows-cfg '((apropos-mode)
                   :height 0.3
                   :position bottom
@@ -138,10 +139,12 @@
 (use-package helpful
   :init
   (+lookup-set-fn 'buffer '(helpful-mode . helpful-at-point))
+  (add-to-list 'popper-reference-buffers 'helpful-mode)
   ;;popwin suppor
   (+windows-cfg
    '((helpful-mode)
-     :height 0.3 :position bottom :dedicated nil :stick t :noselect nil))
+     :height 0.3 :position bottom :dedicated t :stick nil :noselect nil))
+  ;; (setq helpful-switch-buffer-function )
   :general
   (+leader-keys
     "h :" '("Describe command" . helpful-command)
@@ -178,20 +181,32 @@
 
 (use-package eldoc
   :init
-  (setq eldoc-echo-area-prefer-doc-buffer nil
-        eldoc-idle-delay 0.1
+
+  (setq eldoc-echo-area-prefer-doc-buffer 'maybe
+        eldoc-idle-delay 0.05
         eldoc-echo-area-use-multiline-p 0.2)
+
+
   :hook
   (prog-mode . eldoc-mode))
 
 (use-package eldoc-box
   :init
+  (defvar +eldoc-minibuffer-display-modes '())
+
+
+  (defun +eldoc--setup ()
+    (interactive)
+    (when (not (memq major-mode +eldoc-minibuffer-display-modes))
+      (eldoc-box-hover-mode)))
+
   (setq eldoc-box-clear-with-C-g t
-        eldoc-box-offset '(10 10 10)
         eldoc-box-only-multi-line nil
-        eldoc-box-position-function 'eldoc-box--default-upper-corner-position-function)
+        eldoc-box-position-function 'eldoc-box--default-at-point-position-function)
   :config
-  (set-face-attribute 'eldoc-box-body nil :inherit 'corfu-default))
+  (set-face-attribute 'eldoc-box-body nil :inherit 'corfu-default)
+  :hook
+  (eldoc-mode . +eldoc--setup))
 
 (general-defs
   global-map

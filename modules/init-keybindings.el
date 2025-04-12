@@ -11,10 +11,10 @@
   (setq which-key-popup-type 'minibuffer
         which-key-idle-delay 0.1
         which-key-max-display-columns 5
-	which-key-allow-evil-operators t
+        which-key-allow-evil-operators t
         which-key-add-column-padding 5
-	which-key-show-remaining-keys t
-	which-key-min-display-lines 6
+        which-key-show-remaining-keys t
+        which-key-min-display-lines 6
         which-key-max-display-lines 6)
   ;; display `which-key' window on bottom side of the frame
   (which-key-setup-side-window-bottom)

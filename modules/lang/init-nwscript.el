@@ -2,8 +2,6 @@
 ;;;; Support for Bioware's Neverwinter Script language.
 
 
-(require 'rx)
-
 (use-package lsp-nwscript
   :straight (lsp-nwscript :type git
                           :host github
@@ -20,6 +18,12 @@
   :hook
   (nwscript-mode . (lambda ()
                      (setq-local case-fold-search nil)
-		     (indent-tabs-mode -1))))
+                     (indent-tabs-mode -1)))
+  :general
+  (nwscript-mode-map
+   :states 'normal
+   :prefix "SPC"
+   :non-normal-prefix "C-c SPC"
+   "s o" '("Outline" . consult-outline)))
 
 (provide 'init-nwscript)

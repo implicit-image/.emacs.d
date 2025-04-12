@@ -5,11 +5,12 @@
 
 (defvar +indent/tab-jump-delims '(?\; ?\) ?\] ?} ?> ?| ?' ?` ?\"))
 
-(defun +indent/smart-tab ()
+(defun +smart-tab (&optional prefix)
   ""
-  (interactive)
+  (interactive "P")
   (cond ((memq (char-after (point)) +indent/tab-jump-delims) (forward-char))
-        (t (indent-for-tab-command))))
+        (nil (forward))
+        (t (indent-for-tab-command prefix))))
 
 (use-package indent-bars
   :straight (indent-bars :type git
@@ -46,8 +47,8 @@
 
 (use-package whitespace
   :custom-face
-  (whitespace-space ((t (:foreground "#4a4a4a"))))
-  (whitespace-empty ((t (:foreground "#4a4a4a"))))
+  (whitespace-space ((t (:foreground ,(doom-lighten (doom-color 'bg) 0.1)))))
+  (whitespace-empty ((t (:foreground ,(doom-lighten (doom-color 'bg) 0.1)))))
   :init
   (defun +whitespace-toggle-style ()
     "Toggle whitespace mode display style."
@@ -73,5 +74,11 @@
   (before-save . whitespace-cleanup)
   (whitespace-mode . +whitespace-toggle-style)
   (before-save . delete-trailing-whitespace))
+
+(general-def global-map
+  :states 'insert
+  "TAB" '+smart-tab
+  "<tab>" '+smart-tab
+  [tab] '+smart-tab)
 
 (provide 'init-indent)

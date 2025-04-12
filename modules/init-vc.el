@@ -3,6 +3,8 @@
 (use-package magit
   :init
   (setq forge-add-default-bindings nil)
+  :config
+  (add-hook 'magit-process-find-password-functions 'magit-process-password-auth-source)
   :general
   (+leader-keys
     "g g" '("Magit" . magit)

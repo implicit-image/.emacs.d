@@ -32,6 +32,14 @@
         show-paren-when-point-inside-paren t
         show-paren-when-point-in-periphery t))
 
+(use-package drag-stuff
+  :demand
+  :general
+  (global-map
+   :states 'visual
+   "M-k" 'drag-stuff-up
+   "M-j" 'drag-stuff-down))
+
 (use-package origami
   :straight (origami :type git
                      :host github
@@ -39,14 +47,14 @@
   :hook
   (after-init . global-origami-mode))
 
-(use-package symbol-overlay
-  :custom-face
-  (symbol-overlay-default-face ((t (:box (:line-width -1)))))
-  :custom
-  (symbol-overlay-idle-timer 0.3)
-  :config
-  :hook
-  ((prog-mode) . symbol-overlay-mode))
+(use-package tabify
+  :straight nil
+  :general
+  (+leader-keys
+    "t TAB" 'tabify
+    "t <tab>" 'tabify
+    "t S-TAB" 'untabify
+    "t <backtab>" 'untabify))
 
 (use-package combobulate
   :straight (combobulate :type git

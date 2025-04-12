@@ -6,7 +6,7 @@
   (require 'f)
 
   ;;;; Custom global options
-  (setq +base/font-family "Comic Code"
+  (setq +base/font-family "Comic Code Ligatures"
         +base/font-weight 'semi-light
         +base/font-size (pcase system-type
                           ('windows-nt 17)
