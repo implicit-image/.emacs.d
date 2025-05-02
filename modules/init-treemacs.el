@@ -8,11 +8,12 @@
         treemacs-eldoc-display 'detailed
         treemacs-indentation 1)
 
-  (add-to-list '+eldoc-minibuffer-display-modes 'treemacs-mode)
+  (when (bound-and-true-p eldoc-box-hover-mode)
+    (add-to-list '+eldoc-minibuffer-display-modes 'treemacs-mode))
   :config
   (treemacs-load-theme "Default")
   :hook
-  (treemacs-mode . (lambda ()
+  (treemacs-mode-hook . (lambda ()
                      (interactive)
                      (toggle-truncate-lines -1)
                      (treemacs-project-follow-mode +1)))

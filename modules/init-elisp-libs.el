@@ -8,7 +8,7 @@
   :config
   (autoload 'dired-async-mode "dired-async.el" nil t)
   :hook
-  (after-init . dired-async-mode))
+  (after-init-hook . dired-async-mode))
 
 (use-package ov)
 

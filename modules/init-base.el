@@ -82,30 +82,33 @@
   :hook
   ;; truncate lines in modes derived from prog-mode
   ;; better to see all of the code
-  (prog-mode . (lambda ()
-                 (interactive)
-                 (toggle-truncate-lines 1)
-                 (visual-wrap-prefix-mode 1)))
+  (prog-mode-hook . (lambda ()
+                      (interactive)
+                      (toggle-truncate-lines 1)
+                      (visual-wrap-prefix-mode 1)))
   ;; display line numbers in text-editing modes
-  ((prog-mode
-    markdown-mode
-    org-mode
-    latex-mode
-    org-roam-mode
-    gfm-mode
-    text-mode
-    conf-mode
-    tuareg-mode)
+  ((prog-mode-hook
+    markdown-mode-hook
+    org-mode-hook
+    latex-mode-hook
+    org-roam-mode-hook
+    gfm-mode-hook
+    text-mode-hook
+    conf-mode-hook
+    tuareg-mode-hook)
    . display-line-numbers-mode)
-  (window-setup . toggle-frame-fullscreen))
+  (window-setup-hook . toggle-frame-fullscreen))
 
 ;; load $PATH from shell
 (use-package exec-path-from-shell
   :commands exec-path-from-shell-initialize
   :if (+os/is-linux-p)
   :init
-  (setq exec-path-from-shell-variables '("PATH" "MANPATH" "JAVA_HOME")
-        exec-path-from-shell-shell-name "bash")
+  (setq exec-path-from-shell-variables '("PATH" "TERM" "MANPATH" "JAVA_HOME")
+        exec-path-from-shell-shell-name (cond ((or (+os/is-wsl-p)
+                                                   (+os/is-linux-p))
+                                               "zsh")
+                                              ((+os/is-windows-p) "powershell")))
   :hook
   (after-init . exec-path-from-shell-initialize))
 

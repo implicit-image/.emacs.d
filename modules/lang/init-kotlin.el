@@ -6,6 +6,6 @@
   :config
   (setq kotlin-tab-width 4)
   :hook
-  (kotlin-mode . +jvm/set-up-kotlin-environment))
+  (kotlin-mode-kotlin . +jvm/set-up-kotlin-environment))
 
 (provide 'init-kotlin)

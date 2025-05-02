@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 
 ;;;; support for legacy Lean3 theorem prover
 (use-package lean-mode)

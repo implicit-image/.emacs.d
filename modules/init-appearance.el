@@ -43,17 +43,18 @@
       color
       0.3
       nil))
+
   :hook
-  (after-init . +colors/setup-doom-themes)
-  (tty-setup . (lambda ()
-                 (interactive)
-                 (load-theme +base/theme t))))
+  (after-init-hook . +colors/setup-doom-themes)
+  (tty-setup-hook . (lambda ()
+                      (interactive)
+                      (load-theme +base/theme t))))
 
 (use-package ef-themes)
 
 (use-package solaire-mode
   :hook
-  (after-init . solaire-global-mode))
+  (after-init-hook . solaire-global-mode))
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -64,13 +65,16 @@
     "i i" '("Insert unicode icon" . nerd-icons-insert)))
 
 (use-package rainbow-delimiters
-  :hook ((prog-mode emacs-lisp-mode) . rainbow-delimiters-mode))
+  :hook ((prog-mode-hook emacs-lisp-mode-hook) . rainbow-delimiters-mode))
 
 (use-package rainbow-mode
   :hook
-  (css-mode . rainbow-mode)
-  (css-ts-mode . rainbow-mode)
-  (helpful-mode . rainbow-mode))
+  ((css-mode-hook
+    css-ts-mode-hook
+    help-mode-hook
+    lsp-help-mode-hook
+    helpful-mode-hook)
+   . rainbow-mode))
 
 (use-package hl-todo
   :commands
@@ -94,7 +98,7 @@
           ("FIXME" . compilation-error)
           ("XXXX*" . compilation-error)))
   :hook
-  (after-init . global-hl-todo-mode))
+  (after-init-hook . global-hl-todo-mode))
 
 (use-package olivetti)
 
@@ -130,5 +134,10 @@
   :general
   (+leader-keys
     "h t" '("Load theme" . load-theme)))
+
+(use-package faces
+  :straight nil
+  :custom-face
+  (variable-pitch ((t (:foreground ,(doom-color 'fg-alt))))))
 
 (provide 'init-appearance)

@@ -61,7 +61,7 @@ query for known project and revert its buffers instead."
         desktop-restore-eager t
         desktop-restore-reuses-frames t)
   :hook
-  (after-init . desktop-save-mode))
+  (after-init-hook . desktop-save-mode))
 
 
 (use-package direnv
@@ -70,6 +70,6 @@ query for known project and revert its buffers instead."
   (setq direnv-always-show-summary nil
         direnv-show-paths-in-summary nil)
   :hook
-  (after-init . direnv-mode))
+  (after-init-hook . direnv-mode))
 
 (provide 'init-projects)

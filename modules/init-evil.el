@@ -31,11 +31,9 @@
 ;;;; collection of evil bindings for popular modes
 (use-package evil-collection
   :hook
-  (after-init . (lambda ()
-                  (interactive)
-                  (evil-collection-init)
-                  ;; (evil-collection-init evil-collection-mode-list)
-                  )))
+  (after-init-hook . (lambda ()
+                       (interactive)
+                       (evil-collection-init))))
 
 ;;;; highlight the AOE of vim motions
 (use-package evil-goggles
@@ -59,10 +57,10 @@
   :config
   (evil-org-set-key-theme)
   :hook
-  ((org-mode) . evil-org-mode)
-  ((org-agenda) . (lambda ()
-                    (require 'evil-org-agenda)
-                    (evil-org-agenda-set-keys))))
+  (org-mode-hook . evil-org-mode)
+  (org-agenda-hook . (lambda ()
+                       (require 'evil-org-agenda)
+                       (evil-org-agenda-set-keys))))
 
 ;;;; evil bindings for treemacs
 (use-package treemacs-evil

@@ -21,7 +21,11 @@
    "C-x w" 'ace-window))
 
 (use-package window
-  :straight nil)
+  :straight nil
+  :init
+  (setq switch-to-buffer-in-dedicated-window t
+        switch-to-buffer-obey-display-actions nil
+        switch-to-buffer-preserve-window-point t))
 
 (use-package popwin
   :init
@@ -46,27 +50,9 @@
     "b p" '("Popup buffer" . popwin:popup-buffer)
     "~" '("Show last popup" . popwin:popup-last-buffer))
   :hook
-  (after-init . (lambda ()
-                  (interactive)
-                  (popwin-mode 1))))
+  (after-init-hook . popwin-mode))
 
-(use-package popper
-  :init
-  (defun +popper-setup ()
-    "Set up popper"
-    (popper-mode 1)
-    (popper-echo-mode 1))
-
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "Output\\*$"
-          help-mode
-          compilation-mode))
-  :hook
-  (after-init . +popper-setup)
-  :general
-  (+leader-keys
-    "b TAB" '("Popup buffers" . popper-cycle)
-    "b <tab>" '("Popup buffers" . popper-cycle)))
+(use-package init-wm
+  :straight nil)
 
 (provide 'init-windows)

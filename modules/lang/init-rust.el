@@ -1,10 +1,10 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package cargo-mode
-  :hook
-  (rust-mode . cargo-minor-mode)
   :config
-  (setq compilation-scroll-output t))
+  (setq compilation-scroll-output t)
+  :hook
+  (rust-mode-hook . cargo-minor-mode))
 
 (use-package rustic
   :config

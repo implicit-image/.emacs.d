@@ -9,7 +9,9 @@
   (which-key-setup-side-window-bottom)
   :init
   (setq which-key-popup-type 'minibuffer
-        which-key-idle-delay 0.1
+        which-key-idle-delay 1
+        which-key-idle-secondary-delay 1
+        which-key-separator " -> "
         which-key-max-display-columns 5
         which-key-allow-evil-operators t
         which-key-add-column-padding 5
@@ -22,7 +24,7 @@
   (which-key-mode)
   :hook
   ;; load after loading user init
-  (after-init . which-key-mode))
+  (after-init-hook . which-key-mode))
 
 (use-package general
   :demand

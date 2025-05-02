@@ -16,6 +16,7 @@
           (lang (car grammar)))
       (treesit-install-language-grammar lang))))
 
+(setq treesit-font-lock-level 3)
 
 (use-package treesit-auto
   :commands
@@ -23,7 +24,7 @@
   :init
   (setq treesit-auto-install t)
   :hook
-  (after-init . (lambda ()
+  (after-init-hook . (lambda ()
                   (interactive)
                   (require 'treesit-auto)
                   (treesit-auto-add-to-auto-mode-alist 'all)

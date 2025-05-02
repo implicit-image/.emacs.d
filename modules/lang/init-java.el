@@ -12,7 +12,7 @@
   :config
   (setq java-ts-mode-indent-offset 4)
   :hook
-  (java-ts-mode . +jvm/set-up-java-environment))
+  (java-ts-mode-hook . +jvm/set-up-java-environment))
 
 (use-package lsp-java
   :init

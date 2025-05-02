@@ -11,8 +11,8 @@
   (+windows-cfg '((flycheck-error-list-mode)
                   :position bottom :height 0.4 :noselect nil))
   :hook
-  ((lsp-mode emacs-lisp-mode merlin-mode) . flycheck-mode)
-  (flycheck-error-list-mode . visual-line-mode)
+  ((lsp-mode-hook emacs-lisp-mode-hook merlin-mode-hook) . flycheck-mode)
+  (flycheck-error-list-mode-hook . visual-line-mode)
   :general
   (+mode-keys
     :keymaps 'flycheck-mode-map
@@ -38,7 +38,7 @@
 (use-package flyspell
   :straight nil
   :hook
-  ((prog-mode emacs-lisp-mode) . flyspell-prog-mode)
-  ((org-mode markdown-mode text-mode) . flyspell-mode))
+  ((prog-mode-hook emacs-lisp-mode-hook) . flyspell-prog-mode)
+  ((org-mode-hook markdown-mode-hook text-mode-hook) . flyspell-mode))
 
 (provide 'init-checkers)

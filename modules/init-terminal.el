@@ -97,6 +97,7 @@
 (use-package vterm
   :init
   (evil-set-initial-state 'vterm-mode 'insert)
+  (+set-tab-function! vterm-mode vterm-send-tab)
   :config
   (setq vterm-shell (exec-path-from-shell-getenv "SHELL")))
 
@@ -111,7 +112,8 @@
                  :files (:defaults "*.el" "*.sh"))
   :config
   (require 'exec-path-from-shell)
-  (setq ee-terminal-command (exec-path-from-shell-getenv "TERM")))
+  (setq ee-terminal-command (cond ((+os/is-windows-p)"wezterm")
+                                  (t (exec-path-from-shell-getenv "TERM")))))
 
 (+leader-keys
   "o t" '(:ignore t :which-key "Terminal")

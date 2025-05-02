@@ -19,9 +19,9 @@
         calibredb-format-icons-in-terminal t
         calibredb-format-character-icons t)
   :hook
-  (calibredb-search-mode . (lambda ()
-                             (interactive)
-                             (blink-cursor-mode -1)))
+  (calibredb-search-mode-hook . (lambda ()
+                                  (interactive)
+                                  (blink-cursor-mode -1)))
   :general
   (+leader-keys
     "a C" '("Open calibre book" . calibredb-consult-read)
@@ -163,7 +163,7 @@
   (add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
   (setq pdf-outline-imenu-use-flat-menus t)
   (+windows-cfg '((pdf-outline-buffer-mode)
-		  :position left :width 0.2 :noselect nil :stick t :dedicated nil))
+                  :position left :width 0.2 :noselect nil :stick t :dedicated nil))
   :general
   (pdf-view-mode-map
    :states '(normal)
@@ -178,7 +178,9 @@
 
 (use-package nov
   :init
-  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+  :hook
+  (nov-mode-hook . variable-pitch-mode))
 
 (use-package djvu)
 

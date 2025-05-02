@@ -6,7 +6,7 @@
   (company-tooltip ((t (:background ,(doom-darken (doom-color 'base4) 0.3)))))
   (company-tooltip-selection ((t (:background ,(doom-color 'bg)))))
   :init
-  (setq company-idle-delay nil
+  (setq company-idle-delay 0.05
         ;; company-backends '((company-dabbrev-code company-keywords)
         ;;                    (company-files company-capf))
         company-backends '(company-capf)

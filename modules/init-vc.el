@@ -3,8 +3,8 @@
 (use-package magit
   :init
   (setq forge-add-default-bindings nil)
-  :config
-  (add-hook 'magit-process-find-password-functions 'magit-process-password-auth-source)
+  :hook
+  (magit-process-find-password-functions . magit-process-password-auth-source)
   :general
   (+leader-keys
     "g g" '("Magit" . magit)
@@ -43,7 +43,9 @@
   :init
   (+windows-cfg
    '(("\*vc-diff\**")
-     :regexp t :height 0.5 :position bottom :dedicated nil)))
+     :regexp t :height 0.5 :position bottom :dedicated nil))
+  (setq vc-make-backup-files nil))
+
 
 (use-package diff-hl
   :init
@@ -57,8 +59,8 @@
                                        (ignored . "i"))
         diff-hl-reference-revision nil)
   :hook
-  (dired-mode . diff-hl-dired-mode)
-  (after-init . (lambda ()
+  (dired-mode-hook . diff-hl-dired-mode)
+  (after-init-hook . (lambda ()
                   (interactive)
                   (diff-hl-margin-mode +1)
                   (global-diff-hl-mode +1)))

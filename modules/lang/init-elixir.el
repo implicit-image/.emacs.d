@@ -8,6 +8,6 @@
 	lsp-elixir-dialyzer-enabled t))
 
 (use-package mix
-  :hook (elixir-mode . mix-minor-mode))
+  :hook (elixir-mode-hook . mix-minor-mode))
 
 (provide 'init-elixir)

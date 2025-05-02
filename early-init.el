@@ -20,6 +20,7 @@
 (setq package-enable-at-startup nil
       evil-want-keybinding nil)
 
+
 (when (member "--light" command-line-args)
   (message "light detected")
   (setq load-light-init t)

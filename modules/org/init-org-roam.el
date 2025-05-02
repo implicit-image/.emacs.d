@@ -59,7 +59,7 @@
                               "#+title: %^{title}\n")
            :unnarrowed t)))
   :hook
-  (org-roam-db-autosync-mode . +roam/mode-setup)
+  (org-roam-db-autosync-mode-hook . +roam/mode-setup)
   :general
   (+leader-keys
     "n r" '(:ignore t :which-key "org roam")

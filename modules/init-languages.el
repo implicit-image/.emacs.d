@@ -1,5 +1,6 @@
 ;;; -*- lexical-binding: t -*-
-(require 'f)
+
+(+module/declare! lang)
 
 (require 'init-c)
 (require 'init-web)

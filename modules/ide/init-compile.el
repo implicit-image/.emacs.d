@@ -3,7 +3,7 @@
   :straight nil
   :init
   (+windows-cfg '((compilation-mode)
-                  :position bottom :height 0.3 :noselect nil :dedicated t))
+                  :position bottom :height 0.5 :noselect nil :dedicated nil :tail t))
 
   (defun +compile/open-compile-buffer ()
     "Open *compilation* buffer."
@@ -13,7 +13,7 @@
   :config
   (setq compilation-scroll-output t)
   :hook
-  (compilation-mode . visual-line-mode)
+  (compilation-mode-hook . visual-line-mode)
   :general
   (+leader-keys
     "c c" '("Compile" . compile)

@@ -1,4 +1,6 @@
-(require 'f)
+;;; -*- lexical-binding: t -*-
+
+(+module/declare! org)
 
 (require 'init-org-mode)
 

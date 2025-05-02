@@ -3,7 +3,7 @@
 (use-package minibuffer
   :straight nil
   :hook
-  (minibuffer-mode . visual-line-mode))
+  (minibuffer-mode-hook . visual-line-mode))
 
 (use-package completion-preview
   :straight nil
@@ -18,7 +18,7 @@
   (setq marginalia-align 'center
         marginalia-align-offset -3)
   :hook
-  (after-init . marginalia-mode))
+  (after-init-hook . marginalia-mode))
 
 (use-package vertico
   :custom
@@ -29,7 +29,7 @@
   :init
   (setq vertico-scroll-margin 5)
   :hook
-  (marginalia-mode . vertico-mode)
+  (marginalia-mode-hook . vertico-mode)
   :general
   (+leader-keys
     "t c" '("Bring up last completion" . vertico-suspend))
@@ -47,11 +47,16 @@
   (+windows-cfg '(("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*" " *Embark Actions*" embark-collect-mode)
                   :regexp t
                   :position bottom
-                  :height 0.3
+                  :height 0.25
                   :dedicated nil
                   :noselect nil))
-  (setq prefix-help-command #'embark-prefix-help-command)
+  (setq prefix-help-command #'embark-prefix-help-command
+        embark-prompter #'embark-completing-read-prompter)
+
   :general
+  (vertico-map
+   "C-e" '("Embark export" . embark-export)
+   "C-a" '("Embark act" . embark-act))
   (+leader-keys
     "e" '("Embark Act" . embark-act)))
 
@@ -61,7 +66,7 @@
   :custom
   (xref-show-xrefs-function 'consult-xref)
   :config
-
+  (require 'consult-xref)
   (defvar +completion/consult-prev-plist nil
     "alist of last recorder picker queries.")
 
@@ -83,14 +88,14 @@
     ;; search
     "s b" '("Search buffer" . consult-line)
     "s B" '("Search all buffers" . consult-line-multi)
-   "s i" '("Imenu" . consult-imenu)
-   "s I" '("imenu everywhere" . consult-imenu-multi)
-   "s o" '("Imenu outline" . consult-outline)
-   "t m" '("Toggle minor mode" . consult-minor-mode-menu)))
+    "s i" '("Imenu" . consult-imenu)
+    "s I" '("imenu everywhere" . consult-imenu-multi)
+    "s o" '("Imenu outline" . consult-outline)
+    "t m" '("Toggle minor mode" . consult-minor-mode-menu)))
 
 (use-package embark-consult
   :hook
-  (embark-collect-mode . consult-preview-at-point-mode))
+  (embark-collect-mode-hook . consult-preview-at-point-mode))
 
 (use-package orderless
   :custom

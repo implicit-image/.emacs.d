@@ -17,9 +17,9 @@
 
 (use-package kkp
   :hook
-  (tty-setup . (lambda ()
-		 (interactive)
-		 (global-kkp-mode +1))))
+  (tty-setup-hook . (lambda ()
+                      (interactive)
+                      (global-kkp-mode +1))))
 
 (use-package evil-terminal-cursor-changer
   :commands
@@ -31,6 +31,6 @@
 	evil-insert-state-cursor 'bar
 	evil-emacs-state-cursor  'hbar)
   :hook
-  (tty-setup . etcc-on))
+  (tty-setup-hook . etcc-on))
 
 (provide 'init-tty)

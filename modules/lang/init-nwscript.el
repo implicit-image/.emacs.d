@@ -15,10 +15,17 @@
                            :host github
                            :branch "master"
                            :repo "implicit-image/nwscript-mode.el")
+  :init
+  (defun +nwscript--setup ()
+    (interactive)
+    (setq-local case-fold-search t)
+    (add-hook 'completion-at-point-functions (cape-capf-super (cape-company-to-capf 'company-dabbrev-code)
+                                                              'cape-file))
+    (funcall-interactively 'untabify (point-min) (point-max))
+    (save-buffer)
+    (indent-tabs-mode -1))
   :hook
-  (nwscript-mode . (lambda ()
-                     (setq-local case-fold-search nil)
-                     (indent-tabs-mode -1)))
+  (nwscript-mode-hook . +nwscript--setup)
   :general
   (nwscript-mode-map
    :states 'normal

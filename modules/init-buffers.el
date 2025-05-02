@@ -27,13 +27,13 @@
 (use-package ibuffer-vc
   :after ibuffer
   :hook
-  (ibuffer-mode . ibuffer-vc-set-filter-groups-by-vc-root))
+  (ibuffer-mode-hook . ibuffer-vc-set-filter-groups-by-vc-root))
 
 
 (use-package recentf
   :straight t
   :hook
-  (after-init . recentf-mode))
+  (after-init-hook . recentf-mode))
 
 
 (+leader-keys

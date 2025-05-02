@@ -3,25 +3,19 @@
 (use-package lispy
   :commands
   lispy-mode
-  :init
-  (defun +lisp/slurp-or-barf-left (&optional times)
-    ""
-    (interactive "p")
-    (lispy-left 1)
-    (lispy-slurp-or-barf-left times))
-  (defun +lisp/slurp-or-barf-right (&optional times)
-    ""
-    (interactive "p")
-    (lispy-right 1)
-    (lispy-slurp-or-barf-right times))
   :hook
-  ((emacs-lisp-mode common-lisp-mode scheme-mode racket-mode dune-mode) . lispy-mode)
+  ((emacs-lisp-mode-hook common-lisp-mode-hook scheme-mode-hook racket-mode-hook dune-mode-hook) . lispy-mode)
   :general
   (lispy-mode-map
-   :states '(insert normal visual)
-   :prefix "C-c"
-   ">" '+lisp/slurp-or-barf-left
-   "<" '+lisp/slurp-or-barf-right))
+   :states '(insert emacs)
+   "C-c g" 'lispy-ace-paren)
+  (lispy-mode-map
+   :states '(insert emacs normal)
+   "C-c <" 'lispy-move-left
+   "C-c >" 'lispy-move-right
+   "C-M-[" 'lispy-wrap-brackets
+   "C-M-{" 'lispy-wrap-braces
+   "C-M-(" 'lispy-wrap-round))
 
 ;; emacs lisp
 (use-package emacs-lisp-mode
@@ -49,7 +43,7 @@
 (use-package lisp-mode
   :straight nil
   :mode "\\.lisp\\'"
-  :hook (common-lisp-mode . (lambda ()
+  :hook (common-lisp-mode-hook . (lambda ()
                               (interactive)
                               (slime-mode +1))))
 

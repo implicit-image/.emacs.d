@@ -6,6 +6,8 @@
   (setq org-src-tab-acts-natively t
         org-edit-src-content-indentation 0
         org-src-preserve-indentation nil)
+
+  (defvar +org-babel-temp-dir (f-join user-emacs-directory "+org-babel"))
   :config
   (+windows-cfg
    '(("\*Org-Babel\**" "\*Org Src\**")
@@ -41,17 +43,15 @@
      (sql . t)
      (sqlite . t)))
   (add-to-list 'org-src-lang-modes (cons "jsx" 'rjsx))
-  (add-to-list 'org-src-lang-modes (cons "nwscript" 'nwscript-mode)))
+  (add-to-list 'org-src-lang-modes (cons "nwscript" 'nwscript-mode))
+  :hook
+  (org-src-mode-hook . +org-babel-edit-setup))
 
 (use-package jupyter
   :hook
-  (org-mode . (lambda ()
+  (org-mode-hook . (lambda ()
                 (require 'ob-jupyter)
                 (org-babel-jupyter-override-src-block "haskell"))))
-
-;; (use-package ob-rust
-;;   :hook
-;;   ())
 
 (use-package ob-sql-mode)
 

@@ -1,11 +1,13 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package evil-mc
+  :init
+  (setq evil-mc-undo-cursors-on-keyboard-quit t)
   :hook
-  (after-init . (lambda ()
-                  (interactive)
-                  (global-evil-mc-mode 1)
-                  (add-to-list 'evil-mc-incompatible-minor-modes 'lispy-mode))))
+  (after-init-hook . (lambda ()
+                       (interactive)
+                       (global-evil-mc-mode 1)
+                       (add-to-list 'evil-mc-incompatible-minor-modes 'lispy-mode))))
 
 (use-package evil-nerd-commenter
   :general
@@ -15,7 +17,7 @@
 
 (use-package evil-surround
   :hook
-  (after-init . global-evil-surround-mode))
+  (after-init-hook . global-evil-surround-mode))
 
 (use-package vundo
   :config
@@ -33,7 +35,6 @@
         show-paren-when-point-in-periphery t))
 
 (use-package drag-stuff
-  :demand
   :general
   (global-map
    :states 'visual
@@ -45,7 +46,7 @@
                      :host github
                      :repo "elp-revive/origami.el")
   :hook
-  (after-init . global-origami-mode))
+  (after-init-hook . global-origami-mode))
 
 (use-package tabify
   :straight nil
@@ -66,7 +67,7 @@
   :custom
   (combobulate-key-prefix "C-c o")
   :hook
-  (prog-mode . combobulate-mode))
+  (prog-mode-hook . combobulate-mode))
 
 (use-package vlf
   :demand)

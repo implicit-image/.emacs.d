@@ -1,6 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
-;; (require 'init-lookup-external-sources)
+(require 'init-lookup-external-sources)
 
 ;;;; Alists of lookup functions
 ;;;; each list contains (MAJOR-MODE . LOOKUP-FUNCTION) pairs
@@ -69,15 +69,18 @@
            (funcall-interactively popup-lookup-function))
           (buffer-lookup-function
            (funcall-interactively buffer-lookup-function))
+          ((or (bound-and-true-p eldoc-box-hover-at-point-mode)
+               (bound-and-true-p eldoc-box-hover-mode))
+           (eldoc-box-help-at-point))
           ((memq 'lsp-ui-mode local-minor-modes)
            (if (display-graphic-p)
-               (lsp-ui-doc-show)
+               (lsp-ui-doc-glance)
              (lsp-describe-thing-at-point)))
           ((memq 'lsp-bridge-mode local-minor-modes)
            (if (display-graphic-p)
                (lsp-bridge-popup-documentation)
              (lsp-bridge-show-documentation)))
-          (lspce-mode (lspce-help-at-point))
+          ((bound-and-true-p lspce-mode) (lspce-help-at-point))
           (t (message "No documentation function found")))))
 
 (defun +lookup/org-get-function ()
@@ -94,7 +97,6 @@
 (use-package apropos
   :straight nil
   :init
-  (add-to-list 'popper-reference-buffers 'apropos-mode)
   (+windows-cfg '((apropos-mode)
                   :height 0.3
                   :position bottom
@@ -139,8 +141,7 @@
 (use-package helpful
   :init
   (+lookup-set-fn 'buffer '(helpful-mode . helpful-at-point))
-  (add-to-list 'popper-reference-buffers 'helpful-mode)
-  ;;popwin suppor
+  ;;popwin support
   (+windows-cfg
    '((helpful-mode)
      :height 0.3 :position bottom :dedicated t :stick nil :noselect nil))
@@ -186,27 +187,45 @@
         eldoc-idle-delay 0.05
         eldoc-echo-area-use-multiline-p 0.2)
 
+  ;; (defun +eldoc--popup-function (docs interactive)
+  ;;   (require 'popup)
+  ;;   (let* (popup (popup-create (point) 10 10 ))))
+
+  ;; (add-to-list 'eldoc-display-functions '+eldoc--popon-function)
 
   :hook
-  (prog-mode . eldoc-mode))
+  (prog-mode-hook . eldoc-mode))
 
 (use-package eldoc-box
+  :disabled
+  :custom-face
+  (eldoc-box-border ((t (:background "black"))))
   :init
   (defvar +eldoc-minibuffer-display-modes '())
-
 
   (defun +eldoc--setup ()
     (interactive)
     (when (not (memq major-mode +eldoc-minibuffer-display-modes))
       (eldoc-box-hover-mode)))
 
+  (defun +eldoc-box--position-function (width height)
+    (let* ((pos (eldoc-box--default-at-point-position-function-1 width height))
+           (x (car pos))
+           (y (cdr pos))
+           (line-h (line-pixel-height))
+           (num-lines (/ height line-h)))
+      (cond ((> num-lines 2) (cons (+ x 100) y))
+            (t (cons (+ x 40) y)))))
+
   (setq eldoc-box-clear-with-C-g t
         eldoc-box-only-multi-line nil
-        eldoc-box-position-function 'eldoc-box--default-at-point-position-function)
+        eldoc-box-max-pixel-height (* (line-pixel-height) 10)
+        eldoc-box-position-function '+eldoc-box--position-function)
+
   :config
   (set-face-attribute 'eldoc-box-body nil :inherit 'corfu-default)
   :hook
-  (eldoc-mode . +eldoc--setup))
+  (eldoc-mode-hook . +eldoc--setup))
 
 (general-defs
   global-map

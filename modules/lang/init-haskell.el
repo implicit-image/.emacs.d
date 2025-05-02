@@ -20,6 +20,4 @@
 	lsp-haskell-plugin-eval-global-on nil
 	lsp-haskell-plugin-semantic-tokens-global-on t))
 
-;; (use-package dante)
-
 (provide 'init-haskell)

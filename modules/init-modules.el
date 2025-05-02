@@ -1,42 +1,26 @@
 ;;; -*- lexical-binding: t -*-
 
-
-(defvar +modules/path "")
-
-(setq +modules/path (concat user-emacs-directory "modules"))
+(defvar +modules/path (concat user-emacs-directory "modules"))
 
 (add-to-list 'load-path +modules/path)
-
-;; setup submodule load paths
-(setq +modules/ide-path (concat +modules/path "/ide"))
-(add-to-list 'load-path +modules/ide-path)
-
-(setq +modules/org-path (concat +modules/path "/org"))
-(add-to-list 'load-path +modules/org-path)
-
-(setq +modules/lang-path (concat +modules/path "/lang"))
-(add-to-list 'load-path +modules/lang-path)
-
-(setq +modules/llm-path (concat +modules/path "/llm"))
-(add-to-list 'load-path +modules/llm-path)
 
 (defvar +modules/loaded-list '()
   "List of features loaded from modules.")
 
-(defmacro +modules/require! (mod-symbol &rest opts)
-  "Define a module deriving feature NAME and load it with OPTS."
-  `(progn (let* ((mod-file-name (concat +modules/path (symbol-name ,mod-symbol) ".el"))
-                 (add-to-list '+modules/loaded-list
-                              (mod-symbol . mod-file-name) )
-                 (require ,mod-symbol)))))
-
-(defmacro +modules/module-loaded-p! (module)
-  "Return t if the module MODULE is loaded and nil otherwise."
-  `(memq )
-  `(not (not (alist-get ,module +modules/provided-module-features))))
+(defmacro +require! (mod-symbol &rest opts)
+  (let* ((should-load? (if (plist-member opts :if)
+                           (plist-get opts :if)
+                         t)))
+    `(when ,should-load?
+       (add-to-list '+modules/loaded-list ,mod-symbol)
+       (require ,mod-symbol))))
 
 (defmacro +module/declare! (name)
-  `(progn (defvar ,(concat "+modules/" (symbol-name name) "-path"))))
+  "Set up `load-path' for a subdirectory in `+modules/path'."
+  (let ((var (intern (concat "+module/" (symbol-name name) "-path")))
+        (path (substitute-in-file-name (concat +modules/path "/" (symbol-name name)))))
+    `(progn (defvar ,var ,(concat +modules/path "/" (symbol-name name)))
+            (add-to-list 'load-path (symbol-value ',var)))))
 
 (defun +modules/browse ()
   "Open user init module file."
@@ -57,10 +41,13 @@
   (interactive)
   (consult-ripgrep +modules/path))
 
+(defun +config/ripgrep ()
+  (interactive)
+  (consult-ripgrep user-emacs-directory))
 
 (with-eval-after-load 'init-keybindings
   (+leader-keys
     "f P" '("Open module files" . +modules/browse)
-    "f p *" '("Ripgrep in module dir" . +modules/ripgrep)))
+    "f p *" '("Ripgrep in emacs dir" . +config/ripgrep)))
 
 (provide 'init-modules)

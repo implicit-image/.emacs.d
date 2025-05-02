@@ -6,23 +6,23 @@
 (use-package lsp-mode
   :custom-face
   (lsp-lens-face ((t (:size ,+base/font-size))))
+  (lsp-signature-highlight-function-argument ((t (:underline t))))
   :config
+  (defalias 'lsp-booster--advice-json-parse
+    #'(lambda (old-fn &rest args)
+        "Try to parse bytecode instead of json."
+        (or
+         (when (equal (following-char) 35)
+           (let ((bytecode (read (current-buffer))))
+             (when (byte-code-function-p bytecode) (funcall bytecode))))
+         (apply old-fn args))))
 
-  (defun lsp-booster--advice-json-parse (old-fn &rest args)
-    "Try to parse bytecode instead of json."
-    (or
-     (when (equal (following-char) ?#)
-       (let ((bytecode (read (current-buffer))))
-         (when (byte-code-function-p bytecode)
-           (funcall bytecode))))
-     (apply old-fn args)))
-
-  (advice-add (if (progn (require 'json)
-                         (fboundp 'json-parse-buffer))
-                  'json-parse-buffer
-                'json-read)
-              :around
-              #'lsp-booster--advice-json-parse)
+  ;; (advice-add (if (progn (require 'json)
+  ;;                        (fboundp 'json-parse-buffer))
+  ;;                 'json-parse-buffer
+  ;;               'json-read)
+  ;;             :around
+  ;;             #'lsp-booster--advice-json-parse)
 
   (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
     "Prepend emacs-lsp-booster command to lsp CMD."
@@ -39,7 +39,7 @@
             (cons "emacs-lsp-booster" orig-result))
         orig-result)))
 
-  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+  ;; (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 
   (+windows-cfg
    '(("\*lsp-help\**" "\*lsp-install*")
@@ -47,7 +47,7 @@
   (setq lsp-auto-configure t
         ;; lsp-mode features
         lsp-keymap-prefix "C-c l"
-        lsp-enable-symbol-highlighting t
+        lsp-enable-symbol-highlighting nil
         lsp-enable-xref t
         lsp-enable-imenu t
         lsp-enable-folding t
@@ -67,15 +67,14 @@
                                       :on-server-request
                                       :after-completion)
         lsp-signature-render-documentation t
-        lsp-signature-doc-lines 0
+        lsp-signature-doc-lines 1
         lsp-signature-cycle t
         ;; completion
         lsp-completion-enable t
         lsp-completion-show-kind t
-        lsp-completion-show-detail nil
+        lsp-completion-show-detail t
         lsp-completion-provider :none
         lsp-completion-show-label-description t
-
         lsp-completion-default-behaviour :replace
         ;; headerline
         lsp-headerline-breadcrumb-enable nil
@@ -99,7 +98,22 @@
         lsp-rust-analyzer-completion-auto-self-enable nil
         ;; typescript
         lsp-typescript-suggest-auto-imports t
-        lsp-typescript-auto-closing-tags t)
+        lsp-typescript-auto-closing-tags t
+        ;;nix
+        lsp-nix-nixd-server-path (executable-find "nixd"))
+  :hook
+  ((c-ts-mode-hook
+    c++-ts-mode-hook
+    java-ts-mode-hook
+    kotlin-mode-hook
+    python-ts-mode-hook
+    typescript-ts-mode-hook
+    rust-ts-mode-hook
+    js-ts-mode-hook
+    tsx-ts-mode-hook
+    fstar-mode-hook
+    nix-mode-hook)
+   . lsp)
   :general
   (lsp-mode-map
    :states '(normal visual)
@@ -112,16 +126,17 @@
    :prefix "SPC"
    :global-prefix "M-SPC"
    "t h" '("Headerline" . lsp-headerline-breadcrumb-mode)
+   "c a" '("Apply code actions" . lsp-execute-code-action)
    "c D" '("Show doc buffer" . lsp-describe-thing-at-point)
    "c R" '("LSP rename" . lsp-rename)
    "c r" '("lsp find references" . lsp-find-references)))
 
 
-
 (use-package lsp-ui
   :custom-face
-  (lsp-ui-peek-footer ((t (:background ,(doom-color 'bg)))))
-  (lsp-ui-peek-header ((t (:background ,(doom-color 'bg)))))
+  (lsp-ui-peek-footer ((t (:background ,(doom-color 'bg)))) t)
+  (lsp-ui-peek-header ((t (:background ,(doom-color 'bg)))) t)
+  (lsp-ui-doc-background ((t :background ,(doom-color 'base0))))
   :config
   (+windows-cfg '((lsp-ui-imenu-mode)
                   :position bottom
@@ -142,24 +157,24 @@
         lsp-ui-sideline-update-mode 'point
         lsp-ui-sideline-diagnostic-max-line-length 200
         ;; docs
-        lsp-ui-doc-enable t
+        lsp-ui-doc-enable nil
         lsp-ui-doc-use-childframe t
         lsp-ui-doc-alignment 'window
         lsp-ui-doc-max-width 70
-        lsp-ui-doc-max-height 30
+        lsp-ui-doc-max-height 10
         lsp-ui-doc-header nil
         lsp-ui-doc-include-signature t
         lsp-ui-doc-show-with-cursor nil
         lsp-ui-doc-show-with-mouse nil
         lsp-ui-doc-position 'at-point
-        lsp-ui-doc-delay 0.5
+        lsp-ui-doc-delay nil
         lsp-ui-imenu-enable t
         lsp-ui-imenu-buffer-position 'right)
   :hook
-  (lsp-mode . (lambda ()
-                (interactive)
-                (lsp-ui-mode +1)
-                (lsp-ui-doc-mode +1)))
+  (lsp-mode-hook . (lambda ()
+                     (interactive)
+                     (lsp-ui-mode +1)
+                     (lsp-ui-doc-mode +1)))
   :general
   (lsp-ui-mode-map
    :states '(normal visual insert)
@@ -169,7 +184,6 @@
    :prefix "SPC"
    :global-prefix "M-SPC"
    "s i" '("LSP imenu" . lsp-ui-imenu)
-   "c a" '("Apply code actions" . lsp-ui-sideline-apply-code-actions)
    "c p r" '("Peek references" . lsp-ui-peek-find-references)
    "c p d" '("Peek definition" . lsp-ui-peek-find-definitions)
    "c p i" '("Peek implementation" . lsp-ui-peek-find-implementation)
@@ -178,7 +192,6 @@
   (lsp-ui-peek-mode-map
    "j" 'lsp-ui-peek--select-next
    "k" 'lsp-ui-peek--select-prev))
-
 
 (use-package consult-lsp
   :config

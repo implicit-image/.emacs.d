@@ -17,10 +17,10 @@
            (csv-header-line t))))
 
   :config
-  (eval-after-load 'dabbrev
+  (with-eval-after-load 'dabbrev
     (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
 
   :hook
-  (csv-mode . +csv/setup))
+  (csv-mode-hook . +csv/setup))
 
 (provide 'init-csv)

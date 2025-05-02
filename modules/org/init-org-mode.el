@@ -33,7 +33,9 @@
         org-use-sub-superscripts "{}"
         org-startup-with-inline-images t
         org-image-actual-width t
-        org-latex-preview-live '(inline block edit-special)
+        org-latex-preview-live-throttle 0.1
+        org-latex-preview-live-debounce 0.1
+        org-latex-preview-live t
         org-latex-preview-appearance-options '(:foreground "#f1f1f1" :background "#181818" :scale 2.0 :zoom. 1.0 :page-width 1.0 :matchers ("begin" "$1" "$" "$$" "\\(" "\\["))
         +org/agenda-file (substitute-in-file-name "$HOME/org/agenda/agenda.org")
         +org/tasks-file (substitute-in-file-name "$HOME/org/agenda/tasks.org")
@@ -110,8 +112,11 @@
           ("mw" "Weight" table-line (file+headline +org/metrics-file "Weight")
            "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
   :hook
-  (org-mode . visual-line-mode)
-  (org-mode . org-latex-preview-auto-mode)
+  (org-mode-hook . visual-line-mode)
+  (org-mode-hook . (lambda ()
+                (interactive)
+                (whitespace-mode -1)))
+  (org-mode-hook . org-latex-preview-auto-mode)
   :general
   (org-mode-map
    :states '(normal visual)
@@ -134,14 +139,14 @@
 (use-package org-roam-ui)
 
 (use-package org-appear
-  :hook (org-mode . org-appear-mode))
+  :hook (org-mode-hook . org-appear-mode))
 
 (use-package org-pretty-table
   :straight (org-pretty-table :type git
                               :host github
                               :repo "Fuco1/org-pretty-table")
   :hook
-  (org-mode . org-pretty-table-mode))
+  (org-mode-hook . org-pretty-table-mode))
 
 (use-package edraw
   :straight (edraw :type git
@@ -154,7 +159,7 @@
     (require 'edraw-org)
     (edraw-org-setup-exporter))
   :hook
-  (org-mode . edraw-org-setup-default))
+  (org-mode-hook . edraw-org-setup-default))
 
 (use-package org-xopp
   :straight (org-xopp :type git
@@ -163,11 +168,11 @@
 
 (use-package toc-org
   :hook
-  (org-mode . toc-org-mode))
+  (org-mode-hook . toc-org-mode))
 
 (use-package org-special-block-extras
   :hook
-  (org-mode . org-special-block-extras-mode)
+  (org-mode-hook . org-special-block-extras-mode)
   :custom
   (o-docs-libraries
    '("~/org-special-block-extras/documentation.org")

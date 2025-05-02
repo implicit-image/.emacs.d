@@ -5,24 +5,19 @@
   "Set SYMBOLS to associated values while taking care of setting default options."
   `(dolist (binding ,( symbols))))
 
+
 (defun +toggle-var (var)
   (set var (not (symbol-value var))))
 
 (defun +utils/toggle-mode (mode)
   (interactive)
-  (if (symbol-value mode)
+  (if (and (bound-and-true-p mode))
       (funcall-interactively mode -1)
     (funcall-interactively mode -1)))
 
-(defun +utils-nth-wrapped (n list)
+(defmacro +nth (n list)
   "Returnd nth element of `list'. If `n' is greater than length of `list' takes `(mod n (length list))' instead."
   (nth (mod (length list) n) list))
-
-;; (defun +utils/open-in-chromium (&optional thing-at-point)
-;;   (interactive)
-;;   (let ((url (if thing-at-point
-;; 		 (thing-at-point-url-at-point)
-;; 	       ()))))
 
 ;;;###autoload
 (defun +utils/delete-visited-file ()
@@ -93,10 +88,21 @@
         ((bound-and-true-p project-root) (project-root))
         (t default-directory)))
 
+(defun +char-whitespace? (char)
+  (memq char '(32 160 9)))
+
+(defun +get-region-contents ()
+  "Get the contents in region."
+  (interactive)
+  (when (use-region-p)
+    (buffer-substring-no-properties (region-beginning) (region-end))))
+
 (use-package simple
   :straight nil
+  :init
+  (setq backward-delete-char-untabify-method 'hungry)
   :hook
-  ((help-mode helpful-mode lsp-ui-doc-mode) . visual-line-mode))
+  ((help-mode-hook helpful-mode-hook lsp-ui-doc-mode-hook) . visual-line-mode))
 
 
 (+leader-keys

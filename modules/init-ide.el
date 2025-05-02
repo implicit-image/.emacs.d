@@ -1,4 +1,7 @@
 
+
+(+module/declare! ide)
+
 (require 'init-format)
 
 (require 'init-edit)
@@ -18,7 +21,6 @@
 (require 'init-compile)
 
 ;;;; in-buffer completion
-;; (require 'init-corfu)
 ;;;; custom LSP integration and utils
 (require 'init-lsp)
 
@@ -26,12 +28,8 @@
 ;; (require 'init-lsp-mode)
 (require 'init-cape)
 (require 'init-corfu)
-(require 'init-company)
 (require 'init-lsp-bridge)
 (require 'init-lsp-mode)
-
-;;;; simple LSP client implemented as an emacs module.
-;; (require 'init-lspce)
 
 (require 'init-ui)
 

@@ -3,14 +3,28 @@
 
 ;;; Code:
 
-(defvar +indent/tab-jump-delims '(?\; ?\) ?\] ?} ?> ?| ?' ?` ?\"))
+(defvar +indent/tab-jump-delims '(?\; ?\) ?\( ?\] ?\[ ?{ ?} ?> ?< ?| ?' ?` ?\. ?\"))
+
+(defvar-local +indent-tab-function nil)
+
+(defmacro +set-tab-function! (mode function &optional hook)
+  "Set default tab function FUNCTION for MODE in HOOK."
+  (let ((fun (intern (concat "+" (symbol-name mode) "-indent-setup")))
+        (hook (or (when (bound-and-true-p hook) hook)
+                  (intern (concat (symbol-name mode) "-hook")))))
+    `(progn (defun ,fun ()
+              (setq-local +indent-tab-function ',function))
+            (add-hook (quote ,hook) (quote ,fun)))))
 
 (defun +smart-tab (&optional prefix)
   ""
   (interactive "P")
-  (cond ((memq (char-after (point)) +indent/tab-jump-delims) (forward-char))
-        (nil (forward))
-        (t (indent-for-tab-command prefix))))
+  (let ((next (char-after (point))))
+    (cond ((bound-and-true-p +indent-tab-function) (funcall-interactively +indent-tab-function))
+          ((memq next +indent/tab-jump-delims) (forward-char))
+          ((+char-whitespace? next) (forward-whitespace 1))
+          ((eolp) (yasnippet-capf))
+          (t (indent-for-tab-command prefix)))))
 
 (use-package indent-bars
   :straight (indent-bars :type git
@@ -25,43 +39,53 @@
         indent-bars-width-frac 0.1
         indent-bars-pad-frac 0.1
         indent-bars-zigzag nil
-        indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1) ; blend=1: blend with BG only
-        indent-bars-highlight-current-depth '(:blend 0.5) ; pump up the BG blend on current
-        indent-bars-display-on-blank-lines t)
+        indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1)
+        indent-bars-highlight-current-depth '(:blend 0.5)
+        indent-bars-display-on-blank-lines 'least)
   :custom
   (indent-bars-prefer-character t)
   :hook
-  ((c-mode
-    gleam-ts-mode
-    java-ts-mode
-    js-ts-mode
-    nwscript-mode
-    tsx-ts-mode
-    typescript-ts-mode
-    c-ts-mode
-    js2-mode
-    css-mode
-    nix-mode
-    rust-ts-mode)
+  ((c-mode-hook
+    gleam-ts-mode-hook
+    java-ts-mode-hook
+    js-ts-mode-hook
+    tsx-ts-mode-hook
+    typescript-ts-mode-hook
+    c-ts-mode-hook
+    js2-mode-hook
+    css-mode-hook
+    nix-mode-hook
+    rust-ts-mode-hook)
    . indent-bars-mode))
 
 (use-package whitespace
   :custom-face
-  (whitespace-space ((t (:foreground ,(doom-lighten (doom-color 'bg) 0.1)))))
-  (whitespace-empty ((t (:foreground ,(doom-lighten (doom-color 'bg) 0.1)))))
+  (whitespace-space ((t (:foreground ,(doom-color 'base4)))) t)
+  (whitespace-hspace ((t (:foreground ,(doom-color 'bg) :background ,(doom-color 'bg)))) t)
+  (whitespace-indentation ((t (:foreground ,(doom-color 'base4)))) t)
   :init
+  (setq whitespace-global-modes '(not markdown-mode gfm-mode org-mode latex-mode))
   (defun +whitespace-toggle-style ()
     "Toggle whitespace mode display style."
     (if (display-graphic-p)
-        (setq whitespace-style '(face indentation tabs spaces tab-mark space-mark))
+        (setq whitespace-style '(face spaces indentation::space space-mark))
       (setq whitespace-style '(face line spaces tabs))))
 
+  (defun +whitespace-on ()
+    (interactive)
+    (whitespace-turn-on))
+
+  (defun +whitespace-off ()
+    (interactive)
+    (whitespace-turn-off))
+
   (setq-default indent-tabs-mode nil)
-  (setq whitespace-style '(face indentation tabs spaces tab-mark space-mark)
-        whitespace-display-mappings '((space-mark 32
+  :config
+  ;; (setq-default whitespace-space-regexp "\\(^ +\\)")
+  (setq whitespace-display-mappings '((space-mark 32 ;; space
                                                   [183]
                                                   [46])
-                                      (space-mark 160
+                                      (space-mark 160 ;; hard space
                                                   [164]
                                                   [95])
                                       (newline-mark 10
@@ -70,10 +94,10 @@
                                                 [187 9]
                                                 [92 9])))
   :hook
-  ((prog-mode emacs-lisp-mode nwscript-mode) . whitespace-mode)
-  (before-save . whitespace-cleanup)
-  (whitespace-mode . +whitespace-toggle-style)
-  (before-save . delete-trailing-whitespace))
+  (enable-theme-functions . global-whitespace-mode)
+  (before-save-hook . whitespace-cleanup)
+  (whitespace-mode-hook . +whitespace-toggle-style)
+  (before-save-hook . delete-trailing-whitespace))
 
 (general-def global-map
   :states 'insert

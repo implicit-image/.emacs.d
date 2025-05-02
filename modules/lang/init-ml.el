@@ -9,11 +9,11 @@
   (setq merlin-completion-with-doc t
 	merlin-completion-dwim t)
   :hook
-  (tuareg-mode . merlin-mode))
+  (tuareg-mode-hook . merlin-mode))
 
 (use-package flycheck-ocaml
   :hook
-  ((merlin-mode reason-mode) . (lambda ()
+  ((merlin-mode-hook reason-mode-hook) . (lambda ()
 				 (interactive)
 				 (setq-local merlin-error-after-save nil)
 				 (flycheck-ocaml-setup))))
@@ -29,8 +29,8 @@
   (setq merlin-eldoc-max-lines 10
 	merlin-eldoc-delimiter "  \n  ")
   :hook
-  ((reason-mode tuareg-mode) . merlin-eldoc-setup)
-  ((merlin-mode) . +ml/setup-merlin-doc))
+  ((reason-mode-hook tuareg-mode-hook) . merlin-eldoc-setup)
+  ((merlin-mode-hook) . +ml/setup-merlin-doc))
 
 (use-package ocaml-ts-mode)
 

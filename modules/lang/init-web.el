@@ -28,7 +28,7 @@
   (setq tide-enable-xref t
         tide-imenu-flatten t
         tide-completion-detailed t)
-  :hook ((typescript-ts-mode) . (lambda ()
+  :hook (typescript-ts-mode-hook . (lambda ()
                                   (interactive)
                                   (tide-setup)
                                   (tide-hl-identifier-mode +1))))
@@ -45,7 +45,7 @@
   :mode "\\.php\\'")
 
 (use-package composer
-  :hook ((php-mode)) . #'composer)
+  :hook (php-mode-hook . composer))
 
 (use-package know-your-http-well)
 

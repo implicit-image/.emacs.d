@@ -3,7 +3,7 @@
   (defun +jvm/set-up-clojure-environment ()
     "Set uo clojure environment depending on a runtime.")
   :hook
-  (clojure-mode . +jvm/set-up-clojure-environment))
+  (clojure-mode-hook . +jvm/set-up-clojure-environment))
 
 (use-package cider)
 

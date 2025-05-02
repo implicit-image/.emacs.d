@@ -1,20 +1,17 @@
-;;; -*- lexical-binding: t -*-
+;;; -*- lexical-binding: t -* t t t-
 
 (use-package context-menu-mode
   :straight nil
-  :config
-
+  :init
   (defun my-ctx-menu-addons (menu click)
     (when lsp-mode
       (define-key-after menu [lsp-hover]
         '(menu-item "LSP hover" lsp-ui-doc-show
                     :help "Show LSP Hover info")))
     menu)
-
-  (add-hook 'context-menu-functions 'my-ctx-menu-addons)
   :hook
-  (dired-mode . context-menu-mode)
-  (prog-mode . context-menu-mode))
+  (context-menu-functions . my-ctx-menu-addons)
+  ((dired-mode-hook prog-mode-hook) . context-menu-mode))
 
 (use-package flycheck-overlay
   :disabled
@@ -39,7 +36,7 @@
         flycheck-overlay-hide-when-cursor-is-on-same-line t
         flycheck-overlay-icon-right-padding 0.9)
   :hook
-  (flycheck-mode . flycheck-overlay-mode)
+  (flycheck-mode-hook . flycheck-overlay-mode)
   :general
   (flycheck-mode-map
    :states '(normal visual)
@@ -50,11 +47,11 @@
 
 (use-package sideline-flycheck
   :custom-face
-  (sideline-flycheck-info ((t (:background ,(doom-color 'base2)))))
-  (sideline-flycheck-warning ((t (:background ,(doom-color 'base2)))))
-  (sideline-flycheck-error ((t (:background ,(doom-color 'base2)))))
+  (sideline-flycheck-info ((t (:background ,(doom-color 'base2)))) t)
+  (sideline-flycheck-warning ((t (:background ,(doom-color 'base2)))) t)
+  (sideline-flycheck-error ((t (:background ,(doom-color 'base2)))) t)
   :init
-  (setq sideline-flycheck-max-lines 1
+  (setq sideline-flycheck-max-lines 5
         sideline-flycheck-show-checker-name nil))
 
 (use-package sideline-blame
@@ -65,7 +62,7 @@
 
 (use-package sideline-lsp
   :custom-face
-  (sideline-lsp-code-action ((t (:foreground ,(doom-color 'base5)))))
+  (sideline-lsp-code-action ((t (:foreground ,(doom-color 'base6)))) t)
   :init
   (setq sideline-lsp-ignore-duplicate t
         sideline-lsp-code-actions-prefix "[!]"))
@@ -77,7 +74,7 @@
                                   sideline-flycheck)
         sideline-backends-right-skip-current-line t
         sideline-order-right 'up
-        sideline-format-right "    %s               "
+        sideline-format-right "%s"
         sideline-display-backend-name nil
         sideline-display-backend-format ""
         sideline-display-backend-type nil)
@@ -87,11 +84,11 @@
   (require 'sideline-blame)
   (global-sideline-mode 1)
   :hook
-  ((flycheck-mode lsp-mode prog-mode blamer-mode) . sideline-mode))
+  ((flycheck-mode-hook lsp-mode-hook prog-mode-hook blamer-mode-hook) . sideline-mode))
 
 (use-package which-func
   :custom-face
-  (header-line ((t (:background ,(doom-color 'bg-alt) :inherit nil))))
+  (header-line ((t (:background ,(doom-color 'bg-alt) :inherit nil :underline ,(doom-color 'fg-alt)))))
   :straight nil
   :init
   (setq which-func-display 'header
@@ -101,10 +98,8 @@
                                          face which-func mouse-face mode-line-highlight help-echo
                                          "Current function\nmouse-1: go to beginning\nmouse-2: toggle rest visibility\nmouse-3: go to end")
                             ""))
-  (defun +which-func--setup ()
-    (which-function-mode))
   :hook
-  ((python-ts-mode c-ts-mode rust-ts-mode emacs-lisp-mode c++-ts-mode ) . +which-func--setup))
+  (after-init-hook . which-function-mode))
 
 (provide 'init-ui)
 ;;; init-ui.el ends here

@@ -13,34 +13,43 @@
 (add-hook 'company-mode-hook '+auto-completion-setup)
 
 (use-package corfu
+  :custom-face
+  (corfu-border ((t (:background ,(doom-color 'fg-alt)))) t)
+  (corfu-echo ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg)))))
   :init
   (setq corfu-cycle t
-        corfu-doc-delay 0.0
+        corfu-doc-delay 0.1
         corfu-echo-delay '(0.3 . 0.15)
         corfu-auto-delay 0.2
         corfu-preselect 'prompt
         corfu-preview-current 'insert
         corfu-auto nil
-        corfu-popupinfo-delay '(0.1 . 0.1)
+        corfu-popupinfo-delay 0.05
         corfu-left-margin-width 3
         corfu-right-margin-width 0
         corfu-bar-width 0
         corfu-count 17
         corfu-max-width 50
         corfu-quit-no-match t
-        corfu-on-exact-match 'insert
-        global-corfu-minibuffer nil)
+        corfu-on-exact-match 'insert)
+
+
   (defun +corfu--setup ()
     (interactive)
     (completion-preview-mode 1)
     (corfu-echo-mode +1)
     (corfu-history-mode +1)
-    (corfu-terminal-mode +1)
+    (when (not (display-graphic-p))
+      (setq-local global-corfu-minibuffer t)
+      (corfu-terminal-mode +1))
     (corfu-popupinfo-mode +1))
+  :config
+  (setf (alist-get 'child-frame-border-width corfu--frame-parameters) 2)
   :hook
-  (nwscript-mode . corfu-mode)
-  (corfu-mode . +corfu--setup)
-  (company-mode . (lambda ()
+  (after-init-hook . global-corfu-mode)
+  (nwscript-mode-hook . corfu-mode)
+  (corfu-mode-hook . +corfu--setup)
+  (company-mode-hook . (lambda ()
                     (interactive)
                     (when (bound-and-true-p corfu-mode)
                       (corfu-mode -1))))
@@ -54,7 +63,8 @@
   (corfu-map
    :states 'insert
    "M-h" 'corfu-popupinfo-documentation
-   "M-g" 'corfu-info-location
+   "M-g" 'corfu-info-locationa
+   "M-e" 'corfu-expand
    [tab] 'corfu-next
    "<tab>" 'corfu-next
    "TAB" 'corfu-next
@@ -62,37 +72,27 @@
    "<backtab>" 'corfu-previous
    "S-TAB" 'corfu-previous))
 
-
 ;; emacs 31 should add tty child frames
 (when (< (string-to-number emacs-version) 31)
   ;; for corfu terminal support
   (use-package corfu-terminal
     :init
     (setq corfu-terminal-enable-on-minibuffer t
-          corfu-terminal-disable-on-gui nil
+          corfu-terminal-disable-on-gui t
           corfu-terminal-position-right-margin 5)
     :hook
-    (tty-setup . corfu-terminal-mode))
+    (tty-setup-hook . corfu-terminal-mode))
 
   (use-package corfu-doc-terminal
     :straight (corfu-doc-terminal :type git
                                   :repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git")
     :hook
-    (corfu-terminal-mode . corfu-doc-terminal-mode)))
-
-(use-package cape
-  :init
-  (defun +corfu/cape-setup ()
-    (require 'cape)
-    (add-hook 'completion-at-point-functions 'cape-file)
-    (add-hook 'completion-at-point-functions 'cape-dabbrev))
-  :hook
-  (corfu-mode . +corfu/cape-setup))
+    (corfu-terminal-mode-hook . corfu-doc-terminal-mode)))
 
 (use-package nerd-icons-corfu
   :functions
   nerd-icons-corfu-formatter
-  :config
+  :init
   (setq nerd-icons-corfu-mapping
         '((array :style "cod" :icon "symbol_array" :face font-lock-type-face)
           (boolean :style "cod" :icon "symbol_boolean" :face font-lock-builtin-face)
@@ -130,7 +130,8 @@
           (value :style "cod" :icon "symbol_field" :face font-lock-builtin-face)
           (variable :style "md" :icon "variable" :face font-lock-variable-name-face)
           (t :style "oct" :icon "code_square" :face font-lock-warning-face)))
-  :hook
-  (global-corfu-mode . (lambda ()
-                         (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))))
+
+  (with-eval-after-load 'corfu
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
+
 (provide 'init-corfu)

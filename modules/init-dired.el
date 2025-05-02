@@ -22,7 +22,7 @@
         dired-recursive-deletes 'top
         dired-auto-revert-buffer t
         dired-create-destination-dirs 'ask)
-  :hook ((dired-mode) . (lambda ()
+  :hook (dired-mode-hook . (lambda ()
                           (interactive)
                           (toggle-truncate-lines +1)
                           (setq-local case-fold-search nil))))
@@ -31,6 +31,6 @@
   :commands
   (diredfl-mode)
   :hook
-  (dired-mode . diredfl-mode))
+  (dired-mode-hook . diredfl-mode))
 
 (provide 'init-dired)

@@ -2,12 +2,12 @@
 
 (use-package editorconfig
   :hook
-  (after-init . editorconfig-mode))
+  (after-init-hook . editorconfig-mode))
 
 (use-package sqlformat)
 
 (use-package apheleia
   :hook
-  (after-init . apheleia-global-mode))
+  (after-init-hook . apheleia-global-mode))
 
 (provide 'init-format)

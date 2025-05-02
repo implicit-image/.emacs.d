@@ -1,13 +1,16 @@
 ;;; -*- lexical-binding: t -*-
 
+
 (use-package lsp-bridge
-  ;; :straight (lsp-bridge :type git
-  ;;                       :host github
-  ;;                       :repo "manateelazycat/lsp-bridge"
-  ;;                       :files ("*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
-  ;;                       ;; do not perform byte compilation or native compilation for lsp-bridge
-  ;;                       :build (:not compile))
-  ;; NOTE: lsp-bridge installed with home-manager
+  ;; if we are on nixos dont install `lsp-bridge' using straight
+  ;; :straight `(,@(when (not (executable-find "nixos-rebuild"))
+  ;;                 `(lsp-bridge :type git
+  ;;                              :host github
+  ;;                              :repo "manateelazycat/lsp-bridge"
+  ;;                              :files ("*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+  ;;                              ;; do not perform byte compilation or native compilation for lsp-bridge
+  ;;                              :build (:not compile))))
+
   :straight nil
   ;; ;; :custom-face
   ;; (lsp-bridge-semantic-tokens-variable-face ((t (:family "Iosevka Comfy" :box (:color "#FFDD33" :line-width -1 :style nil)))))
@@ -33,7 +36,7 @@
         lsp-bridge-nix-lsp-server "nixd"
         lsp-bridge-python-lsp-server "basedpyright")
   :hook
-  (lsp-bridge-mode . (lambda ()
+  (lsp-bridge-mode-hook . (lambda ()
                        (interactive)
                        (indent-tabs-mode -1)
                        (apheleia-mode -1)))
@@ -107,7 +110,7 @@
     :straight (acm-terminal :host github
                             :repo "twlz0ne/acm-terminal")
     :hook
-    (lsp-bridge-mode . (lambda ()
+    (lsp-bridge-mode-hook . (lambda ()
                          (require 'acm-terminal)))
     :general
     (acm-mode-map

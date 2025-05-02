@@ -4,8 +4,8 @@
 
 (use-package cdlatex
   :hook
-  (LaTeX-mode . turn-on-cdlatex)
-  (org-mode . org-cdlatex-mode))
+  (LaTeX-mode-hook . turn-on-cdlatex)
+  (org-mode-hook . org-cdlatex-mode))
 
 (use-package xenops)
 

@@ -21,6 +21,7 @@
 
 ;; make use-package use straight.el by default
 (setq straight-use-package-by-default t
+      use-package-hook-name-suffix nil
       ;; lazy load by default
       use-package-always-defer t)
 
