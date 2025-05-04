@@ -9,7 +9,7 @@
   (setq +base/font-family "Comic Code Ligatures"
         +base/font-weight 'semi-light
         +base/font-size (pcase system-type
-                          ('windows-nt 17)
+                          ('windows-nt 12)
                           (t 17))
         +base/font-spec (font-spec :family +base/font-family
                                    :weight +base/font-weight
