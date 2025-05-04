@@ -92,6 +92,7 @@
   :straight nil
   :init
   (setq which-func-display 'header
+        which-func-modes '(prog-mode)
         which-func-update-delay 0.2
         which-func-format '("      "
                             (:propertize which-func-current

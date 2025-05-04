@@ -1,10 +1,8 @@
-
 (use-package compile
   :straight nil
-  :init
-  (+windows-cfg '((compilation-mode)
-                  :position bottom :height 0.5 :noselect nil :dedicated nil :tail t))
 
+
+  :init
   (defun +compile/open-compile-buffer ()
     "Open *compilation* buffer."
     (interactive)
@@ -24,6 +22,9 @@
   :init
   (setq comint-eol-on-send t)
   :general
+  (comint-mode-map
+   :states 'normal
+   "q" 'quit-window)
   (+leader-keys
     "!" '("Comint run" . comint-run)))
 

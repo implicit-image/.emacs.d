@@ -64,7 +64,7 @@
   (whitespace-hspace ((t (:foreground ,(doom-color 'bg) :background ,(doom-color 'bg)))) t)
   (whitespace-indentation ((t (:foreground ,(doom-color 'base4)))) t)
   :init
-  (setq whitespace-global-modes '(not markdown-mode gfm-mode org-mode latex-mode))
+  (setq whitespace-global-modes '(not markdown-mode gfm-mode org-mode latex-mode csv-mode nxml-mode ess-mode diff-mode magit-mode magit-diff-mode))
   (defun +whitespace-toggle-style ()
     "Toggle whitespace mode display style."
     (if (display-graphic-p)

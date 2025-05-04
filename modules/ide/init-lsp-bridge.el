@@ -14,10 +14,6 @@
   :straight nil
   ;; ;; :custom-face
   ;; (lsp-bridge-semantic-tokens-variable-face ((t (:family "Iosevka Comfy" :box (:color "#FFDD33" :line-width -1 :style nil)))))
-  :init
-  (+windows-cfg
-   '(("\*lsp-bridge-doc\*")
-     :regexp t :height 0.3 :position bottom :dedicated t :noselect nil))
   :config
   (setq lsp-bridge-enable-log t
         lsp-bridge-complete-manually nil
@@ -37,9 +33,9 @@
         lsp-bridge-python-lsp-server "basedpyright")
   :hook
   (lsp-bridge-mode-hook . (lambda ()
-                       (interactive)
-                       (indent-tabs-mode -1)
-                       (apheleia-mode -1)))
+                            (interactive)
+                            (indent-tabs-mode -1)
+                            (apheleia-mode -1)))
   :general
   (lsp-bridge-mode-map
    :states '(insert)
@@ -111,7 +107,7 @@
                             :repo "twlz0ne/acm-terminal")
     :hook
     (lsp-bridge-mode-hook . (lambda ()
-                         (require 'acm-terminal)))
+                              (require 'acm-terminal)))
     :general
     (acm-mode-map
      :states 'insert

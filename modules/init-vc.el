@@ -41,9 +41,6 @@
 (use-package vc
   :straight nil
   :init
-  (+windows-cfg
-   '(("\*vc-diff\**")
-     :regexp t :height 0.5 :position bottom :dedicated nil))
   (setq vc-make-backup-files nil))
 
 
@@ -61,9 +58,9 @@
   :hook
   (dired-mode-hook . diff-hl-dired-mode)
   (after-init-hook . (lambda ()
-                  (interactive)
-                  (diff-hl-margin-mode +1)
-                  (global-diff-hl-mode +1)))
+                       (interactive)
+                       (diff-hl-margin-mode +1)
+                       (global-diff-hl-mode +1)))
   :general
   (diff-hl-mode-map
    :states '(normal visual)

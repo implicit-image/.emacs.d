@@ -41,9 +41,6 @@
 
   ;; (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 
-  (+windows-cfg
-   '(("\*lsp-help\**" "\*lsp-install*")
-     :regexp t :height 0.35 :position bottom :dedicated nil))
   (setq lsp-auto-configure t
         ;; lsp-mode features
         lsp-keymap-prefix "C-c l"
@@ -138,10 +135,6 @@
   (lsp-ui-peek-header ((t (:background ,(doom-color 'bg)))) t)
   (lsp-ui-doc-background ((t :background ,(doom-color 'base0))))
   :config
-  (+windows-cfg '((lsp-ui-imenu-mode)
-                  :position bottom
-                  :dedicated nil
-                  :height 0.3))
   (setq lsp-ui-peek-enable t
         lsp-ui-peek-always-show t
         lsp-ui-peek-list-width 40

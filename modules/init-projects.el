@@ -51,7 +51,6 @@ query for known project and revert its buffers instead."
 (use-package persp-mode
   :config
   (setq persp-autokill-buffer-on-remove 'kill-weak
-        persp-reset-windows-on-nil-window-conf
         persp-nil-hidden t))
 
 (use-package desktop

@@ -12,6 +12,15 @@
         evil-lookup-func 'woman)
   :config
   (evil-mode 1)
+  (evil-set-initial-state 'calibredb-search-mode 'normal)
+  (evil-set-initial-state 'calibredb-show-mode 'normal)
+  (evil-set-initial-state 'pdf-view-mode 'normal)
+  (evil-set-initial-state 'org-agenda-mode 'normal)
+  (evil-set-initial-state 'vterm-mode 'insert)
+  (evil-set-initial-state 'eat-mode 'insert)
+  (evil-set-initial-state 'Info-mode 'normal)
+  (evil-set-initial-state 'shell-command-mode 'normal)
+  (evil-set-initial-state 'comint-mode 'normal)
   :general
   (+leader-keys
     "`" '("Last buffer" . evil-switch-to-windows-last-buffer)
@@ -69,6 +78,34 @@
   :general
   (evil-treemacs-state-map
    :states '(motion)
+   "SPC w" 'evil-window-next
+   "C-w" 'evil-windw-next
+   "C-l" 'evil-window-right
+   "C-k" 'evil-window-up
+   "C-h" 'evil-window-left
+   "C-j" 'evil-window-down
    "p" 'treemacs-project-map))
+
+(use-package evil-textobj-tree-sitter
+  :after (treeesit evil))
+
+(use-package evil-mc
+  :init
+  (setq evil-mc-undo-cursors-on-keyboard-quit t)
+  :hook
+  (after-init-hook . (lambda ()
+                       (interactive)
+                       (global-evil-mc-mode 1)
+                       (add-to-list 'evil-mc-incompatible-minor-modes 'lispy-mode))))
+
+(use-package evil-nerd-commenter
+  :general
+  (global-map
+   :states '(visual normal)
+   "g c" 'evilnc-comment-or-uncomment-lines))
+
+(use-package evil-surround
+  :hook
+  (after-init-hook . global-evil-surround-mode))
 
 (provide 'init-evil)

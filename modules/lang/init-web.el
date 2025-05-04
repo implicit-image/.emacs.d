@@ -22,16 +22,15 @@
 
 (use-package tide
   :init
-  (+windows-cfg '(("\*tide-documentation\*") :position bottom :height 0.3))
   (+lookup-set-fn 'buffer '(typescript-ts-mode . tide-documentation-at-point))
   :config
   (setq tide-enable-xref t
         tide-imenu-flatten t
         tide-completion-detailed t)
   :hook (typescript-ts-mode-hook . (lambda ()
-                                  (interactive)
-                                  (tide-setup)
-                                  (tide-hl-identifier-mode +1))))
+                                     (interactive)
+                                     (tide-setup)
+                                     (tide-hl-identifier-mode +1))))
 
 (use-package web-mode
   :mode "\\.html\\'"

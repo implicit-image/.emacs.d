@@ -1,24 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-(use-package evil-mc
-  :init
-  (setq evil-mc-undo-cursors-on-keyboard-quit t)
-  :hook
-  (after-init-hook . (lambda ()
-                       (interactive)
-                       (global-evil-mc-mode 1)
-                       (add-to-list 'evil-mc-incompatible-minor-modes 'lispy-mode))))
-
-(use-package evil-nerd-commenter
-  :general
-  (global-map
-   :states '(visual normal)
-   "g c" 'evilnc-comment-or-uncomment-lines))
-
-(use-package evil-surround
-  :hook
-  (after-init-hook . global-evil-surround-mode))
-
 (use-package vundo
   :config
   (vundo-popup-mode 1)

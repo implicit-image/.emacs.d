@@ -43,16 +43,8 @@
 (use-package embark
   :custom
   (embark-mixed-indicator-delay 0.3)
-  :init
-  (+windows-cfg '(("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*" " *Embark Actions*" embark-collect-mode)
-                  :regexp t
-                  :position bottom
-                  :height 0.25
-                  :dedicated nil
-                  :noselect nil))
-  (setq prefix-help-command #'embark-prefix-help-command
-        embark-prompter #'embark-completing-read-prompter)
-
+  (embark-prompter 'embark-completing-read-prompter)
+  (embark-quit-after-action t)
   :general
   (vertico-map
    "C-e" '("Embark export" . embark-export)

@@ -25,6 +25,7 @@
 
 
 ;;; Commentary:
+;; This programs allows to dynamically change where the next Emacs window will be displayed
 
 ;; commentary
 
@@ -42,8 +43,21 @@
   "Each of CFG-FORMS is alist of (MODES-OR-BUFFER-NAMES . EWM-CONFIG-SYMBOLS) where
 each of `EWM-CONFIG-SYMBOLS' are one of keys of `ewm-config-symbols'")
 
+(defvar ewm-action-alist
+  (list :split-left '((display-buffer-in-side-window)
+                      (side . left))
+        :split-right '((display-buffer-in-side-window)
+                       (side . right))))
 
-(ewm-define-config-symbol )
+
+
+(defun ewm-modeline-segment ()
+  "")
+
+(with-eval-after-load 'mood-line
+  (defun ewm-mood-line-segment ()
+    ""))
+
 
 (define-minor-mode ewm-mode
   "Minor mode for managing windows in EMACS."

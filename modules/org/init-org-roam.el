@@ -31,9 +31,6 @@
     "Setup `org-roam' related variables and modes."
     (interactive)
     (setq-local org-attach-id-dir (f-join org-roam-directory "data/")))
-
-  (+windows-cfg '(("\*Org Select\*")
-                  :position bottom :height 0.3 :noselect nil))
   :config
   (org-roam-db-autosync-mode)
   (require 'org-roam-protocol)

@@ -1,11 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package calibredb
-  :init
-  (evil-set-initial-state 'calibredb-search-mode 'normal)
-  (evil-set-initial-state 'calibredb-show-mode 'normal)
-  ;; (+windows-cfg '((calibredb-show-mode)
-  ;; 		  :position right :width 0.5 :dedicated t :noselect nil :stick nil))
   :config
   (setq calibredb-root-dir "~/library"
         calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir)
@@ -159,11 +154,8 @@
 
 (use-package pdf-tools
   :init
-  (evil-set-initial-state 'pdf-view-mode 'normal)
   (add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
   (setq pdf-outline-imenu-use-flat-menus t)
-  (+windows-cfg '((pdf-outline-buffer-mode)
-                  :position left :width 0.2 :noselect nil :stick t :dedicated nil))
   :general
   (pdf-view-mode-map
    :states '(normal)

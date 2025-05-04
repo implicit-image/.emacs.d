@@ -29,18 +29,21 @@
 
 ;;;###autoload
 (defun +terminal/popup (&optional create-new)
-  "Popup an existing terminal or a new one."
+  "Popup an existing terminal or a new one if CREATE-NEW is non-nil."
   (interactive)
-  (let ((buffers (mapcar 'buffer-name (+terminal--get-buffers))))
+  (let ((buffers (mapcar 'buffer-name (+terminal--get-buffers)))
+        (action '((display-buffer-below-selected)
+                  (window-height . 0.3)
+                  (dedicated . t))))
     (pcase (length buffers)
-      (1 (popwin:popup-buffer (-first-item buffers)))
+      (1 (pop-to-buffer (-first-item buffers) action))
       (_ (consult--read buffers
                         :prompt "Popup vterm"
-                        :default 0
+                        :default 1
                         :require-match nil
                         :lookup (lambda (buffer &rest args)
                                   (interactive)
-                                  (popwin:popup-buffer buffer)))))))
+                                  (pop-to-buffer buffer action)))))))
 
 ;;;###autoload
 (defun +terminal/open (&optional other-window)
@@ -90,20 +93,18 @@
 
 (use-package shell
   :straight nil
-  :init
-  (+windows-cfg '((shell-command-mode)
-                  :position bottom :height 0.3)))
+  :general
+  (shell-command-mode-map
+   :states 'normal
+   "q" 'quit-window))
 
 (use-package vterm
   :init
-  (evil-set-initial-state 'vterm-mode 'insert)
   (+set-tab-function! vterm-mode vterm-send-tab)
   :config
   (setq vterm-shell (exec-path-from-shell-getenv "SHELL")))
 
-(use-package eat
-  :init
-  (evil-set-initial-state 'eat-mode 'insert))
+(use-package eat)
 
 (use-package eee
   :straight (eee :type git

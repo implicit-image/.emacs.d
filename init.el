@@ -77,6 +77,8 @@
   (require 'init-elisp-libs)
   (require 'init-keybindings)
   (require 'init-base)
+  ;; keybindings
+  ;; (require 'init-meow)
   (require 'init-evil)
 
   (require 'init-treesitter)

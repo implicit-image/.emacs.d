@@ -34,8 +34,6 @@
 ;; common-lisp
 (use-package sly
   :init
-  (+windows-cfg '((sly-repl-mode)
-                  :position bottom :height 0.3 :noselect nil :dedicated t :stick nil))
   (setq inferior-lisp-program "sbcl"))
 
 (use-package common-lisp-snippets)
@@ -44,7 +42,7 @@
   :straight nil
   :mode "\\.lisp\\'"
   :hook (common-lisp-mode-hook . (lambda ()
-                              (interactive)
-                              (slime-mode +1))))
+                                   (interactive)
+                                   (slime-mode +1))))
 
 (provide 'init-lisp)

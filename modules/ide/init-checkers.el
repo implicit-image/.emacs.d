@@ -5,11 +5,6 @@
   (flycheck-indication-mode nil)
   (flycheck-highlighting-mode 'symbols)
   (flycheck-idle-change-delay 0.5)
-  :init
-  (+windows-cfg '((flycheck-mode-major-mode)
-                  :position bottom :height 0.3))
-  (+windows-cfg '((flycheck-error-list-mode)
-                  :position bottom :height 0.4 :noselect nil))
   :hook
   ((lsp-mode-hook emacs-lisp-mode-hook merlin-mode-hook) . flycheck-mode)
   (flycheck-error-list-mode-hook . visual-line-mode)

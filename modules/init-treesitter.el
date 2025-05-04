@@ -25,13 +25,9 @@
   (setq treesit-auto-install t)
   :hook
   (after-init-hook . (lambda ()
-                  (interactive)
-                  (require 'treesit-auto)
-                  (treesit-auto-add-to-auto-mode-alist 'all)
-                  (global-treesit-auto-mode))))
-
-
-(use-package evil-textobj-tree-sitter
-  :after (treeesit evil))
+                       (interactive)
+                       (require 'treesit-auto)
+                       (treesit-auto-add-to-auto-mode-alist 'all)
+                       (global-treesit-auto-mode))))
 
 (provide 'init-treesitter)

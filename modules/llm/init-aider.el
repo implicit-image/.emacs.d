@@ -7,9 +7,6 @@
              :repo "tninja/aider.el"
              :files ("aider.el"))
   :init
-  (+windows-cfg '(("*aider")
-                  :position right :width 0.5 :regexp t))
-
   (defun +aider/setup ()
     "Setup aider environment."
     (let* ((auth-info (car (auth-source-search :host "DeepSeek-R1-nebbc.eastus2.models.ai.azure.com"

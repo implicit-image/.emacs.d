@@ -95,14 +95,7 @@
     (message "Not in org mode")))
 
 (use-package apropos
-  :straight nil
-  :init
-  (+windows-cfg '((apropos-mode)
-                  :height 0.3
-                  :position bottom
-                  :dedicated nil
-                  :stick nil
-                  :noselect nil)))
+  :straight nil)
 
 (use-package dumb-jump
   :init
@@ -120,19 +113,10 @@
     "c g b" '("Xref back" . xref-go-back)))
 
 (use-package info
-  :straight nil
-  :init
-  (evil-set-initial-state 'Info-mode 'normal))
+  :straight nil)
 
 (use-package help-mode
   :straight nil
-  :init
-  (+windows-cfg '((help-mode)
-                  :height 0.3
-                  :position bottom
-                  :dedicated nil
-                  :stick nil
-                  :noselect nil))
   :general
   (help-mode-map
    :states '(normal)
@@ -141,10 +125,6 @@
 (use-package helpful
   :init
   (+lookup-set-fn 'buffer '(helpful-mode . helpful-at-point))
-  ;;popwin support
-  (+windows-cfg
-   '((helpful-mode)
-     :height 0.3 :position bottom :dedicated t :stick nil :noselect nil))
   ;; (setq helpful-switch-buffer-function )
   :general
   (+leader-keys
@@ -162,8 +142,6 @@
 (use-package dictionary
   :straight nil
   :init
-  (+windows-cfg '(("\*Dictionary\*")
-                  :position bottom :height 0.3))
   (setq dictionary-server "dict.org")
   :general
   (+leader-keys
