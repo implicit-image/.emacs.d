@@ -31,6 +31,7 @@
         org-pretty-entities t
         org-highlight-latex-and-related '(latex native)
         org-use-sub-superscripts "{}"
+        org-inhibit-logging t
         org-startup-with-inline-images t
         org-image-actual-width t
         org-latex-preview-live-throttle 0.1
@@ -114,8 +115,8 @@
   :hook
   (org-mode-hook . visual-line-mode)
   (org-mode-hook . (lambda ()
-                (interactive)
-                (whitespace-mode -1)))
+                     (interactive)
+                     (whitespace-mode -1)))
   (org-mode-hook . org-latex-preview-auto-mode)
   :general
   (org-mode-map

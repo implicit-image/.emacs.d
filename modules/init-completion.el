@@ -43,12 +43,60 @@
 (use-package embark
   :custom
   (embark-mixed-indicator-delay 0.3)
-  (embark-prompter 'embark-completing-read-prompter)
+  (embark-prompter 'embark-keymap-prompter)
   (embark-quit-after-action t)
+  :init
+  (defun embark-which-key-indicator ()
+    "An embark indicator that displays keymaps using which-key.
+The which-key help message will show the type and value of the
+current target followed by an ellipsis if there are further
+targets."
+    (lambda (&optional keymap targets prefix)
+      (if (null keymap)
+          (which-key--hide-popup-ignore-command)
+        (which-key--show-keymap
+         (if (eq (plist-get (car targets) :type) 'embark-become)
+             "Become"
+           (format "Act on %s '%s'%s"
+                   (plist-get (car targets) :type)
+                   (embark--truncate-target (plist-get (car targets) :target))
+                   (if (cdr targets) "…" "")))
+         (if prefix
+             (pcase (lookup-key keymap prefix 'accept-default)
+               ((and (pred keymapp) km) km)
+               (_ (key-binding prefix 'accept-default)))
+           keymap)
+         nil nil t (lambda (binding)
+                     (not (string-suffix-p "-argument" (cdr binding))))))))
+
+  (setq embark-indicators
+        '(embark-which-key-indicator
+          embark-highlight-indicator
+          embark-isearch-highlight-indicator))
+
+  (defun embark-hide-which-key-indicator (fn &rest args)
+    "Hide the which-key indicator immediately when using the completing-read prompter."
+    (which-key--hide-popup-ignore-command)
+    (let ((embark-indicators
+           (remq #'embark-which-key-indicator embark-indicators)))
+      (apply fn args)))
+
+  (advice-add #'embark-completing-read-prompter
+              :around #'embark-hide-which-key-indicator)
+  :config
+  (require 'embark-consult)
   :general
   (vertico-map
-   "C-e" '("Embark export" . embark-export)
-   "C-a" '("Embark act" . embark-act))
+   "C-c e" '("Embark export" . embark-export)
+   "C-c l" '("Embark live" . embark-live)
+   "C-c o" '("Embark open" . embark-open-externally)
+   "C-c a" '("Embark act" . embark-act)
+   "C-c d" '("Embark dwim" . embark-dwim)
+   "C-c i" '("Embark insert" . embark-insert)
+   "C-c c" '("Embark collect" . embark-collect))
+  (general-override-mode-map
+   :states '(normal visual)
+   "C-c a" 'embark-act)
   (+leader-keys
     "e" '("Embark Act" . embark-act)))
 
@@ -57,6 +105,14 @@
   (consult--read)
   :custom
   (xref-show-xrefs-function 'consult-xref)
+  :init
+  (setq consult-find-args (+os/per-system! :wsl  (format "%s . -not ( -path */.[A-Za-z]* -prune )"
+                                                         find-program)
+                                           :linux (format "%s . -not ( -path */.[A-Za-z]* -prune )"
+                                                          find-program)
+                                           :win (format "%s . -not ( -path */.[A-Za-z]* -prune )"
+                                                        find-program)))
+
   :config
   (require 'consult-xref)
   (defvar +completion/consult-prev-plist nil
@@ -85,9 +141,6 @@
     "s o" '("Imenu outline" . consult-outline)
     "t m" '("Toggle minor mode" . consult-minor-mode-menu)))
 
-(use-package embark-consult
-  :hook
-  (embark-collect-mode-hook . consult-preview-at-point-mode))
 
 (use-package orderless
   :custom

@@ -2,7 +2,10 @@
 
 (use-package magit
   :init
-  (setq forge-add-default-bindings nil)
+  (setq forge-add-default-bindings nil
+        magit-git-executable (+os/per-system! :wsl "git"
+                                              :linux "git"
+                                              :win "C:/Program Files/Git/cmd/git.exe"))
   :hook
   (magit-process-find-password-functions . magit-process-password-auth-source)
   :general

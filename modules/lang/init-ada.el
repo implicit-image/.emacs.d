@@ -4,7 +4,7 @@
 (use-package ada-mode
   :init
   (setq ada-indent-use 4
-	ada-indent-when 4))
+        ada-indent-when 4))
 
 
 ;;;; Editing GNAT files.

@@ -5,11 +5,20 @@
   :init
   (require 'f)
 
+  (defun +set-global-font-size ()
+    (interactive)
+    (let* ((weight +base/font-weight)
+          (family +base/font-family)
+          (size (read-number "Font size: "))
+          (spec (font-spec :family family
+                           :weight weight
+                           :size size)))
+      (set-frame-font spec nil t t)))
   ;;;; Custom global options
   (setq +base/font-family "Comic Code Ligatures"
         +base/font-weight 'semi-light
         +base/font-size (pcase system-type
-                          ('windows-nt 12)
+                          ('windows-nt 10)
                           (t 17))
         +base/font-spec (font-spec :family +base/font-family
                                    :weight +base/font-weight
@@ -97,7 +106,10 @@
     conf-mode-hook
     tuareg-mode-hook)
    . display-line-numbers-mode)
-  (window-setup-hook . toggle-frame-fullscreen))
+  (window-setup-hook . toggle-frame-fullscreen)
+  :general
+  (+leader-keys
+    "t f" '+set-global-font-size))
 
 ;; load $PATH from shell
 (use-package exec-path-from-shell

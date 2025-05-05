@@ -12,6 +12,21 @@
 (use-package ace-window
   :init
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (setq aw-dispatch-alist
+        '((?d aw-delete-window "Delete Window")
+          (?S aw-swap-window "Swap Windows")
+          (?m aw-move-window "Move Window")
+          (?c aw-copy-window "Copy Window")
+          (?b aw-switch-buffer-in-window "Select Buffer")
+          (?F aw-flip-window)
+          (?B aw-switch-buffer-other-window "Switch Buffer Other Window")
+          ;; (?! aw-execute-command-other-window "Execute Command Other Window")
+          ;; (? aw-split-window-fair "Split Fair Window")
+          (?V aw-split-window-vert "Split Vert Window")
+          (?H aw-split-window-horz "Split Horz Window")
+          (?M delete-other-windows "Delete Other Windows")
+          (?T aw-transpose-frame "Transpose Frame")
+          (?? aw-show-dispatch-help)))
   :general
   (+leader-keys
     "w w" '("Switch" . ace-window))
@@ -33,12 +48,6 @@
                     buffers)))
           popwin-cfg-forms))
 
-  (defun +windows--buffer-below-or-split ()
-    nil)
-
-
-  (defvar +windows-popup-stack nil)
-
   (defun +windows--popup-below-selected (buffer alist)
     (display-buffer-below-selected buffer alist))
 
@@ -59,7 +68,7 @@
                                        (derived-mode . apropos-mode)
                                        (derived-mode . helpful-mode)))
                                 (display-buffer-below-selected)
-                                (window-height . 18)
+                                (window-height . 0.4)
                                 (body-function . select-window))
                                ;; embark shenanigans
                                ((or . ("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
@@ -67,7 +76,7 @@
                                        (derived-mode . embark-collect-mode)))
                                 (display-buffer-reuse-mode-window display-buffer-in-side-window)
                                 (side . bottom)
-                                (window-height . 20)
+                                (window-height . 17)
                                 (window-parameters . ((mode-line-format . none))))
                                ;; interactive bottom buffers
                                ((or . ((derived-mode . flycheck-error-list-mode)
@@ -103,8 +112,7 @@
                                 ((or . ("\*Org-Babel\*"
                                         "\*Org Src\*"))
                                  (display-buffer-same-window)
-                                 (dedicated . nil))
-                                )
+                                 (dedicated . nil)))
                                ;; bottom side window
                                ((or . ((derived-mode . proced-mode)))
                                 (display-buffer-at-bottom)

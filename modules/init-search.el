@@ -3,8 +3,14 @@
 (use-package grep
   :straight nil
   :init
-  (setq grep-program "rg")
+  (setq find-program (+os/per-system! :win (shell-quote-argument "c:/Program Files/Git/usr/bin/find.exe")
+                                      :linux "find"
+                                      :wsl "find"))
 
+  (setq grep-program (or (executable-find "rg")
+                         (executable-find "grep")))
+
+  (setq grep-find-command (+os/per-system! :win ))
   ;; for preview in grep mode
   (defun +next-error-no-select (&optional n)
     (interactive "p")
@@ -25,7 +31,15 @@
    "M-n" '+next-error-no-select
    "M-p" '+previous-error-no-select))
 
-(use-package rg)
+(use-package rg
+  :init
+  (setq rg-align-position-numbers t)
+  :general
+  (general-override-mode-map
+   :states '(normal visual)
+   "g *" 'rg-dwim)
+  (+leader-keys
+    "s R" '("Ripgrep menu" . rg-menu)))
 
 (defun +search/rg-thing-at-point ()
   (interactive)
