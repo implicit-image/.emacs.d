@@ -37,7 +37,14 @@
   :general
   (general-override-mode-map
    :states '(normal visual)
-   "g *" 'rg-dwim)
+   "g /" '(:keymap rg-global-map :package rg))
+  (rg-global-map
+   "d" 'ignore
+   "/" 'rg-dwim
+   "p" 'rg-project
+   "s" 'rg-isearch-project
+   "S" 'rg-isearch-current-dir
+   "f" 'rg-isearch-current-file)
   (+leader-keys
     "s R" '("Ripgrep menu" . rg-menu)))
 
