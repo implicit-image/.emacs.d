@@ -165,4 +165,24 @@
    "c S" '("Workspace LSP symbols" . consult-lsp-symbols)
    "c e" '("LSP diagnostics" . consult-lsp-diagnostics)))
 
+(use-package lsp-treemacs
+  :custom
+  (lsp-treemacs-call-hierarchy-expand-depth t)
+  (lsp-treemacs-error-list-expand-depth 3)
+  (lsp-treemacs-type-hierarchy-epxand-depth 3)
+  :hook
+  (after-init . lsp-treemacs-sync-mode)
+  :general
+  (lsp-ui-mode-map
+   :states '(normal visual)
+   :prefix "SPC c"
+   :global-prefix"C-c"
+   "t e" '("Error list" . lsp-treemacs-errors-list)
+   "t s" '("Symbols per file" . lsp-treemacs-symbols)
+   "t r" '("References" . lsp-treemacs-references)
+   "t i" '("Implementations" . lsp-treemacs-implementations)
+   "t c" '("Call hierarchy" . lsp-treemacs-call-hierarchy)
+   "t t" '("Type hierarchy" . lsp-treemacs-type-hierarchy)))
+;; "T d" '("Dependencies" . lsp-treemacs-deps--icon)))
+
 (provide 'init-lsp-mode)
