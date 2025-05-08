@@ -24,6 +24,11 @@
                                           nil
                                           (file-name-nondirectory (buffer-file-name))))))
 
+  (add-to-list 'save-some-buffers-action-alist
+               (list "d"
+                     (lambda (buffer) (diff-buffer-with-file (buffer-file-name buffer)))
+                     "show diff between the buffer and its file"))
+
   :general
   (+leader-keys
     "." '("Find file in cwd" . find-file)
@@ -38,7 +43,7 @@
 (use-package autorevert
   :straight nil
   :hook
-  (dired-mode-hook . auto-revert-mode))
+  ((dired-mode-hook pdf-mode-hook) . auto-revert-mode))
 
 (use-package ready-player
   :init
