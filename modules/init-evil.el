@@ -109,4 +109,17 @@
   :hook
   (after-init-hook . global-evil-surround-mode))
 
+(use-package evil-anzu
+  :init
+  (setq anzu-search-threshold nil
+        anzu-replace-threshold nil)
+  :hook
+  (after-init-hook . global-anzu-mode)
+  :general
+  (+leader-keys
+    "c R" '("Rename" . anzu-query-replace)
+    "s r" '("Query replace" . anzu-query-replace)
+    "s R" '("Replace at point" . anzu-replace-threshold)
+    "s R" '("Query replace regexp" . anzu-query-replace-regexp)))
+
 (provide 'init-evil)
