@@ -1,16 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-
-(use-package hide-mode-line
-  :hook
-  ((calibredb-search-mode-hook
-    calibredb-edit-annotation-mode-hook
-    calibredb-show-mode-hook
-    helpful-mode-hook
-    fundamental-mode-hook
-    help-mode-hook)
-   . hide-mode-line-mode))
-
 ;; (use-package emacs
 ;;   (setq-default mode-line-format
 ;;                 ("%e" mode-line-front-space

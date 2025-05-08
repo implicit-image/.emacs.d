@@ -56,6 +56,12 @@
   (defun +windows--split-below-side (buffer alist))
 
   (setq display-buffer-alist '(;; no window
+                               ((or . ((derived-mode . calibredb-search-mode)
+                                       (derived-mode . calibredb-edit-annotation-mode)
+                                       (derived-mode . calibredb-show-mode-hook)))
+                                (window-parameters . ((mode-line-format . none))))
+                               ((derived-mode . fundamental-mode)
+                                (window-parameters . ((mode-line-format . none))))
                                ((or . ("\*Warnings\*"))
                                 (display-buffer-no-window))
                                ;; bottom side window
