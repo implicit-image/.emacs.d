@@ -1,7 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-(require 'init-lookup-external-sources)
-
 ;;;; Alists of lookup functions
 ;;;; each list contains (MAJOR-MODE . LOOKUP-FUNCTION) pairs
 ;;;; if current mode is not found, the default lookup mechanism, `+lookup/' is used
@@ -107,6 +105,8 @@
 (use-package devdocs)
 
 (use-package xref
+  :init
+  (setq xref-search-program 'ripgrep)
   :general
   (+leader-keys
     "c g f" '("Xref forward" . xref-go-forward)
@@ -209,7 +209,7 @@
   global-map
   :states '(visual normal)
   "K" '+lookup/documentation
-  "C-k" '+lookup/in-buffer
+  "M-k" '+lookup/in-buffer
   help-mode-map
   :states '(normal)
   "q" 'quit-window)

@@ -21,6 +21,7 @@
   (evil-set-initial-state 'Info-mode 'normal)
   (evil-set-initial-state 'shell-command-mode 'normal)
   (evil-set-initial-state 'comint-mode 'normal)
+  (evil-set-initial-state 'profiler-report-mode 'normal)
   :general
   (+leader-keys
     "`" '("Last buffer" . evil-switch-to-windows-last-buffer)
@@ -73,18 +74,18 @@
 
 ;;;; evil bindings for treemacs
 (use-package treemacs-evil
-  :demand
-  :after treemacs
+  :init
+  (with-eval-after-load 'treemacs
+    (require 'treemacs-evil))
   :general
   (evil-treemacs-state-map
-   :states '(motion)
    "SPC w" 'evil-window-next
-   "C-w" 'evil-windw-next
+   "C-w" 'evil-window-next
    "C-l" 'evil-window-right
    "C-k" 'evil-window-up
+   "C-p" '(:keymap projectile-command-map :package projectile)
    "C-h" 'evil-window-left
-   "C-j" 'evil-window-down
-   "p" 'treemacs-project-map))
+   "C-j" 'evil-window-down))
 
 (use-package evil-textobj-tree-sitter
   :after (treeesit evil))

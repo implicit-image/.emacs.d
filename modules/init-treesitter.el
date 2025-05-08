@@ -25,7 +25,6 @@
   (setq treesit-auto-install t)
   :hook
   (after-init-hook . (lambda ()
-                       (interactive)
                        (require 'treesit-auto)
                        (treesit-auto-add-to-auto-mode-alist 'all)
                        (global-treesit-auto-mode))))

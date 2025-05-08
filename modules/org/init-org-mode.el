@@ -34,8 +34,8 @@
         org-inhibit-logging t
         org-startup-with-inline-images t
         org-image-actual-width t
-        org-latex-preview-live-throttle 0.1
-        org-latex-preview-live-debounce 0.1
+        org-latex-preview-live-throttle 0.5
+        org-latex-preview-live-debounce 0.5
         org-latex-preview-live t
         org-latex-preview-appearance-options '(:foreground "#f1f1f1" :background "#181818" :scale 2.0 :zoom. 1.0 :page-width 1.0 :matchers ("begin" "$1" "$" "$$" "\\(" "\\["))
         +org/agenda-file (substitute-in-file-name "$HOME/org/agenda/agenda.org")
@@ -148,19 +148,6 @@
                               :repo "Fuco1/org-pretty-table")
   :hook
   (org-mode-hook . org-pretty-table-mode))
-
-(use-package edraw
-  :straight (edraw :type git
-                   :host github
-                   :repo "misohena/el-easydraw")
-  :functions
-  (edraw-org-setup-default edraw-org-setup-exporter)
-  :config
-  (with-eval-after-load "ox"
-    (require 'edraw-org)
-    (edraw-org-setup-exporter))
-  :hook
-  (org-mode-hook . edraw-org-setup-default))
 
 (use-package org-xopp
   :straight (org-xopp :type git

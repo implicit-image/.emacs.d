@@ -26,7 +26,6 @@
         (exec-path-from-shell-setenv "AZURE_API_BASE" api-base))
       (when api-version
         (exec-path-from-shell-setenv "AZURE_API_VERSION" api-version))))
-  :config
 
   (setq aider-args `("--model" "azure/DeepSeek-R1-nebbc.eastus2.models.ai.azure.com"))
   :general

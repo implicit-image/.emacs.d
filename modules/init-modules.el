@@ -25,7 +25,6 @@
 (defun +modules/browse ()
   "Open user init module file."
   (interactive)
-  (require 'f)
   (consult--read (mapcar (lambda (path)
                            (string-trim-left path (format "^%s/" +modules/path)))
                          (-filter (lambda (path)
@@ -34,8 +33,8 @@
                  :prompt "Open init module file: "
                  :require-match t
                  :lookup (lambda (name &rest args)
-                           (message (format "entry is %s" (f-join +modules/path name)))
-                           (find-file (f-join +modules/path name)))))
+                           (message (format "entry is %s" (file-name-concat +modules/path name)))
+                           (find-file (file-name-concat +modules/path name)))))
 
 (defun +modules/ripgrep ()
   (interactive)

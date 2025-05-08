@@ -2,7 +2,7 @@
 
 (use-package auth-source
   :demand
-  :config
+  :init
   (setq auth-sources '("~/.authinfo" "~/.authinfo.gpg" "~/.netrc")))
 
 (use-package tramp

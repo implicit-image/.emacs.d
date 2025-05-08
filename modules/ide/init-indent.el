@@ -60,9 +60,9 @@
 
 (use-package whitespace
   :custom-face
-  (whitespace-space ((t (:foreground ,(doom-color 'base4)))) t)
-  (whitespace-hspace ((t (:foreground ,(doom-color 'bg) :background ,(doom-color 'bg)))) t)
-  (whitespace-indentation ((t (:foreground ,(doom-color 'base4)))) t)
+  (whitespace-space ((t (:foreground ,(doom-color 'base4)))))
+  (whitespace-hspace ((t (:foreground ,(doom-color 'bg) :background ,(doom-color 'bg)))))
+  (whitespace-indentation ((t (:foreground ,(doom-color 'base4)))))
   :init
   (setq whitespace-global-modes '(not markdown-mode gfm-mode org-mode latex-mode dired-mode csv-mode nxml-mode ess-mode diff-mode magit-mode magit-diff-mode))
   (defun +whitespace-toggle-style ()
@@ -79,7 +79,6 @@
     (interactive)
     (whitespace-turn-off))
 
-  (setq-default indent-tabs-mode nil)
   :config
   ;; (setq-default whitespace-space-regexp "\\(^ +\\)")
   (setq whitespace-display-mappings '((space-mark 32 ;; space

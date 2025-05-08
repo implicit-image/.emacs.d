@@ -5,6 +5,7 @@
   (flycheck-indication-mode nil)
   (flycheck-highlighting-mode 'symbols)
   (flycheck-idle-change-delay 0.5)
+  (flycheck-display-errors-delay 1)
   :hook
   ((lsp-mode-hook emacs-lisp-mode-hook merlin-mode-hook) . flycheck-mode)
   (flycheck-error-list-mode-hook . visual-line-mode)
@@ -32,6 +33,9 @@
 
 (use-package flyspell
   :straight nil
+  :init
+  (setq flyspell-issue-welcome-flag nil
+        flyspell-issue-message-flag nil)
   :hook
   ((prog-mode-hook emacs-lisp-mode-hook) . flyspell-prog-mode)
   ((org-mode-hook markdown-mode-hook text-mode-hook) . flyspell-mode))

@@ -14,7 +14,7 @@
 
 (use-package corfu
   :custom-face
-  (corfu-border ((t (:background ,(doom-color 'fg-alt)))) t)
+  (corfu-border ((t (:background ,(doom-color 'fg-alt)))))
   (corfu-echo ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg)))))
   :init
   (setq corfu-cycle t
@@ -50,9 +50,9 @@
   (nwscript-mode-hook . corfu-mode)
   (corfu-mode-hook . +corfu--setup)
   (company-mode-hook . (lambda ()
-                    (interactive)
-                    (when (bound-and-true-p corfu-mode)
-                      (corfu-mode -1))))
+                         (interactive)
+                         (when (bound-and-true-p corfu-mode)
+                           (corfu-mode -1))))
   (lsp-bridge . (lambda ()
                   (corfu-mode -1)))
   :general

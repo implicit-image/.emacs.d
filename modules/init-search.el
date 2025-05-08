@@ -8,9 +8,9 @@
                                       :wsl "find"))
 
   (setq grep-program (or (executable-find "rg")
-                         (executable-find "grep")))
-
-  (setq grep-find-command (+os/per-system! :win ))
+                         (executable-find "grep"))
+        grep-find-ignored-directories '("SCCS" "RCS" "CVS" "MCVS" ".src" ".svn" ".git" ".hg" ".bzr" "_MTN" "_darcs" "{arch}" "node_modules" "build" "dist")
+        )
   ;; for preview in grep mode
   (defun +next-error-no-select (&optional n)
     (interactive "p")

@@ -27,18 +27,33 @@
   (vertico-cycle t)
   (vertico-preselect 'first)
   :init
-  (setq vertico-scroll-margin 5)
+  (setq vertico-scroll-margin 5
+        vertico-flat-format
+        '(:multiple
+          #(" %s " 0 1 (face minibuffer-prompt) 3 4 (face minibuffer-prompt))
+          :single
+          #("[%s]" 0 1 (face minibuffer-prompt) 1 3 (face success) 3 4
+            (face minibuffer-prompt))
+          :prompt
+          #("(%s)" 0 1 (face minibuffer-prompt) 3 4 (face minibuffer-prompt))
+          :separator #(" | " 0 3 (face minibuffer-prompt)) :ellipsis
+          #(" ... " 0 1 (face minibuffer-prompt)) :no-match "[No match]" :spacer
+          #(" " 0 1 (cursor t))))
+  :config
+  (vertico-flat-mode 1)
   :hook
   (marginalia-mode-hook . vertico-mode)
   :general
   (+leader-keys
     "t c" '("Bring up last completion" . vertico-suspend))
   (vertico-map
+   "C-c f" '("Toggle flat mode" . vertico-flat-mode)
    "C-c ." '("Repeat last vertico session" . vertico-repeat)
    "C-c i" '("Insert candidate" . vertico-insert)
    "C-c s" '("Suspend current session" . vertico-suspend)
    "C-c b" '("Toggle vertico-buffer-mode" . vertico-buffer-mode)))
 
+(use-package embark-consult)
 
 (use-package embark
   :custom
@@ -88,15 +103,18 @@ targets."
   :general
   (vertico-map
    "C-c e" '("Embark export" . embark-export)
+   "C-c b" '("Embark become" . embark-become)
    "C-c l" '("Embark live" . embark-live)
    "C-c o" '("Embark open" . embark-open-externally)
    "C-c a" '("Embark act" . embark-act)
+   "C-c A" '("Embark act on all" . embark-act-all)
    "C-c d" '("Embark dwim" . embark-dwim)
    "C-c i" '("Embark insert" . embark-insert)
    "C-c c" '("Embark collect" . embark-collect))
   (general-override-mode-map
    :states '(normal visual)
-   "C-c a" 'embark-act)
+   "C-c a" 'embark-act
+   "C-c A" 'embark-act-all)
   (+leader-keys
     "e" '("Embark Act" . embark-act)))
 
@@ -114,14 +132,13 @@ targets."
                                                         find-program)))
 
   :config
-  (require 'consult-xref)
-  (defvar +completion/consult-prev-plist nil
-    "alist of last recorder picker queries.")
-
   (consult-customize
    consult-grep consult-ripgrep consult-git-grep consult-line-multi
    :initial "")
   :general
+  (rg-global-map
+   :states '(normal visual)
+   "?" 'consult-ripgrep)
   (+leader-keys
     "m :" '("Run active mode command" . consult-mode-command)
     "/" '("Grep directory" . consult-ripgrep)
@@ -132,6 +149,7 @@ targets."
     "f r" '("Recent files" . consult-recent-file)
     "f /" '("Find files" . consult-find)
     "h i" '("Emacs Info" . consult-info)
+    "h ! m" '("Manpages" . consult-man)
     "o b" '("Bookmarks" . consult-bookmark)
     ;; search
     "s b" '("Search buffer" . consult-line)

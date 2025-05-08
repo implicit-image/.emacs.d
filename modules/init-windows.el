@@ -3,11 +3,12 @@
 
 (use-package frame
   :straight nil
-  :config
+  :init
   (setq window-divider-default-places 'right-only
         window-divider-default-right-width 1
         window-divider-default-bottom-width 1)
-  (window-divider-mode))
+  :hook
+  (window-setup-hook . window-divider-mode))
 
 (use-package ace-window
   :init
@@ -20,7 +21,7 @@
           (?b aw-switch-buffer-in-window "Select Buffer")
           (?F aw-flip-window)
           (?B aw-switch-buffer-other-window "Switch Buffer Other Window")
-          ;; (?! aw-execute-command-other-window "Execute Command Other Window")
+          (?! aw-execute-command-other-window "Execute Command Other Window")
           ;; (? aw-split-window-fair "Split Fair Window")
           (?V aw-split-window-vert "Split Vert Window")
           (?H aw-split-window-horz "Split Horz Window")
@@ -37,6 +38,7 @@
 (use-package window
   :straight nil
   :init
+
   (defun +windows-cfg (&rest display-cfg-forms)
     "Each one of POPWIN-CFG-FORMS is (BUFFER-NAMES . POPWIN-OPTIONS-PLIST)."
     (mapc (lambda (cfg-form)
@@ -54,10 +56,15 @@
   (defun +windows--split-below-side (buffer alist))
 
   (setq display-buffer-alist '(;; no window
-                               ;; ((or . ()))
+                               ((or . ("\*Warnings\*"))
+                                (display-buffer-no-window))
+                               ;; bottom side window
+                               ((or .("\*rg\*"))
+                                (display-buffer-same-window)
+                                (window-height . 0.3)
+                                (body-function . select-window))
                                ;; popup bottom buffers
-                               ((or . ("\*Warnings\*"
-                                       "\*Org Select\*"
+                               ((or . ("\*Org Select\*"
                                        "\*lsp-bridge-doc\*"
                                        "\*lsp-help\*"
                                        "\*tide-documentation\*"
@@ -83,20 +90,23 @@
                                        (derived-mode . comint-mode)
                                        (derived-mode . compilation-mode)
                                        (derived-mode . sly-repl-mode)
+                                       (derived-mode . lsp-treemacs-error-list-mode)
                                        "\*Dictionary\*"
+                                       "\*LSP Lookup\*"
                                        "\*vc-diff\**"))
                                 (display-buffer-below-selected)
-                                (window-height . 0.3)
+                                (window-height . 0.4)
                                 (dedicated . t)
                                 (body-function . select-window))
                                ;; left sidebar
-                               ((or . ((derived-mode . treemacs-mode)))
+                               ((or . (" \*Treemacs-*"))
                                 (display-buffer-in-side-window)
                                 (dedicated . t)
                                 (side . left)
-                                (slot . 0))
+                                (slot . -1))
                                ;; right sidebar
-                               ((or . ((derived-mode . pdf-outline-buffer-mode)))
+                               ((or . ((derived-mode . pdf-outline-buffer-mode)
+                                       "\*Call Hierarchy\*"))
                                 (display-buffer-in-side-window)
                                 (dedicated . t)
                                 (side . right)

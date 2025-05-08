@@ -1,6 +1,10 @@
 ;;; -*- lexical-binding: t -*-
 
 
+(use-package project
+  :disabled
+  :straight nil)
+
 (use-package projectile
   :init
 
@@ -8,7 +12,6 @@
     "Reverts all buffers asociated wit current project. If CHOOSE-PROJECT is t\
 query for known project and revert its buffers instead."
     (interactive)
-    (require 'projectile)
     (let ((project (if choose-project
                        (completing-read "Revert buffers:"
                                         projectile-known-projects)

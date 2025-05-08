@@ -113,7 +113,9 @@
                  :files (:defaults "*.el" "*.sh"))
   :config
   (require 'exec-path-from-shell)
-  (setq ee-terminal-command (cond ((+os/is-windows-p)"wezterm")
+  (setq ee-terminal-command (cond ((or (+os/is-windows-p)
+                                       (+os/is-wsl-p))
+                                   "wezterm")
                                   (t (exec-path-from-shell-getenv "TERM")))))
 
 (+leader-keys

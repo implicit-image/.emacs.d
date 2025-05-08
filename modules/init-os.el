@@ -13,7 +13,7 @@
 
 (defun +os/is-wsl-p ()
   (and (+os/is-linux-p)
-       (f-exists? "/proc/sys/fs/binfmt_misc/WSLInterop")))
+       (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop")))
 
 (when (+os/is-windows-p)
   (add-to-list 'exec-path "c:/ProgramData/chocolatey/bin/")

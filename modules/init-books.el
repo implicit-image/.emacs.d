@@ -1,7 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package calibredb
-  :config
+  :init
   (setq calibredb-root-dir "~/library"
         calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir)
         calibredb-library-alist '(("~/library"))

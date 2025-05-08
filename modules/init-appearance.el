@@ -17,8 +17,6 @@
   (defun +colors/setup-doom-themes ()
     (interactive)
     (progn
-      (require 'doom-themes)
-      (require 'f)
       (add-to-list 'custom-theme-load-path (f-join straight-base-dir
                                                    "straight"
                                                    straight-build-dir
@@ -32,7 +30,6 @@
       (doom-themes-treemacs-config)
       (doom-themes-org-config)
       (load-theme +base/theme t)))
-  :config
 
   (defmacro +contrast-color! (color)
     "Return a color contrasting well with COLOR."
@@ -43,7 +40,6 @@
       color
       0.3
       nil))
-
   :hook
   (after-init-hook . +colors/setup-doom-themes)
   (tty-setup-hook . (lambda ()
@@ -79,7 +75,7 @@
 (use-package hl-todo
   :commands
   global-hl-todo-mode
-  :config
+  :init
   (setq hl-todo-keyword-faces
         `(("HOLD" . "#d0bf8f")
           ("TODO" . ,(doom-color 'green))
@@ -109,7 +105,7 @@
 
 ;; font ligatures
 (use-package ligature
-  :config
+  :init
   (ligature-set-ligatures '(haskell-mode ocaml-ts-mode agda-mode lean-mode)
                           '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
                             "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" ">>=" "<=>" "<==>" "<===>" "<====>" "<!---"

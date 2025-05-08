@@ -6,14 +6,20 @@
         magit-git-executable (+os/per-system! :wsl "git"
                                               :linux "git"
                                               :win "C:/Program Files/Git/cmd/git.exe"))
+
   :hook
   (magit-process-find-password-functions . magit-process-password-auth-source)
   :general
+  (magit-mode-map
+   "")
   (+leader-keys
     "g g" '("Magit" . magit)
     "p t" '("List project todos" . magit-todos-list)))
 
 (use-package magit-todos)
+
+(use-package smerge-mode
+  :straight nil)
 
 (use-package forge
   :init
@@ -79,13 +85,13 @@
   (blamer-face ((t (:slant normal))))
   (blamer-pretty-border-face ((t (:foreground ,(doom-color 'yellow)))))
   :custom
-  (blamer-idle-time 10)
+  (blamer-idle-time 0.1)
   (blamer-min-offset 150)
-  (blamer-view 'overlay-right)
+  (blamer-view 'overlay)
   :init
-  (setq blamer-type 'margin-overlay
+  (setq blamer-type 'both
         blamer-commit-formatter "❌ %s"
-        blamer--overlay-popup-position 'smart)
+        blamer--overlay-popup-position 'bottom)
   :general
   (+mode-keys
     :keymaps 'override

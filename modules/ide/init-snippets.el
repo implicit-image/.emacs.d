@@ -10,17 +10,15 @@
   :init
   (setq doom-snippets-enable-short-helpers t)
   :config
-  (require 'f)
   (setq yas-snippet-dirs (append yas-snippet-dirs
-                                 `(,(f-join user-emacs-directory "straight" straight-build-dir "doom-snippets")
-                                   ,(f-join user-emacs-directory "snippets")
-                                   ,(f-join user-emacs-directory "straight" straight-build-dir "yasnippet-snippets/snippets"))))
+                                 `(,(file-name-concat user-emacs-directory "straight" straight-build-dir "doom-snippets")
+                                   ,(file-name-concat user-emacs-directory "snippets")
+                                   ,(file-name-concat user-emacs-directory "straight" straight-build-dir "yasnippet-snippets/snippets"))))
   :config
   (yas-global-mode)
   :general
   (+leader-keys
     "i s" '("Insert snippet" . yas-insert-snippet)))
-
 
 (use-package doom-snippets
   :straight (doom-snippets :type git

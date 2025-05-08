@@ -1,12 +1,12 @@
 ;;; -*- lexical-binding: t -*-
 
-(use-package f)
+(use-package f
+  :demand t)
 
 (use-package dash)
 
 (use-package async
-  :config
-  (autoload 'dired-async-mode "dired-async.el" nil t)
+  :autoload (dired-async-mode)
   :hook
   (after-init-hook . dired-async-mode))
 

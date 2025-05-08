@@ -47,9 +47,9 @@
 
 (use-package sideline-flycheck
   :custom-face
-  (sideline-flycheck-info ((t (:background ,(doom-color 'base2)))) t)
-  (sideline-flycheck-warning ((t (:background ,(doom-color 'base2)))) t)
-  (sideline-flycheck-error ((t (:background ,(doom-color 'base2)))) t)
+  (sideline-flycheck-info ((t (:background ,(doom-color 'base2)))))
+  (sideline-flycheck-warning ((t (:background ,(doom-color 'base2)))))
+  (sideline-flycheck-error ((t (:background ,(doom-color 'base2)))))
   :init
   (setq sideline-flycheck-max-lines 5
         sideline-flycheck-show-checker-name nil))
@@ -62,7 +62,7 @@
 
 (use-package sideline-lsp
   :custom-face
-  (sideline-lsp-code-action ((t (:foreground ,(doom-color 'base6)))) t)
+  (sideline-lsp-code-action ((t (:foreground ,(doom-color 'base6)))))
   :init
   (setq sideline-lsp-ignore-duplicate t
         sideline-lsp-code-actions-prefix "[!]"))
@@ -88,7 +88,7 @@
 
 (use-package which-func
   :custom-face
-  (header-line ((t (:background ,(doom-color 'bg-alt) :inherit nil :underline ,(doom-color 'fg-alt)))))
+  (header-line ((t (:background ,(doom-color 'base1) :inherit nil))))
   :straight nil
   :init
   (setq which-func-display 'header

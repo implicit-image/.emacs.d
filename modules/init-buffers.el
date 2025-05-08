@@ -1,8 +1,8 @@
 ;;; -*- lexical-binding: t -*-
 
-(defun +buffers/decide-ibuffer-filters ()
+(defun +decide-ibuffer-filter-groups ()
   (interactive)
-  (let ((group (symbol-name 'default)))
+  (let ((group "default"))
     (ibuffer-switch-to-saved-filter-groups group)))
 
 
@@ -17,6 +17,33 @@
   :straight nil
   :init
   (setq ibuffer-show-empty-filter-groups nil)
+  (setq ibuffer-saved-filter-groups '(("default"
+                                       ("org" (or
+                                               (mode . org-mode)
+                                               (name . "^\\*Org Src")
+                                               (name . "^\\*Org Agenda\\*$")))
+                                       ("tramp" (name . "^\\*tramp.*"))
+                                       ("emacs" (or
+                                                 (name . "^\\*scratch\\*$")
+                                                 (name . "^\\*Messages\\*$")
+                                                 (name . "^\\*Warnings\\*$")
+                                                 (name . "^\\*Shell Command Output\\*$")
+                                                 (name . "^\\*Async-native-compile-log\\*$")
+                                                 (name . "^\\*straight-")))
+                                       ("ediff" (or
+                                                 (name . "^\\*ediff.*")
+                                                 (name . "^\\*Ediff.*")))
+                                       ("dired" (mode . dired-mode))
+                                       ("terminal" (or
+                                                    (mode . term-mode)
+                                                    (mode . shell-mode)
+                                                    (mode . eshell-mode)))
+                                       ("help" (or
+                                                (name . "^\\*Help\\*$")
+                                                (name . "^\\*info\\*$")
+                                                (name . "^\\*helpful"))))))
+  :hook
+  (ibuffer-mode-hook . +decide-ibuffer-filter-groups)
   :general
   (+leader-keys
     "b i" '("Open ibuffer" . ibuffer)))

@@ -104,7 +104,6 @@
   :hook
   ((help-mode-hook helpful-mode-hook lsp-ui-doc-mode-hook) . visual-line-mode))
 
-
 (+leader-keys
   "f D" '("Delete current file" . +utils/delete-visited-file)
   "f C" '("Copy current file" . +utils/copy-visited-file)

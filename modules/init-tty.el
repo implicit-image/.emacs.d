@@ -6,12 +6,13 @@
 (defun +tty-setup-faces ()
   "Setup faces for tty display."
   (progn (custom-set-faces `(vertical-border ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg-alt) :width narrow))))
-			   `(border ((t (:background ,(doom-color  'bg) :foreground ,(doom-color 'fg) :width narrow))))
-			   `(internal-border ((t (:background ,(doom-color 'bg) :width narrow))))
+                           `(border ((t (:background ,(doom-color  'bg) :foreground ,(doom-color 'fg) :width narrow))))
+                           `(internal-border ((t (:background ,(doom-color 'bg) :width narrow))))
                            `(whitespace-space ((t (:foreground ,(doom-color 'bg))))))
-	 (set-display-table-slot standard-display-table
-				 'vertical-border
-				 (make-glyph-code ?┃))))
+         (set-display-table-slot standard-display-table
+                                 'vertical-border
+                                 (make-glyph-code ?┃))
+         (set-display-table-slot standard-display-table 'truncation ?\u2192)))
 
 (add-hook 'tty-setup-hook #'+tty-setup-faces)
 
@@ -26,10 +27,10 @@
   (etcc-on)
   :init
   (setq evil-motion-state-cursor 'box
-	evil-visual-state-cursor 'box
-	evil-normal-state-cursor 'box
-	evil-insert-state-cursor 'bar
-	evil-emacs-state-cursor  'hbar)
+        evil-visual-state-cursor 'box
+        evil-normal-state-cursor 'box
+        evil-insert-state-cursor 'bar
+        evil-emacs-state-cursor  'hbar)
   :hook
   (tty-setup-hook . etcc-on))
 

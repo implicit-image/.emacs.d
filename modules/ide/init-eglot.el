@@ -23,12 +23,12 @@
    :states '(visual)
    "=" '("Format" . eglot-format)))
 
-(use-package eglot-booster
-  :straight (eglot-booster :type git
-                           :host github
-                           :repo "jdtsmith/eglot-booster")
-  :after eglot
-  :config
-  (eglot-booster-mode))
+;; (use-package eglot-booster
+;;   :straight (eglot-booster :type git
+;;                            :host github
+;;                            :repo "jdtsmith/eglot-booster")
+;;   :after eglot
+;;   :config
+;;   (eglot-booster-mode))
 
 (provide 'init-eglot)

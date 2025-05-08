@@ -95,8 +95,8 @@
 
 (use-package lsp-ui
   :custom-face
-  (lsp-ui-peek-footer ((t (:background ,(doom-color 'bg)))) t)
-  (lsp-ui-peek-header ((t (:background ,(doom-color 'bg)))) t)
+  (lsp-ui-peek-footer ((t (:background ,(doom-color 'bg)))))
+  (lsp-ui-peek-header ((t (:background ,(doom-color 'bg)))))
   (lsp-ui-doc-background ((t :background ,(doom-color 'base0))))
   :config
   (setq lsp-ui-peek-enable t
