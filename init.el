@@ -1,4 +1,4 @@
-
+;;; -*- lexical-binding: t -*-
 ;; set up straight.el
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -52,82 +52,66 @@
                    "(provide 'org-version)\n")))
               :pin nil))
 
-(if (bound-and-true-p load-light-init)
-    (progn (require 'init-modules (format "%smodules/init-modules.el" user-emacs-directory))
-           (require 'init-os)
-           (require 'init-elisp-libs)
-           (require 'init-keybindings)
-           (require 'init-base)
-           (require 'init-evil)
-           (require 'init-utils)
-           (require 'init-search)
-           (require 'init-appearance)
-           (require 'init-windows)
-           (require 'init-lookup)
-           (require 'init-files)
-           (require 'init-completion)
-           (require 'init-edit)
-           (require 'init-corfu)
-           (require 'init-tty)
-           (require 'init-vc)
-           (require 'init-modeline))
 
-  (require 'init-modules (format "%smodules/init-modules.el" user-emacs-directory))
-  (require 'init-os)
-  (require 'init-elisp-libs)
-  (require 'init-keybindings)
-  (require 'init-base)
-  ;; keybindings
-  ;; (require 'init-meow)
-  (require 'init-evil)
+(require 'init-modules (format "%smodules/init-modules.el" user-emacs-directory))
+(require 'init-os)
+(require 'init-elisp-libs)
+(require 'init-keybindings)
+(require 'init-base)
 
-  (require 'init-treesitter)
-  (require 'init-utils)
-  (require 'init-search)
+;; keybindings
+;; (require 'init-meow)
+(require 'init-evil)
+
+(require 'init-treesitter)
+(require 'init-utils)
+(require 'init-search)
 
 ;;;; appearance
-  (require 'init-appearance)
-  (require 'init-windows)
-  (require 'init-modeline)
+(require 'init-appearance)
+(require 'init-windows)
+(require 'init-modeline)
 
 ;;; minibuffer completion
-  (require 'init-completion)
+(require 'init-completion)
 
 ;;;; programming utilities
-  (require 'init-lookup)
-  (require 'init-ide)
-  (require 'init-languages)
-  (require 'init-projects)
+(require 'init-lookup)
+(require 'init-ide)
+(require 'init-languages)
+(require 'init-projects)
 
 ;;;; version control
-  (require 'init-vc)
+(require 'init-vc)
 
 ;;;; terminal
-  (require 'init-terminal)
+(require 'init-terminal)
 
 ;;;; browsing
-  (require 'init-files)
-  (require 'init-buffers)
-  (require 'init-treemacs)
-  (require 'init-dired)
-  (require 'init-remote)
+(require 'init-files)
+(require 'init-buffers)
+(require 'init-treemacs)
+(require 'init-dired)
+(require 'init-remote)
 
 ;;;; org mode
-  (require 'init-org)
+(require 'init-org)
 
 ;;;; tty emacs options
-  (require 'init-tty)
+(require 'init-tty)
 
 ;;;; books
-  (require 'init-books)
+(require 'init-books)
 
 ;;;; llm integration
-  (require 'init-llm)
+(require 'init-llm)
 
 ;;; social media clients
-  (require 'init-socials)
-  (require 'init-media)
+(require 'init-socials)
+(require 'init-media)
 ;;; start server
-  (require 'server)
-  (when (not (server-running-p))
-    (server-start)))
+(require 'server)
+(when (not (server-running-p))
+  (server-start))
+
+(setq gc-cons-threshold (* 1024 1024 10))
