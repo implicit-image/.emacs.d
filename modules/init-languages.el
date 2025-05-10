@@ -165,6 +165,7 @@
 
 ;;;; lisp
 (use-package lispy
+  :disabled
   :commands
   lispy-mode
   :hook

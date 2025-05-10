@@ -12,8 +12,8 @@
   :general
   (+mode-keys
     :keymaps 'flycheck-mode-map
-    "]" 'flycheck-next-error
-    "[" 'flycheck-previous-error))
+    "C-c M-]" 'flycheck-next-error
+    "C-c M-[" 'flycheck-previous-error))
 
 
 (use-package consult-flycheck

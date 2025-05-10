@@ -7,7 +7,7 @@
   (dired-listing-switches "-alh --group-directories-first")
   (dired-recursive-copies 'always)
   (dired-recursive-deletes 'top)
-  (dired-kill-when-opening-new-dired-buffer t)
+  (dired-kill-when-opening-new-dired-buffer nil)
   (ired-auto-revert-buffer t)
   ;; dired-auto-revert-buffer '+dired-revert-buffer-p
   (dired-create-destination-dirs 'ask)

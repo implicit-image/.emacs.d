@@ -2,8 +2,6 @@
 
 ;;;; packages for setting and exploring keybindings.
 
-(use-package hydra)
-
 (use-package which-key
   :commands
   (which-key-setup-side-window-bottom)
