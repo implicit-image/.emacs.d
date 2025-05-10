@@ -1,49 +1,5 @@
 ;;; -*- lexical-binding: t -* t t t-
 
-(use-package context-menu-mode
-  :straight nil
-  :init
-  (defun my-ctx-menu-addons (menu click)
-    (when lsp-mode
-      (define-key-after menu [lsp-hover]
-        '(menu-item "LSP hover" lsp-ui-doc-show
-                    :help "Show LSP Hover info")))
-    menu)
-  :hook
-  (context-menu-functions . my-ctx-menu-addons)
-  ((dired-mode-hook prog-mode-hook) . context-menu-mode))
-
-(use-package flycheck-overlay
-  :disabled
-  :straight (flycheck-overlay :type git
-                              :host github
-                              :repo "konrad1977/flycheck-overlay")
-  :custom-face
-  (flycheck-overlay-marker ((t (:foreground ,(doom-darken (doom-color 'fg) 0.1) :underline nil))))
-  :init
-  (setq flycheck-overlay-use-theme-colors t
-        flycheck-overlay-virtual-line-type 'line-no-arrow
-        flycheck-overlay-show-at-eol nil
-        flycheck-overlay-hide-checker-name t
-        flycheck-overlay-show-virtual-line t
-        flycheck-overlay-virtual-line-icon nil
-        flycheck-overlay-background-lightness 60
-        flycheck-overlay-text-tint 'lighter
-        flycheck-overlay-text-tint-percent 60
-        flycheck-overlay-percent-darker 70
-        flycheck-overlay-info-icon "ℹ"
-        flycheck-overlay-debounce-interval 0.1
-        flycheck-overlay-hide-when-cursor-is-on-same-line t
-        flycheck-overlay-icon-right-padding 0.9)
-  :hook
-  (flycheck-mode-hook . flycheck-overlay-mode)
-  :general
-  (flycheck-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :non-normal-prefix "C-c SPC"
-   "t o" '("Toggle flycheck overlay" . flycheck-overlay-toggle)))
-
 
 (use-package sideline-flycheck
   :custom-face
@@ -86,9 +42,13 @@
   :hook
   ((flycheck-mode-hook lsp-mode-hook prog-mode-hook blamer-mode-hook) . sideline-mode))
 
+(use-package emacs
+  :custom-face
+  (menu ((t (:background ,(doom-color 'bg-alt)) :foreground ,(doom-color 'fg)))))
+
 (use-package which-func
   :custom-face
-  (header-line ((t (:background ,(doom-color 'base1) :inherit nil))))
+  (header-line ((t (:background ,(doom-color 'bg-alt) :inherit nil))))
   :straight nil
   :init
   (setq which-func-display 'header

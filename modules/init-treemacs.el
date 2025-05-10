@@ -4,6 +4,7 @@
   :init
   (setq treemacs-indent-guide-style 'line
         treemacs-no-png-images t
+        treemacs-icons nil
         treemacs-eldoc-display 'detailed
         treemacs-indentation 1)
 

@@ -50,6 +50,18 @@ each of `EWM-CONFIG-SYMBOLS' are one of keys of `ewm-config-symbols'")
                        (side . right))))
 
 
+(defun ewm-vsplit-left-prefix ()
+  "Open next window in left vsplit of current window."
+  (display-buffer-override-next-command
+   (lambda (buffer alist)
+     (let `u))))
+
+(defun ewm-vsplit-right-prefix ())
+
+(defun ewm-hsplit-below-prefix ())
+
+(defun ewm-vsplit-above-prefix ())
+
 
 (defun ewm-modeline-segment ()
   "")

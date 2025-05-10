@@ -35,7 +35,6 @@
         lsp-completion-show-kind t
         lsp-completion-show-detail t
         lsp-completion-provider :none
-        lsp-completion-show-label-description t
         lsp-completion-default-behaviour :replace
         ;; headerline
         lsp-headerline-breadcrumb-enable nil
@@ -184,5 +183,58 @@
    "t c" '("Call hierarchy" . lsp-treemacs-call-hierarchy)
    "t t" '("Type hierarchy" . lsp-treemacs-type-hierarchy)))
 ;; "T d" '("Dependencies" . lsp-treemacs-deps--icon)))
+
+(use-package lsp-tailwindcss
+  :straight (lsp-tailwindcss :type git
+                             :host github
+                             :repo "merrickluo/lsp-tailwindcss")
+  :init
+  (setq lsp-tailwindcss-addon-mode t)
+  :config
+  (dolist (tw-major-mode
+           '(css-mode
+             css-ts-mode
+             typescript-mode
+             typescript-ts-mode
+             tsx-ts-mode
+             js2-mode
+             js-ts-mode
+             clojure-mode))
+    (add-to-list 'lsp-tailwindcss-major-modes tw-major-mode)))
+
+(use-package lsp-pyright
+  :init
+  (setq lsp-pyright-auto-import-completions t))
+
+(use-package lsp-metals
+  :after scala-mode)
+
+(use-package lsp-java
+  :init
+  (setq lsp-java-references-code-lens-enabled t
+        lsp-java-signature-help-enabled t
+        lsp-java-signature-help-description-enabled t
+        lsp-java-save-actions-organize-imports t
+        lsp-java-completion-enabled t
+        lsp-java-completion-overwrite t
+        lsp-java-import-gradle-enabled t))
+
+(use-package lsp-haskell
+  :init
+  (setq lsp-haskell-server-path "haskell-language-server-wrapper"
+        ;; lsp-haskell-server-args '()
+        lsp-haskell-check-project nil
+        lsp-haskell-completion-in-comments nil
+        lsp-haskell-plugin-eval-global-on nil
+        lsp-haskell-plugin-semantic-tokens-global-on t))
+
+(use-package lsp-fsharp
+  :straight nil)
+
+(use-package lsp-nwscript
+  :straight (lsp-nwscript :type git
+                          :host github
+                          :repo "implicit-image/lsp-nwscript.el"
+                          :files ("lsp-nwscript.el")))
 
 (provide 'init-lsp-mode)

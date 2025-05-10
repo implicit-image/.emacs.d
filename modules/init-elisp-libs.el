@@ -1,7 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
-(use-package f
-  :demand t)
+(use-package f)
 
 (use-package dash)
 

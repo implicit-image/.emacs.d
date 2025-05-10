@@ -38,7 +38,8 @@
     "f y" '("Yank current file name" . +yank-current-file)
     "f Y" '("Yank current full path" . +yank-current-path)
     "h l" '("Load library" . load-library)
-    "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)))
+    "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
+    "q r" '("Restart emacs" . restart-emacs)))
 
 (use-package autorevert
   :straight nil

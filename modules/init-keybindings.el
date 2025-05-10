@@ -16,6 +16,7 @@
         which-key-allow-evil-operators t
         which-key-add-column-padding 5
         which-key-show-remaining-keys t
+        which-key-max-display-columns nil
         which-key-min-display-lines 6
         which-key-max-display-lines 6)
   ;; display `which-key' window on bottom side of the frame

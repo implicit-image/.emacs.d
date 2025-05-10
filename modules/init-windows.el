@@ -50,25 +50,19 @@
                     buffers)))
           popwin-cfg-forms))
 
-  (defun +windows--popup-below-selected (buffer alist)
-    (display-buffer-below-selected buffer alist))
-
-  (defun +windows--split-below-side (buffer alist))
-
   (setq display-buffer-alist '(;; no window
                                ((or . ((derived-mode . calibredb-search-mode)
                                        (derived-mode . calibredb-edit-annotation-mode)
                                        (derived-mode . calibredb-show-mode-hook)))
-                                (window-parameters . ((mode-line-format . none))))
-                               ((derived-mode . fundamental-mode)
+                                (display-buffer-reuse-window)
                                 (window-parameters . ((mode-line-format . none))))
                                ((or . ("\*Warnings\*"))
                                 (display-buffer-no-window))
                                ;; bottom side window
-                               ((or .("\*rg\*"))
+                               ((or . ("\*rg\*"
+                                       (derived-mode . xref--xref-buffer-mode)))
                                 (display-buffer-same-window)
-                                (window-height . 0.3)
-                                (body-function . select-window))
+                                (post-command-select-window . t))
                                ;; popup bottom buffers
                                ((or . ("\*Org Select\*"
                                        "\*lsp-bridge-doc\*"
@@ -82,7 +76,9 @@
                                        (derived-mode . helpful-mode)))
                                 (display-buffer-below-selected)
                                 (window-height . 0.4)
-                                (body-function . select-window))
+                                (preserve-size . (t . t))
+                                (window-parameters . ((mode-line-format . none)))
+                                (post-command-select-window . t))
                                ;; embark shenanigans
                                ((or . ("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                                        " *Embark Actions*"
@@ -100,35 +96,35 @@
                                        "\*Dictionary\*"
                                        "\*LSP Lookup\*"
                                        "\*vc-diff\**"))
-                                (display-buffer-below-selected)
+                                (display-buffer-reuse-mode-window display-buffer-below-selected)
                                 (window-height . 0.4)
                                 (dedicated . t)
-                                (body-function . select-window))
+                                (post-command-select-window . t))
                                ;; left sidebar
-                               ((or . (" \*Treemacs-*"))
+                               ((and . (" \*Treemacs-*"
+                                        (derived-mode . treemacs-mode)))
                                 (display-buffer-in-side-window)
                                 (dedicated . t)
-                                (side . left)
-                                (slot . -1))
+                                (side . left))
                                ;; right sidebar
                                ((or . ((derived-mode . pdf-outline-buffer-mode)
                                        "\*Call Hierarchy\*"))
                                 (display-buffer-in-side-window)
+                                (window-parameters . ((mode-line-format . none)))
                                 (dedicated . t)
-                                (side . right)
-                                (slot . 0))
+                                (side . right))
                                ;; some window
                                ((or . ("*aider"))
                                 (display-buffer-in-side-window)
-                                (side . right)
-                                ;; top split
-                                ;; left split
-                                ;; right split
-                                ;; temp same window
-                                ((or . ("\*Org-Babel\*"
-                                        "\*Org Src\*"))
-                                 (display-buffer-same-window)
-                                 (dedicated . nil)))
+                                (side . right))
+                               ;; top split
+                               ;; left split
+                               ;; right split
+                               ;; temp same window
+                               ((or . ("\*Org-Babel\*"
+                                       "\*Org Src\*"))
+                                (display-buffer-same-window)
+                                (dedicated . nil))
                                ;; bottom side window
                                ((or . ((derived-mode . proced-mode)))
                                 (display-buffer-at-bottom)

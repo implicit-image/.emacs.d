@@ -1,15 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
-(setq custom-theme-directory (f-join user-emacs-directory "straight" "build" "doom-gruber-darker"))
-
-;;;###autoload
-(defun +eye-candy/insert-doom-color ()
-  "Insert the rgb value of a doom theme color."
-  (interactive)
-  (consult--read doom-themes--colors
-                 :prompt "Doom theme color: "
-                 :lookup (lambda (color-entry &rest props)
-                           (insert (-second-item color-entry)))))
+(setq custom-theme-directory (expand-file-name (file-name-concat user-emacs-directory "straight" "build" "doom-gruber-darker")))
 
 (use-package doom-themes
   :demand
@@ -17,10 +8,10 @@
   (defun +colors/setup-doom-themes ()
     (interactive)
     (progn
-      (add-to-list 'custom-theme-load-path (f-join straight-base-dir
-                                                   "straight"
-                                                   straight-build-dir
-                                                   "doom-gruber-darker-theme/"))
+      (add-to-list 'custom-theme-load-path (file-name-concat straight-base-dir
+                                                             "straight"
+                                                             straight-build-dir
+                                                             "doom-gruber-darker-theme/"))
       (setq doom-themes-enable-bold t
             doom-themes-enable-italic t
             doom-themes-treemacs-enable-variable-pitch nil
@@ -29,31 +20,22 @@
       (doom-themes-neotree-config)
       (doom-themes-treemacs-config)
       (doom-themes-org-config)
-      (load-theme +base/theme t)))
+      (load-theme +base/theme t)
+      ;;;; idk why :custom face doesnt work with these
+      ;;;; should be in `init-edit'
+      (face-spec-set 'show-paren-match-expression `((t (:box nil :background ,(doom-color 'base4) :underline nil :overline nil))))))
 
-  (defmacro +contrast-color! (color)
-    "Return a color contrasting well with COLOR."
-    `(apply
-      ,(if (< (color-distance color "#000000") 180000)
-           'doom-lighten
-         'doom-darken)
-      color
-      0.3
-      nil))
   :hook
   (after-init-hook . +colors/setup-doom-themes)
   (tty-setup-hook . (lambda ()
                       (interactive)
                       (load-theme +base/theme t))))
 
-(use-package ef-themes)
+(use-package all-the-icons)
 
 (use-package solaire-mode
   :hook
   (after-init-hook . solaire-global-mode))
-
-(use-package all-the-icons
-  :if (display-graphic-p))
 
 (use-package nerd-icons
   :general
@@ -76,23 +58,24 @@
   :commands
   global-hl-todo-mode
   :init
-  (setq hl-todo-keyword-faces
-        `(("HOLD" . "#d0bf8f")
-          ("TODO" . ,(doom-color 'green))
-          ("NEXT" . "#dca3a3")
-          ("THEM" . "#dc8cc3")
-          ("PROG" . ,(doom-color 'dark-blue))
-          ("OKAY" . ,(doom-color 'blue))
-          ("DONT" . "#5f7f5f")
-          ("FAIL" . compilation-error)
-          ("DONE" . "#afd8af")
-          ("NOTE" . "#d0bf8f")
-          ("MAYBE" . "#d0bf8f")
-          ("KLUDGE" . warning)
-          ("HACK" . warning)
-          ("TEMP" . warning)
-          ("FIXME" . compilation-error)
-          ("XXXX*" . compilation-error)))
+  (with-eval-after-load 'doom-themes
+    (setq hl-todo-keyword-faces
+          `(("HOLD" . "#d0bf8f")
+            ("TODO" . ,(doom-color 'green))
+            ("NEXT" . "#dca3a3")
+            ("THEM" . "#dc8cc3")
+            ("PROG" . ,(doom-color 'dark-blue))
+            ("OKAY" . ,(doom-color 'blue))
+            ("DONT" . "#5f7f5f")
+            ("FAIL" . compilation-error)
+            ("DONE" . "#afd8af")
+            ("NOTE" . "#d0bf8f")
+            ("MAYBE" . "#d0bf8f")
+            ("KLUDGE" . warning)
+            ("HACK" . warning)
+            ("TEMP" . warning)
+            ("FIXME" . compilation-error)
+            ("XXXX*" . compilation-error))))
   :hook
   (after-init-hook . global-hl-todo-mode))
 
@@ -102,21 +85,6 @@
   :straight (doom-gruber-darker-theme :type git
                                       :host github
                                       :repo "implicit-image/doom-gruber-darker-theme"))
-
-;; font ligatures
-(use-package ligature
-  :init
-  (ligature-set-ligatures '(haskell-mode ocaml-ts-mode agda-mode lean-mode)
-                          '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
-                            "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" ">>=" "<=>" "<==>" "<===>" "<====>" "<!---"
-                            "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
-                            ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++"))
-  (ligature-set-ligatures '(js-ts-mode typescript-ts-mode web-mode html-ts-mode)
-                          '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
-                            "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" ">>=" "<=>" "<==>" "<===>" "<====>" "<!---"
-                            "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
-                            ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++")))
-
 
 (use-package face-remap
   :straight nil

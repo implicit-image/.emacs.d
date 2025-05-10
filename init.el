@@ -77,7 +77,29 @@
 
 ;;;; programming utilities
 (require 'init-lookup)
-(require 'init-ide)
+(require 'init-format)
+(require 'init-edit)
+;;;; validating code and showing errors
+(require 'init-checkers)
+;;;; inserting and managing snippets
+(require 'init-snippets)
+(require 'init-indent)
+;;;; debugging code
+(require 'init-debug)
+;;;; compiling and running code
+(require 'init-compile)
+;;;; custom LSP integration and utils
+;; (require 'init-lsp)
+
+;;;; standard elisp lsp client
+;; (require 'init-lsp-mode)
+(require 'init-cape)
+(require 'init-corfu)
+;; (require 'init-eglot)
+;; (require 'init-lsp-bridge)
+(require 'init-lsp-mode)
+
+(require 'init-ui)
 (require 'init-languages)
 (require 'init-projects)
 
@@ -95,7 +117,11 @@
 (require 'init-remote)
 
 ;;;; org mode
-(require 'init-org)
+(require 'init-org-mode)
+(require 'init-org-babel)
+(require 'init-org-agenda)
+(require 'init-org-roam)
+
 
 ;;;; tty emacs options
 (require 'init-tty)
@@ -104,7 +130,10 @@
 (require 'init-books)
 
 ;;;; llm integration
-(require 'init-llm)
+(require 'init-aider)
+(require 'init-gptel)
+(require 'init-mcp)
+(require 'init-elysium)
 
 ;;; social media clients
 (require 'init-socials)
@@ -114,4 +143,5 @@
 (when (not (server-running-p))
   (server-start))
 
+;; reset gc limit after init file
 (setq gc-cons-threshold (* 1024 1024 10))

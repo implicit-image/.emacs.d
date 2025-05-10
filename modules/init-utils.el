@@ -1,6 +1,20 @@
 ;;; -*- lexical-binding: t -*-
 
 
+(defvar +indent/tab-jump-delims '(?\; ?\) ?\( ?\] ?\[ ?{ ?} ?> ?< ?| ?' ?` ?\. ?\"))
+
+(defvar-local +indent-tab-function nil)
+
+(defmacro +contrast-color! (color)
+  "Return a color contrasting well with COLOR."
+  `(apply
+    ,(if (< (color-distance color "#000000") 180000)
+         'doom-lighten
+       'doom-darken)
+    color
+    0.3
+    nil))
+
 (defmacro +setq! (&rest symbols)
   "Set SYMBOLS to associated values while taking care of setting default options."
   `(dolist (binding ,( symbols))))
@@ -96,6 +110,25 @@
   (interactive)
   (when (use-region-p)
     (buffer-substring-no-properties (region-beginning) (region-end))))
+
+(defmacro +set-tab-function! (mode function &optional hook)
+  "Set default tab function FUNCTION for MODE in HOOK."
+  (let ((fun (intern (concat "+" (symbol-name mode) "-indent-setup")))
+        (hook (or (when (bound-and-true-p hook) hook)
+                  (intern (concat (symbol-name mode) "-hook")))))
+    `(progn (defun ,fun ()
+              (setq-local +indent-tab-function ',function))
+            (add-hook (quote ,hook) (quote ,fun)))))
+
+(defun +smart-tab (&optional prefix)
+  ""
+  (interactive "P")
+  (let ((next (char-after (point))))
+    (cond ((bound-and-true-p +indent-tab-function) (funcall-interactively +indent-tab-function))
+          ((memq next +indent/tab-jump-delims) (forward-char))
+          ((+char-whitespace? next) (forward-whitespace 1))
+          ((eolp) (yasnippet-capf))
+          (t (indent-for-tab-command prefix)))))
 
 (use-package simple
   :straight nil

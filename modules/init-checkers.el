@@ -27,15 +27,11 @@
    :global-prefix "M-SPC"
    "s e" '("Consult errors" . consult-flycheck)))
 
-(use-package flymake)
-
-(use-package flymake-collection)
-
 (use-package flyspell
   :straight nil
-  :init
-  (setq flyspell-issue-welcome-flag nil
-        flyspell-issue-message-flag nil)
+  :custom
+  (flyspell-issue-welcoe-flag nil)
+  (flyspell-issue-message-flag nil)
   :hook
   ((prog-mode-hook emacs-lisp-mode-hook) . flyspell-prog-mode)
   ((org-mode-hook markdown-mode-hook text-mode-hook) . flyspell-mode))

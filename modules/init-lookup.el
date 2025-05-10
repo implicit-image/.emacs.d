@@ -97,17 +97,23 @@
 
 (use-package dumb-jump
   :init
-  (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
+  (setq xref-show-definitions-function #'xref-show-definitions-completing-read)
+  :hook
+  (xref-backend-functions . dumb-jump-xref-activate))
 
 ;; TODO: add :dash to use-package language mode declarations
-(use-package dash-docs)
+;; (use-package dash-docs)
 
-(use-package devdocs)
+(use-package devdocs
+  :custom-face
+  (devdocs-code-block ((t (:background ,(doom-color 'base4) :extend t)))))
 
 (use-package xref
-  :init
-  (setq xref-search-program 'ripgrep)
+  :custom
+  (xref-search-program 'ripgrep)
   :general
+  (evil-motion-state-map
+   "g r" 'xref-find-references)
   (+leader-keys
     "c g f" '("Xref forward" . xref-go-forward)
     "c g b" '("Xref back" . xref-go-back)))
@@ -164,13 +170,6 @@
   (setq eldoc-echo-area-prefer-doc-buffer 'maybe
         eldoc-idle-delay 0.05
         eldoc-echo-area-use-multiline-p 0.2)
-
-  ;; (defun +eldoc--popup-function (docs interactive)
-  ;;   (require 'popup)
-  ;;   (let* (popup (popup-create (point) 10 10 ))))
-
-  ;; (add-to-list 'eldoc-display-functions '+eldoc--popon-function)
-
   :hook
   (prog-mode-hook . eldoc-mode))
 
@@ -204,6 +203,63 @@
   (set-face-attribute 'eldoc-box-body nil :inherit 'corfu-default)
   :hook
   (eldoc-mode-hook . +eldoc--setup))
+
+(use-package browse-url
+  :init
+  (setq browse-url-firefox-program (+os/per-system! :wsl "/mnt/c/Program Files/Mozilla Firefox/firefox.exe"
+                                                    :win "/mnt/c/Program Files/Mozilla Firefox/firefox.exe"
+                                                    :linux "firefox")))
+
+(use-package webjump
+  :straight nil
+  :custom
+  (webjump-sites
+   '(("DuckDuckGo" . [simple-query "www.duckduckgo.com" "www.duckduckgo.com/?q=" ""])
+     ("Google" . [simple-query "www.google.com" "www.google.com/search?q=" ""])
+     ("YouTube" . [simple-query "www.youtube.com/feed/subscriptions" "www.youtube.com/rnesults?search_query=" ""])
+     ("Google" . [simple-query "https://www.google.com/search" "https://www.google.com/search?hl=en&q=" ""])
+     ("Stack Overflow" . [simple-query "https://duckduckgo.com/?q=site%3Astackoverflow.com+" "https://duckduckgo.com/?q=site%3Astackoverflow.com+" ""])
+     ("MyNixos" . [simple-query "https://mynixos.com" "https://mynixos.com/search?q=" ""])
+     ("Wikipedia" . [simple-query "https://en.wikipedia.org" "https://en.wikipedia.org/w/index.php?search=" ""])
+     ("CSS Tricks" . [simple-query "https://css-tricks.com" "https://css-tricks.com/?s=" ""])
+     ("Python docs" . [simple-query "https://docs.python.org/3" "https://docs.python.org/3/search.html?q=" ""])
+     ("DevDocs.io" . [simple-query "https://devdocs.io" "https://devdocs.io/#q=" ""])
+     ("Rust STD Docs" . [simple-query "https://doc.rust-lang.org/stable" "https://doc.rust-lang.org/stable/std/index.html?search=" ""])
+     ("Hoogle" . [simple-query "https://hoogle.haskell.org" "https://hoogle.haskell.org/?hoogle=" ""])
+     ("ChatGPT" . [simple-query "https://chatgpt.com" "https://chatgpt.com/?q=" ""])))
+  :init
+
+  (defun +webjump (&optional at-point)
+    (interactive)
+    (let* ((site (assoc-string
+                  (completing-read "Site: " webjump-sites nil t)
+                  webjump-sites t))
+           (name (car site))
+           (expr (cdr site))
+           (fun (if webjump-use-internal-browser
+                    (apply-partially #'browse-url-with-browser-kind 'internal)
+                  #'browse-url))
+           (thing (if (bound-and-true-p at-point)
+                      (thing-at-point symbol t)
+                    (webjump-url-fix
+                     (cond ((not expr) "")
+                           ((stringp expr) expr)
+                           ((vectorp expr) (webjump-builtin expr name))
+                           ((listp expr) (eval expr t))
+                           ((symbolp expr)
+                            (if (fboundp expr)
+                                (funcall expr name)
+                              (error "WebJump URL function \"%s\" undefined"
+                                     expr)))
+                           (t (error "WebJump URL expression for \"%s\" invalid"
+                                     name)))))))
+      (funcall fun thing)))
+  :general
+  (evil-normal-state-map
+   "g X" '+webjump)
+  (+leader-keys
+    "s W" '("Search the web" . webjump)))
+
 
 (general-defs
   global-map

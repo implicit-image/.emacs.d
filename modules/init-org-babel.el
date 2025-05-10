@@ -7,7 +7,7 @@
         org-edit-src-content-indentation 0
         org-src-preserve-indentation nil)
 
-  (defvar +org-babel-temp-dir (f-join user-emacs-directory "+org-babel"))
+  (defvar +org-babel-temp-dir (file-name-concat (expand-file-name user-emacs-directory) "+org-babel"))
 
   (defun +ob--setup ()
     (org-babel-do-load-languages

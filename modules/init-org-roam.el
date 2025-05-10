@@ -15,17 +15,17 @@
                                                             "#+title: %Y=%m-%d\n"))))
   :init
   (defun +roam/template-fn--file-in-subdir (&optional dir)
-    (let* ((root-dir (file-name-as-directory (f-join org-roam-directory
-                                                     (if (boundp 'dir)
-                                                         (concat dir "/")
-                                                       ""))))
+    (let* ((root-dir (file-name-as-directory (file-name-concat (expand-file-name org-roam-directory)
+                                                               (if (boundp 'dir)
+                                                                   (concat dir "/")
+                                                                 ""))))
            (subdir (read-directory-name "subdirectory: "
                                         root-dir))
            (filename (read-file-name "file: "
                                      (file-name-as-directory subdir))))
-      (f-join root-dir
-              subdir
-              filename)))
+      (file-name-concat root-dir
+                        subdir
+                        filename)))
 
   (defun +roam/mode-setup ()
     "Setup `org-roam' related variables and modes."

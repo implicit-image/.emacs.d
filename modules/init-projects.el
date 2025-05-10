@@ -51,21 +51,6 @@ query for known project and revert its buffers instead."
   (global-map
    "C-c p" '("Projectile commands" . projectile-command-map)))
 
-(use-package persp-mode
-  :config
-  (setq persp-autokill-buffer-on-remove 'kill-weak
-        persp-nil-hidden t))
-
-(use-package desktop
-  :straight nil
-  :init
-  (setq desktop-restore-frames t
-        desktop-restore-eager t
-        desktop-restore-reuses-frames t)
-  :hook
-  (after-init-hook . desktop-save-mode))
-
-
 (use-package direnv
   :if (+os/is-linux-p)
   :init

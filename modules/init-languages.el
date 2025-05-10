@@ -29,24 +29,6 @@
 (use-package css-ts-mode
   :straight nil)
 
-(use-package lsp-tailwindcss
-  :straight (lsp-tailwindcss :type git
-                             :host github
-                             :repo "merrickluo/lsp-tailwindcss")
-  :init
-  (setq lsp-tailwindcss-addon-mode t)
-  :config
-  (dolist (tw-major-mode
-           '(css-mode
-             css-ts-mode
-             typescript-mode
-             typescript-ts-mode
-             tsx-ts-mode
-             js2-mode
-             js-ts-mode
-             clojure-mode))
-    (add-to-list 'lsp-tailwindcss-major-modes tw-major-mode)))
-
 ;;;; json
 (use-package json-ts-mode
   :mode "\\.json\\'"
@@ -88,9 +70,6 @@
 ;;;; python
 (use-package anaconda-mode)
 
-(use-package lsp-pyright
-  :init
-  (setq lsp-pyright-auto-import-completions t))
 
 (use-package python-ts-mode
   :straight nil
@@ -108,32 +87,19 @@
 
 (use-package sbt-mode)
 
-(use-package lsp-metals
-  :after scala-mode)
-
 ;;;; java
 (use-package java-ts-mode
   :preface
   (defun +jvm/set-up-java-environment ()
     "Set up java environment variables and locations."
     (setq lsp-java-java-path
-          (file-name-concat (exec-path-from-shell-getenv "JAVA_HOME") "/bin/java")
+          (expand-file-name (file-name-concat (exec-path-from-shell-getenv "JAVA_HOME") "/bin/java"))
           lsp-java-import-gradle-java-home
-          (file-name-concat (exec-path-from-shell-getenv "JAVA_HOME") "/bin/java")))
+          (expand-file-name (file-name-concat (exec-path-from-shell-getenv "JAVA_HOME") "/bin/java"))))
   :config
   (setq java-ts-mode-indent-offset 4)
   :hook
   (java-ts-mode-hook . +jvm/set-up-java-environment))
-
-(use-package lsp-java
-  :init
-  (setq lsp-java-references-code-lens-enabled t
-        lsp-java-signature-help-enabled t
-        lsp-java-signature-help-description-enabled t
-        lsp-java-save-actions-organize-imports t
-        lsp-java-completion-enabled t
-        lsp-java-completion-overwrite t
-        lsp-java-import-gradle-enabled t))
 
 ;;;; kotlin
 (use-package kotlin-mode
@@ -176,15 +142,6 @@
 
 (use-package haskell-ts-mode
   :mode "\\.hs\\|.lhs\\'")
-
-(use-package lsp-haskell
-  :init
-  (setq lsp-haskell-server-path "haskell-language-server-wrapper"
-        ;; lsp-haskell-server-args '()
-        lsp-haskell-check-project nil
-        lsp-haskell-completion-in-comments nil
-        lsp-haskell-plugin-eval-global-on nil
-        lsp-haskell-plugin-semantic-tokens-global-on t))
 
 ;;;; rust
 (use-package cargo-mode
@@ -317,9 +274,6 @@
 
 (use-package fsharp-mode
   :mode "\\.fs\\'")
-
-(use-package lsp-fsharp
-  :straight nil)
 
 (use-package fstar-mode)
 
@@ -480,12 +434,6 @@
 (use-package cuda-mode)
 
 ;;;; Bioware's Neverwinter Script support
-(use-package lsp-nwscript
-  :straight (lsp-nwscript :type git
-                          :host github
-                          :repo "implicit-image/lsp-nwscript.el"
-                          :files ("lsp-nwscript.el")))
-
 (use-package nwscript-mode
   :autoload (nwscript-mode)
   :mode "\\.nss\\'"

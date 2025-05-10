@@ -20,6 +20,8 @@
 (setq package-enable-at-startup nil
       evil-want-keybinding nil)
 
+(setq disabled-command-function nil)
+
 ;; override garbage collector limit
 (setq gc-cons-threshold (* 1024 1024 100))
 

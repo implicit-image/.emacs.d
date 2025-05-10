@@ -1,7 +1,7 @@
+;;; package --- Summary
 ;;; -*- lexical-binding: t -*-
 
 ;;;; packages for evil emulation
-
 
 (use-package evil
   :demand

@@ -1,18 +1,19 @@
 ;;; -*- lexical-binding: t -*-
 
+
 (use-package calibredb
-  :init
-  (setq calibredb-root-dir "~/library"
-        calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir)
-        calibredb-library-alist '(("~/library"))
-        calibredb-search-page-max-rows 50
-        calibredb-virtual-library-alist '(("Economics" . "economics")
-                                          ("Theory" . "theory")
-                                          ("Maths" . "maths")
-                                          ("Computer Science" . "cs"))
-        calibredb-format-all-the-icons t
-        calibredb-format-icons-in-terminal t
-        calibredb-format-character-icons t)
+  :custom
+  (calibredb-root-dir "~/library")
+  (calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
+  (calibredb-library-alist '(("~/library")))
+  (calibredb-search-page-max-rows 50)
+  (calibredb-virtual-library-alist '(("Economics" . "economics")
+                                     ("Theory" . "theory")
+                                     ("Maths" . "maths")
+                                     ("Computer Science" . "cs")))
+  (calibredb-format-all-the-icons t)
+  (calibredb-format-icons-in-terminal t)
+  (calibredb-format-character-icons t)
   :hook
   (calibredb-search-mode-hook . (lambda ()
                                   (interactive)
@@ -85,15 +86,15 @@
    "C-c s t" 'calibredb-set-metadata--tags))
 
 (use-package org-noter
+  :custom
+  (org-noter-default-notes-file-names '("booknotes.org" "notes.org"))
+  (org-noter-notes-search-path '("~/org/booknotes"))
+  (org-noter-default-heading-title  "page $p$")
+  (org-noter-auto-save-last-location t)
+  (org-noter-kill-frame-at-session-end nil)
+  (org-noter-always-create-frame nil)
+  (org-noter-insert-selected-text-inside-note t)
   :init
-  (setq org-noter-default-notes-file-names '("booknotes.org" "notes.org")
-        org-noter-notes-search-path '("~/org/booknotes")
-        org-noter-default-heading-title  "page $p$"
-        org-noter-auto-save-last-location t
-        org-noter-kill-frame-at-session-end nil
-        org-noter-always-create-frame nil
-        org-noter-insert-selected-text-inside-note t)
-
   (defun +books/org-noter-init-session (&optional local-elem)
     "Select a document from calibre and start org-noter sesion with it."
     (interactive)
@@ -153,9 +154,9 @@
    "n" '("Start Org Noter session" . +books/org-noter-init-session)))
 
 (use-package pdf-tools
-  :init
-  (add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
-  (setq pdf-outline-imenu-use-flat-menus t)
+  :custom
+  (pdf-outline-imenu-use-flat-menus t)
+  :mode ("\\.pdf\\'" . pdf-tools-install)
   :general
   (pdf-view-mode-map
    :states '(normal)
@@ -169,8 +170,7 @@
    "q" 'kill-this-buffer))
 
 (use-package nov
-  :init
-  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+  :mode ("\\.epub\\'" . nov-mode)
   :hook
   (nov-mode-hook . variable-pitch-mode))
 

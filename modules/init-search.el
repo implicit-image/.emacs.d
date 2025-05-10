@@ -31,22 +31,33 @@
    "M-n" '+next-error-no-select
    "M-p" '+previous-error-no-select))
 
+(use-package deadgrep
+  :custom
+  (deadgrep-display-buffer-function '+deadgrep-display-buffer-function)
+  :init
+  (defun +deadgrep-display-buffer-function (buffer)
+    (display-buffer-same-window buffer nil))
+  :general
+  (deadgrep-edit-mode-map
+   :states 'normal
+   "Z Z" 'deadgrep-mode)
+  (rg-global-map
+   "?" 'deadgrep))
+
 (use-package rg
   :init
   (setq rg-align-position-numbers t)
   :general
   (general-override-mode-map
    :states '(normal visual)
-   "g /" '(:keymap rg-global-map :package rg))
+   "g /" '(:which-key "rg" :keymap rg-global-map :package rg))
   (rg-global-map
    "d" 'ignore
    "/" 'rg-dwim
    "p" 'rg-project
    "s" 'rg-isearch-project
    "S" 'rg-isearch-current-dir
-   "f" 'rg-isearch-current-file)
-  (+leader-keys
-    "s R" '("Ripgrep menu" . rg-menu)))
+   "f" 'rg-isearch-current-file))
 
 (defun +search/rg-thing-at-point ()
   (interactive)

@@ -1,10 +1,10 @@
 ;;; -*- lexical-binding: t -*-
 
-(setq visible-cursor nil)
 
-;;;###autoload
-(defun +tty-setup-faces ()
-  "Setup faces for tty display."
+
+(defun +tty-setup ()
+  "Run some code to adjust emacs for tty experience."
+  ;;;; set up faces for tty
   (progn (custom-set-faces `(vertical-border ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg-alt) :width narrow))))
                            `(border ((t (:background ,(doom-color  'bg) :foreground ,(doom-color 'fg) :width narrow))))
                            `(internal-border ((t (:background ,(doom-color 'bg) :width narrow))))
@@ -12,9 +12,14 @@
          (set-display-table-slot standard-display-table
                                  'vertical-border
                                  (make-glyph-code ?┃))
-         (set-display-table-slot standard-display-table 'truncation ?\u2192)))
+         (set-display-table-slot standard-display-table 'truncation ?\u2192)
+         (setq visible-cursor nil)
+;;;; corfu-terminal
+         (corfu-terminal-mode (if (display-graphic-p) -1 1))))
 
-(add-hook 'tty-setup-hook #'+tty-setup-faces)
+(add-hook 'tty-setup-hook '+tty-setup)
+
+
 
 (use-package kkp
   :hook

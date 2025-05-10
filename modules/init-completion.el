@@ -14,33 +14,19 @@
    "C-p" 'completion-preview-prev-candidate))
 
 (use-package marginalia
-  :init
-  (setq marginalia-align 'center
-        marginalia-align-offset -3)
+  :custom
+  (marginalia-align 'center)
+  (marginalia-align-offset -3)
   :hook
   (after-init-hook . marginalia-mode))
 
 (use-package vertico
   :custom
-  (vertico-count 15)
+  (vertico-count 13)
   (vertico-resize nil)
   (vertico-cycle t)
   (vertico-preselect 'first)
-  :init
-  (setq vertico-scroll-margin 5
-        vertico-flat-format
-        '(:multiple
-          #(" %s " 0 1 (face minibuffer-prompt) 3 4 (face minibuffer-prompt))
-          :single
-          #("[%s]" 0 1 (face minibuffer-prompt) 1 3 (face success) 3 4
-            (face minibuffer-prompt))
-          :prompt
-          #("(%s)" 0 1 (face minibuffer-prompt) 3 4 (face minibuffer-prompt))
-          :separator #(" | " 0 3 (face minibuffer-prompt)) :ellipsis
-          #(" ... " 0 1 (face minibuffer-prompt)) :no-match "[No match]" :spacer
-          #(" " 0 1 (cursor t))))
-  :config
-  (vertico-flat-mode 1)
+  (vertico-scroll-margin 5)
   :hook
   (marginalia-mode-hook . vertico-mode)
   :general
@@ -50,8 +36,7 @@
    "C-c f" '("Toggle flat mode" . vertico-flat-mode)
    "C-c ." '("Repeat last vertico session" . vertico-repeat)
    "C-c i" '("Insert candidate" . vertico-insert)
-   "C-c s" '("Suspend current session" . vertico-suspend)
-   "C-c b" '("Toggle vertico-buffer-mode" . vertico-buffer-mode)))
+   "C-c s" '("Suspend current session" . vertico-suspend)))
 
 (use-package embark-consult)
 
@@ -60,6 +45,9 @@
   (embark-mixed-indicator-delay 0.3)
   (embark-prompter 'embark-keymap-prompter)
   (embark-quit-after-action t)
+  (embark-indicators '(embark-which-key-indicator
+                       embark-highlight-indicator
+                       embark-isearch-highlight-indicator))
   :init
   (defun embark-which-key-indicator ()
     "An embark indicator that displays keymaps using which-key.
@@ -83,11 +71,6 @@ targets."
            keymap)
          nil nil t (lambda (binding)
                      (not (string-suffix-p "-argument" (cdr binding))))))))
-
-  (setq embark-indicators
-        '(embark-which-key-indicator
-          embark-highlight-indicator
-          embark-isearch-highlight-indicator))
 
   (defun embark-hide-which-key-indicator (fn &rest args)
     "Hide the which-key indicator immediately when using the completing-read prompter."
@@ -137,7 +120,6 @@ targets."
    :initial "")
   :general
   (rg-global-map
-   :states '(normal visual)
    "?" 'consult-ripgrep)
   (+leader-keys
     "m :" '("Run active mode command" . consult-mode-command)

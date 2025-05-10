@@ -3,28 +3,6 @@
 
 ;;; Code:
 
-(defvar +indent/tab-jump-delims '(?\; ?\) ?\( ?\] ?\[ ?{ ?} ?> ?< ?| ?' ?` ?\. ?\"))
-
-(defvar-local +indent-tab-function nil)
-
-(defmacro +set-tab-function! (mode function &optional hook)
-  "Set default tab function FUNCTION for MODE in HOOK."
-  (let ((fun (intern (concat "+" (symbol-name mode) "-indent-setup")))
-        (hook (or (when (bound-and-true-p hook) hook)
-                  (intern (concat (symbol-name mode) "-hook")))))
-    `(progn (defun ,fun ()
-              (setq-local +indent-tab-function ',function))
-            (add-hook (quote ,hook) (quote ,fun)))))
-
-(defun +smart-tab (&optional prefix)
-  ""
-  (interactive "P")
-  (let ((next (char-after (point))))
-    (cond ((bound-and-true-p +indent-tab-function) (funcall-interactively +indent-tab-function))
-          ((memq next +indent/tab-jump-delims) (forward-char))
-          ((+char-whitespace? next) (forward-whitespace 1))
-          ((eolp) (yasnippet-capf))
-          (t (indent-for-tab-command prefix)))))
 
 (use-package indent-bars
   :straight (indent-bars :type git
@@ -69,7 +47,7 @@
     "Toggle whitespace mode display style."
     (if (display-graphic-p)
         (setq whitespace-style '(face spaces indentation::space space-mark))
-      (setq whitespace-style '(face line spaces tabs))))
+      (setq whitespace-style '(face line spaces tabs indentation::space indentation::tab indentation big-indent))))
 
   (defun +whitespace-on ()
     (interactive)
@@ -98,10 +76,15 @@
   (whitespace-mode-hook . +whitespace-toggle-style)
   (before-save-hook . delete-trailing-whitespace))
 
-(general-def global-map
-  :states 'insert
-  "TAB" '+smart-tab
-  "<tab>" '+smart-tab
-  [tab] '+smart-tab)
+;; (general-def global-map
+;;   :states 'insert
+;;   "TAB" '+smart-tab
+;;   "<tab>" '+smart-tab
+;;   [tab] '+smart-tab)
+
+(setq tab-always-indent 'complete
+      tab-first-completion 'complete)
+
+
 
 (provide 'init-indent)
