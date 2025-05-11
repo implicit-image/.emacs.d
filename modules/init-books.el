@@ -17,7 +17,10 @@
   :hook
   (calibredb-search-mode-hook . (lambda ()
                                   (interactive)
-                                  (blink-cursor-mode -1))))
+                                  (blink-cursor-mode -1)))
+  :bind
+  (("C-x a c" . calibredb-consult-read)
+   ("C-x a C" . calibredb)))
 
 ;; :general
 ;; (+leader-keys

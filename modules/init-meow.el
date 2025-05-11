@@ -1,6 +1,20 @@
 ;;; -*-lexical-binding: t-*-
 
+(defun +meow-eval-command (&optional insert)
+  (minibuffer-with-setup-hook
+      (lambda ()
+        (set-syntax-table emacs-lisp-mode-syntax-table)
+        (add-hook 'completion-at-point-functions
+                  #'elisp-completion-at-point nil t)
+        (setq-local trusted-content :all)
+        (run-hooks 'eval-expression-minibuffer-setup-hook))
+    (read-from-minibuffer prompt initial-contents
+                          read--expression-map t
+                          'read-expression-history)))
+
 (use-package meow
+  :custom
+  (meow-use-keypad-when-execute-kbd nil)
   :init
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)

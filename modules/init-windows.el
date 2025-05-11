@@ -11,6 +11,8 @@
   (window-setup-hook . window-divider-mode))
 
 (use-package ace-window
+  :commands
+  (ace-window)
   :init
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (setq aw-dispatch-alist
@@ -27,7 +29,10 @@
           (?H aw-split-window-horz "Split Horz Window")
           (?M delete-other-windows "Delete Other Windows")
           (?T aw-transpose-frame "Transpose Frame")
-          (?? aw-show-dispatch-help))))
+          (?? aw-show-dispatch-help)))
+  :bind*
+  ( :map meow-window-keymap
+    ("w" . ace-window)))
 ;; :general
 ;; (+leader-keys
 ;;   "w w" '("Switch" . ace-window))
@@ -35,9 +40,37 @@
 ;;  "<remap> <evil-window-next>" 'ace-window
 ;;  "C-x w" 'ace-window))
 
+
+(use-package windmove
+  :commands
+  (windmove-left windmove-right windmove-up windmove-down)
+  :bind*
+  (("C-h" . windmove-left)
+   ("C-j" . windmove-down)
+   ("C-k" . windmove-up)
+   ("C-l" . windmove-right)
+   :map meow-window-keymap
+   ("-" . shrink-window)
+   ("+" . enlarge-window)
+   ("l" . windmove-right)
+   ("h" . windmove-left)
+   ("j" . windmove-down)
+   ("k" . windmove-up)))
+
+
 (use-package window
   :straight nil
   :init
+  ;; setup meow keymap
+  (setq meow-window-keymap (make-keymap))
+
+  (meow-define-state window
+    "meow state for window navigation"
+    :keymap meow-window-keymap)
+
+  (meow-define-keys 'window
+    '("<escape>" . meow-normal-mode))
+
 
   (defun +windows-cfg (&rest display-cfg-forms)
     "Each one of POPWIN-CFG-FORMS is (BUFFER-NAMES . POPWIN-OPTIONS-PLIST)."
@@ -133,7 +166,13 @@
 
   (setq switch-to-buffer-in-dedicated-window t
         switch-to-buffer-obey-display-actions nil
-        switch-to-buffer-preserve-window-point t))
+        switch-to-buffer-preserve-window-point t)
+  :bind-keymap*
+  ("C-w" . meow-window-keymap)
+  :bind
+  ( :map meow-window-keymap
+    ("v" . split-window-horizontally)
+    ("s" . split-window-vertically)))
 ;; :general
 ;; (general-override-mode-map
 ;;  :states 'normal
