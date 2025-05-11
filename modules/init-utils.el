@@ -137,13 +137,13 @@
   :hook
   ((help-mode-hook helpful-mode-hook lsp-ui-doc-mode-hook) . visual-line-mode))
 
-(+leader-keys
-  "f D" '("Delete current file" . +utils/delete-visited-file)
-  "f C" '("Copy current file" . +utils/copy-visited-file)
-  "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
-  "t c" '("Colorize color strings" . rainbow-mode)
-  "t I" '("Select input method" . set-input-method)
-  "t v" '("Visual line mode" . visual-line-mode)
-  "i !" '("Shell command" . +utils/insert-shell-command-output))
+;; (+leader-keys
+;;   "f D" '("Delete current file" . +utils/delete-visited-file)
+;;   "f C" '("Copy current file" . +utils/copy-visited-file)
+;;   "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
+;;   "t c" '("Colorize color strings" . rainbow-mode)
+;;   "t I" '("Select input method" . set-input-method)
+;;   "t v" '("Visual line mode" . visual-line-mode)
+;;   "i !" '("Shell command" . +utils/insert-shell-command-output))
 
 (provide 'init-utils)

@@ -26,10 +26,10 @@
 (use-package vundo
   :custom
   (vundo-compact-display t)
-  (vundo-window-max-height 6)
-  :general
-  (global-map
-   "C-x u" '("Visualize undo" . vundo)))
+  (vundo-window-max-height 6))
+;; :general
+;; (global-map
+;;  "C-x u" '("Visualize undo" . vundo)))
 
 (use-package paren
   :straight nil
@@ -45,12 +45,12 @@
   (after-init-hook . show-paren-mode))
 
 
-(use-package drag-stuff
-  :general
-  (global-map
-   :states 'visual
-   "M-k" 'drag-stuff-up
-   "M-j" 'drag-stuff-down))
+(use-package drag-stuff)
+;; :general
+;; (global-map
+;;  :states 'visual
+;;  "M-k" 'drag-stuff-up
+;;  "M-j" 'drag-stuff-down))
 
 ;; (use-package origami
 ;;   :straight (origami :type git
@@ -60,13 +60,13 @@
 ;;   (after-init-hook . global-origami-mode))
 
 (use-package tabify
-  :straight nil
-  :general
-  (+leader-keys
-    "t TAB" 'tabify
-    "t <tab>" 'tabify
-    "t S-TAB" 'untabify
-    "t <backtab>" 'untabify))
+  :straight nil)
+;; :general
+;; (+leader-keys
+;;   "t TAB" 'tabify
+;;   "t <tab>" 'tabify
+;;   "t S-TAB" 'untabify
+;;   "t <backtab>" 'untabify))
 
 (use-package combobulate
   :straight (combobulate :type git

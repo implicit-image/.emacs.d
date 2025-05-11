@@ -40,17 +40,17 @@
                                 ("js" "typescript-language-server" "--stdio")
                                 ("java" "jdtls" "")))
   :hook
-  (lspce-mode . +lspce-setup)
-  :general
-  (lspce-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :non-normal-prefix "C-c"
-   "c a" '("Code Axtions" . lspce-code-actions)
-   "c s i" '("Incoming calls" . lspce-incoming-calls)
-   "c s o" '("Outgoing calls" . lspce-outgoing-calls)
-   "t i" '("Toggle inlay hints" . lspce-inlay-hints-mode)
-   "c R" '("Rename symbol" . lspce-rename)))
+  (lspce-mode . +lspce-setup))
+;; :general
+;; (lspce-mode-map
+;;  :states '(normal visual)
+;;  :prefix "SPC"
+;;  :non-normal-prefix "C-c"
+;;  "c a" '("Code Axtions" . lspce-code-actions)
+;;  "c s i" '("Incoming calls" . lspce-incoming-calls)
+;;  "c s o" '("Outgoing calls" . lspce-outgoing-calls)
+;;  "t i" '("Toggle inlay hints" . lspce-inlay-hints-mode)
+;;  "c R" '("Rename symbol" . lspce-rename)))
 
 
 

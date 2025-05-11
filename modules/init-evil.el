@@ -21,22 +21,22 @@
   (evil-set-initial-state 'Info-mode 'normal)
   (evil-set-initial-state 'shell-command-mode 'normal)
   (evil-set-initial-state 'comint-mode 'normal)
-  (evil-set-initial-state 'profiler-report-mode 'normal)
-  :general
-  (+leader-keys
-    "`" '("Last buffer" . evil-switch-to-windows-last-buffer)
-    "c d" '("Goto definition" . evil-goto-definition)
-    "w s" '("Split window horizontally" . evil-window-split)
-    "w v" '("Split window vertically" . evil-window-vsplit))
-  (general-override-mode-map
-   :states '(normal visual)
-   "C-h" 'evil-window-left
-   "C-j" 'evil-window-down
-   "C-k" 'evil-window-up
-   "C-l" 'evil-window-right)
-  (global-map
-   "C-TAB" 'evil-jump-forward
-   "C-<tab>" 'evil-jump-forward))
+  (evil-set-initial-state 'profiler-report-mode 'normal))
+;; :general
+;; (+leader-keys
+;;   "`" '("Last buffer" . evil-switch-to-windows-last-buffer)
+;;   "c d" '("Goto definition" . evil-goto-definition)
+;;   "w s" '("Split window horizontally" . evil-window-split)
+;;   "w v" '("Split window vertically" . evil-window-vsplit))
+;; (general-override-mode-map
+;;  :states '(normal visual)
+;;  "C-h" 'evil-window-left
+;;  "C-j" 'evil-window-down
+;;  "C-k" 'evil-window-up
+;;  "C-l" 'evil-window-right)
+;; (global-map
+;;  "C-TAB" 'evil-jump-forward
+;;  "C-<tab>" 'evil-jump-forward))
 
 ;;;; collection of evil bindings for popular modes
 (use-package evil-collection
@@ -76,16 +76,16 @@
 (use-package treemacs-evil
   :init
   (with-eval-after-load 'treemacs
-    (require 'treemacs-evil))
-  :general
-  (evil-treemacs-state-map
-   "SPC w" 'evil-window-next
-   "C-w" 'evil-window-next
-   "C-l" 'evil-window-right
-   "C-k" 'evil-window-up
-   "C-p" '(:keymap projectile-command-map :package projectile)
-   "C-h" 'evil-window-left
-   "C-j" 'evil-window-down))
+    (require 'treemacs-evil)))
+;; :general
+;; (evil-treemacs-state-map
+;;  "SPC w" 'evil-window-next
+;;  "C-w" 'evil-window-next
+;;  "C-l" 'evil-window-right
+;;  "C-k" 'evil-window-up
+;;  "C-p" '(:keymap projectile-command-map :package projectile)
+;;  "C-h" 'evil-window-left
+;;  "C-j" 'evil-window-down))
 
 (use-package evil-textobj-tree-sitter
   :after (treeesit evil))
@@ -99,11 +99,11 @@
                        (global-evil-mc-mode 1)
                        (add-to-list 'evil-mc-incompatible-minor-modes 'lispy-mode))))
 
-(use-package evil-nerd-commenter
-  :general
-  (global-map
-   :states '(visual normal)
-   "g c" 'evilnc-comment-or-uncomment-lines))
+(use-package evil-nerd-commenter)
+;; :general
+;; (global-map
+;;  :states '(visual normal)
+;;  "g c" 'evilnc-comment-or-uncomment-lines))
 
 (use-package evil-surround
   :hook
@@ -114,12 +114,12 @@
   (setq anzu-search-threshold nil
         anzu-replace-threshold nil)
   :hook
-  (after-init-hook . global-anzu-mode)
-  :general
-  (+leader-keys
-    "c R" '("Rename" . anzu-query-replace)
-    "s r" '("Query replace" . anzu-query-replace)
-    "s R" '("Replace at point" . anzu-replace-threshold)
-    "s R" '("Query replace regexp" . anzu-query-replace-regexp)))
+  (after-init-hook . global-anzu-mode))
+;; :general
+;; (+leader-keys
+;;   "c R" '("Rename" . anzu-query-replace)
+;;   "s r" '("Query replace" . anzu-query-replace)
+;;   "s R" '("Replace at point" . anzu-replace-threshold)
+;;   "s R" '("Query replace regexp" . anzu-query-replace-regexp)))
 
 (provide 'init-evil)

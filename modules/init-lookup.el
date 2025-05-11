@@ -110,59 +110,58 @@
 
 (use-package xref
   :custom
-  (xref-search-program 'ripgrep)
-  :general
-  (evil-motion-state-map
-   "g r" 'xref-find-references)
-  (+leader-keys
-    "c g f" '("Xref forward" . xref-go-forward)
-    "c g b" '("Xref back" . xref-go-back)))
+  (xref-search-program 'ripgrep))
+;; :general
+;; (evil-motion-state-map
+;;  "g r" 'xref-find-references)
+;; (+leader-keys
+;;   "c g f" '("Xref forward" . xref-go-forward)
+;;   "c g b" '("Xref back" . xref-go-back)))
 
 (use-package info
   :straight nil)
 
 (use-package help-mode
-  :straight nil
-  :general
-  (help-mode-map
-   :states '(normal)
-   "q" 'quit-window))
+  :straight nil)
+;; :general
+;; (help-mode-map
+;;  :states '(normal)
+;;  "q" 'quit-window))
 
 (use-package helpful
   :init
-  (+lookup-set-fn 'buffer '(helpful-mode . helpful-at-point))
-  ;; (setq helpful-switch-buffer-function )
-  :general
-  (+leader-keys
-    "h :" '("Describe command" . helpful-command)
-    "h v" '("Describe variable" . helpful-variable)
-    "h f" '("Describe function" . helpful-callable)
-    "h k" '("Describe key" . helpful-key)
-    "h s" '("Describe symbol" . helpful-symbol))
-  (helpful-mode-map
-   :states 'normal
-   "q" 'quit-window
-   "<esc>" 'quit-window
-   "ESC" 'quit-window))
+  (+lookup-set-fn 'buffer '(helpful-mode . helpful-at-point)))
+;; :general
+;; (+leader-keys
+;;   "h :" '("Describe command" . helpful-command)
+;;   "h v" '("Describe variable" . helpful-variable)
+;;   "h f" '("Describe function" . helpful-callable)
+;;   "h k" '("Describe key" . helpful-key)
+;;   "h s" '("Describe symbol" . helpful-symbol))
+;; (helpful-mode-map
+;;  :states 'normal
+;;  "q" 'quit-window
+;;  "<esc>" 'quit-window
+;;  "ESC" 'quit-window))
 
 (use-package dictionary
   :straight nil
   :init
-  (setq dictionary-server "dict.org")
-  :general
-  (+leader-keys
-    "h d" '("Dictionary" . dictionary-search)))
+  (setq dictionary-server "dict.org"))
+;; :general
+;; (+leader-keys
+;;   "h d" '("Dictionary" . dictionary-search)))
 
 (use-package help-fns
-  :straight nil
-  :general
-  (+leader-keys
-    "h b" '("Describe bindings" . describe-bindings)
-    "h F" '("Describe face" . describe-face)
-    "h m" '("Describe keymap"   . describe-keymap)
-    "h M" '("Describe mode"     . describe-mode)
-    "h p" '("Describe package"  . describe-package)
-    "h c" '("Describe character" . describe-char)))
+  :straight nil)
+;; :general
+;; (+leader-keys
+;;   "h b" '("Describe bindings" . describe-bindings)
+;;   "h F" '("Describe face" . describe-face)
+;;   "h m" '("Describe keymap"   . describe-keymap)
+;;   "h M" '("Describe mode"     . describe-mode)
+;;   "h p" '("Describe package"  . describe-package)
+;;   "h c" '("Describe character" . describe-char)))
 
 (use-package eldoc
   :init
@@ -253,21 +252,21 @@
                                      expr)))
                            (t (error "WebJump URL expression for \"%s\" invalid"
                                      name)))))))
-      (funcall fun thing)))
-  :general
-  (evil-normal-state-map
-   "g X" '+webjump)
-  (+leader-keys
-    "s W" '("Search the web" . webjump)))
+      (funcall fun thing))))
+;; :general
+;; (evil-normal-state-map
+;;  "g X" '+webjump)
+;; (+leader-keys
+;;   "s W" '("Search the web" . webjump)))
 
 
-(general-defs
-  global-map
-  :states '(visual normal)
-  "K" '+lookup/documentation
-  "M-k" '+lookup/in-buffer
-  help-mode-map
-  :states '(normal)
-  "q" 'quit-window)
+;; (general-defs
+;;   global-map
+;;   :states '(visual normal)
+;;   "K" '+lookup/documentation
+;;   "M-k" '+lookup/in-buffer
+;;   help-mode-map
+;;   :states '(normal)
+;;   "q" 'quit-window)
 
 (provide 'init-lookup)

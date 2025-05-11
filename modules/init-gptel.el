@@ -18,10 +18,10 @@
                         :stream t
                         :key (plist-get)))
   :hook
-  (gptel-mode-hook . visual-line-mode)
-  :general
-  (+leader-keys
-    "a i" '("Gptel menu" . gptel-menu)))
+  (gptel-mode-hook . visual-line-mode))
+;; :general
+;; (+leader-keys
+;;   "a i" '("Gptel menu" . gptel-menu)))
 
 
 

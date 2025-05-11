@@ -44,9 +44,9 @@
   (interactive)
   (consult-ripgrep user-emacs-directory))
 
-(with-eval-after-load 'init-keybindings
-  (+leader-keys
-    "f P" '("Open module files" . +modules/browse)
-    "f p *" '("Ripgrep in emacs dir" . +config/ripgrep)))
+;; (with-eval-after-load 'init-keybindings
+;;   (+leader-keys
+;;     "f P" '("Open module files" . +modules/browse)
+;;     "f p *" '("Ripgrep in emacs dir" . +config/ripgrep)))
 
 (provide 'init-modules)

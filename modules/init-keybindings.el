@@ -25,57 +25,57 @@
   ;; load after loading user init
   (after-init-hook . which-key-mode))
 
-(use-package general
-  :demand
-  :config
-  (general-evil-setup)
+;; (use-package general
+;;   :disabled
+;;   :config
+;;   (general-evil-setup)
+;;
+;;   ;;;; key definer for global leader keys
+;;   (general-create-definer +leader-keys
+;;     :states '(normal insert visual emacs)
+;;     :keymaps 'override
+;;     :prefix "SPC"
+;;     :non-normal-prefix "M-SPC"
+;;     :global-prefix "C-c SPC")
+;;
+;;   ;;;; key definer for local leader keys
+;;   (general-create-definer +local-leader-keys
+;;     :states '(normal insert visual emacs)
+;;     :prefix "SPC m"
+;;     :non-normal-prefix "M-SPC m"
+;;     :global-prefix "C-c m")
+;;
+;;   (general-create-definer +mode-keys
+;;     :states '(normal insert visual emacs)
+;;     :prefix ""
+;;     :global-prefix "M-SPC"
+;;     :non-normal-prefix "C-c")
 
-  ;;;; key definer for global leader keys
-  (general-create-definer +leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC"
-    :non-normal-prefix "M-SPC"
-    :global-prefix "C-c SPC")
+;; (general-create-definer +mode-keys-normal)
 
-  ;;;; key definer for local leader keys
-  (general-create-definer +local-leader-keys
-    :states '(normal insert visual emacs)
-    :prefix "SPC m"
-    :non-normal-prefix "M-SPC m"
-    :global-prefix "C-c m")
+;; (general-create-definer +mode-keys-visual)
 
-  (general-create-definer +mode-keys
-    :states '(normal insert visual emacs)
-    :prefix ""
-    :global-prefix "M-SPC"
-    :non-normal-prefix "C-c")
+;; (general-create-definer +mode-keys-insert)
 
-  ;; (general-create-definer +mode-keys-normal)
-
-  ;; (general-create-definer +mode-keys-visual)
-
-  ;; (general-create-definer +mode-keys-insert)
-
-  ;; (general-create-definer +mode-keys-emacs)
+;; (general-create-definer +mode-keys-emacs)
 
   ;;;; key categories
-  (+leader-keys
-    "a" '(:ignore t :which-key "applications")
-    "b" '(:ignore t :which-key "buffer")
-    "c" '(:ignore t :which-key "code")
-    "d" '(:ignore t :which-key "dired")
-    "f" '(:ignore t :which-key "file")
-    "g" '(:ignore t :which-key "git")
-    "h" '(:ignore t :which-key "help")
-    "i" '(:ignore t :which-key "insert")
-    "n" '(:ignore t :which-key "notes")
-    "o" '(:ignore t :which-key "open")
-    "p" '(:ignore t :which-key "projects")
-    "q" '(:ignore t :which-key "quit")
-    "s" '(:ignore t :which-key "search")
-    "t" '(:ignore t :which-key "toggle")
-    "w" '(:ignore t :which-key "window")))
+;; (+leader-keys
+;;   "a" '(:ignore t :which-key "applications")
+;;   "b" '(:ignore t :which-key "buffer")
+;;   "c" '(:ignore t :which-key "code")
+;;   "d" '(:ignore t :which-key "dired")
+;;   "f" '(:ignore t :which-key "file")
+;;   "g" '(:ignore t :which-key "git")
+;;   "h" '(:ignore t :which-key "help")
+;;   "i" '(:ignore t :which-key "insert")
+;;   "n" '(:ignore t :which-key "notes")
+;;   "o" '(:ignore t :which-key "open")
+;;   "p" '(:ignore t :which-key "projects")
+;;   "q" '(:ignore t :which-key "quit")
+;;   "s" '(:ignore t :which-key "search")
+;;   "t" '(:ignore t :which-key "toggle")
+;;   "w" '(:ignore t :which-key "window")))
 
 
 (provide 'init-keybindings)

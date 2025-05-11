@@ -41,23 +41,23 @@
                          (when (bound-and-true-p corfu-mode)
                            (corfu-mode -1))))
   (lsp-bridge . (lambda ()
-                  (corfu-mode -1)))
-  :general
-  (global-map
-   :states 'insert
-   "C-TAB" 'completion-at-point
-   "C-SPC" 'completion-at-point)
-  (corfu-map
-   :states 'insert
-   "M-h" 'corfu-popupinfo-documentation
-   "M-g" 'corfu-info-locationa
-   "M-e" 'corfu-expand
-   [tab] 'corfu-next
-   "<tab>" 'corfu-next
-   "TAB" 'corfu-next
-   [backtab] 'corfu-previous
-   "<backtab>" 'corfu-previous
-   "S-TAB" 'corfu-previous))
+                  (corfu-mode -1))))
+;; :general
+;; (global-map
+;;  :states 'insert
+;;  "C-TAB" 'completion-at-point
+;;  "C-SPC" 'completion-at-point)
+;; (corfu-map
+;;  :states 'insert
+;;  "M-h" 'corfu-popupinfo-documentation
+;;  "M-g" 'corfu-info-locationa
+;;  "M-e" 'corfu-expand
+;;  [tab] 'corfu-next
+;;  "<tab>" 'corfu-next
+;;  "TAB" 'corfu-next
+;;  [backtab] 'corfu-previous
+;;  "<backtab>" 'corfu-previous
+;;  "S-TAB" 'corfu-previous))
 
 ;; emacs 31 should add tty child frames
 (when (< (string-to-number emacs-version) 31)

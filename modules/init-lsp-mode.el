@@ -73,23 +73,23 @@
     tsx-ts-mode-hook
     fstar-mode-hook
     nix-mode-hook)
-   . lsp)
-  :general
-  (lsp-mode-map
-   :states '(normal visual)
-   "g r" 'lsp-find-references)
-  (lsp-signature-mode-map
-   :states '(insert emacs)
-   "M-a" 'lsp-signature-toggle-full-docs)
-  (lsp-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :global-prefix "M-SPC"
-   "t h" '("Headerline" . lsp-headerline-breadcrumb-mode)
-   "c a" '("Apply code actions" . lsp-execute-code-action)
-   "c D" '("Show doc buffer" . lsp-describe-thing-at-point)
-   "c R" '("LSP rename" . lsp-rename)
-   "c r" '("lsp find references" . lsp-find-references)))
+   . lsp))
+;; :general
+;; (lsp-mode-map
+;;  :states '(normal visual)
+;;  "g r" 'lsp-find-references)
+;; (lsp-signature-mode-map
+;;  :states '(insert emacs)
+;;  "M-a" 'lsp-signature-toggle-full-docs)
+;; (lsp-mode-map
+;;  :states '(normal visual)
+;;  :prefix "SPC"
+;;  :global-prefix "M-SPC"
+;;  "t h" '("Headerline" . lsp-headerline-breadcrumb-mode)
+;;  "c a" '("Apply code actions" . lsp-execute-code-action)
+;;  "c D" '("Show doc buffer" . lsp-describe-thing-at-point)
+;;  "c R" '("LSP rename" . lsp-rename)
+;;  "c r" '("lsp find references" . lsp-find-references)))
 
 
 (use-package lsp-ui
@@ -130,39 +130,39 @@
   (lsp-mode-hook . (lambda ()
                      (interactive)
                      (lsp-ui-mode +1)
-                     (lsp-ui-doc-mode +1)))
-  :general
-  (lsp-ui-mode-map
-   :states '(normal visual insert)
-   "C-c TAB" 'lsp-ui-doc-focus-frame)
-  (lsp-ui-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :global-prefix "M-SPC"
-   "s i" '("LSP imenu" . lsp-ui-imenu)
-   "c p r" '("Peek references" . lsp-ui-peek-find-references)
-   "c p d" '("Peek definition" . lsp-ui-peek-find-definitions)
-   "c p i" '("Peek implementation" . lsp-ui-peek-find-implementation)
-   "c p s" '("Peek symbol" . lsp-ui-peek-find-workspace-symbol)
-   "c d" '("Popup documentation" . lsp-ui-doc-show))
-  (lsp-ui-peek-mode-map
-   "j" 'lsp-ui-peek--select-next
-   "k" 'lsp-ui-peek--select-prev))
+                     (lsp-ui-doc-mode +1))))
+;; :general
+;; (lsp-ui-mode-map
+;;  :states '(normal visual insert)
+;;  "C-c TAB" 'lsp-ui-doc-focus-frame)
+;; (lsp-ui-mode-map
+;;  :states '(normal visual)
+;;  :prefix "SPC"
+;;  :global-prefix "M-SPC"
+;;  "s i" '("LSP imenu" . lsp-ui-imenu)
+;;  "c p r" '("Peek references" . lsp-ui-peek-find-references)
+;;  "c p d" '("Peek definition" . lsp-ui-peek-find-definitions)
+;;  "c p i" '("Peek implementation" . lsp-ui-peek-find-implementation)
+;;  "c p s" '("Peek symbol" . lsp-ui-peek-find-workspace-symbol)
+;;  "c d" '("Popup documentation" . lsp-ui-doc-show))
+;; (lsp-ui-peek-mode-map
+;;  "j" 'lsp-ui-peek--select-next
+;;  "k" 'lsp-ui-peek--select-prev))
 
 (use-package consult-lsp
   :config
   (consult-customize
    consult-lsp-symbols
    consult-lsp-file-symbols
-   consult-lsp-diagnostics :initial "")
-  :general
-  (lsp-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :global-prefix "M-SPC"
-   "c s" '("Local LSP symbols" . consult-lsp-file-symbols)
-   "c S" '("Workspace LSP symbols" . consult-lsp-symbols)
-   "c e" '("LSP diagnostics" . consult-lsp-diagnostics)))
+   consult-lsp-diagnostics :initial ""))
+;; :general
+;; (lsp-mode-map
+;;  :states '(normal visual)
+;;  :prefix "SPC"
+;;  :global-prefix "M-SPC"
+;;  "c s" '("Local LSP symbols" . consult-lsp-file-symbols)
+;;  "c S" '("Workspace LSP symbols" . consult-lsp-symbols)
+;;  "c e" '("LSP diagnostics" . consult-lsp-diagnostics)))
 
 (use-package lsp-treemacs
   :custom
@@ -170,19 +170,19 @@
   (lsp-treemacs-error-list-expand-depth 3)
   (lsp-treemacs-type-hierarchy-epxand-depth 3)
   :hook
-  (after-init . lsp-treemacs-sync-mode)
-  :general
-  (lsp-ui-mode-map
-   :states '(normal visual)
-   :prefix "SPC c"
-   :global-prefix"C-c"
-   "t e" '("Error list" . lsp-treemacs-errors-list)
-   "t s" '("Symbols per file" . lsp-treemacs-symbols)
-   "t r" '("References" . lsp-treemacs-references)
-   "t i" '("Implementations" . lsp-treemacs-implementations)
-   "t c" '("Call hierarchy" . lsp-treemacs-call-hierarchy)
-   "t t" '("Type hierarchy" . lsp-treemacs-type-hierarchy)))
-;; "T d" '("Dependencies" . lsp-treemacs-deps--icon)))
+  (after-init . lsp-treemacs-sync-mode))
+;;   :general
+;;   (lsp-ui-mode-map
+;;    :states '(normal visual)
+;;    :prefix "SPC c"
+;;    :global-prefix"C-c"
+;;    "t e" '("Error list" . lsp-treemacs-errors-list)
+;;    "t s" '("Symbols per file" . lsp-treemacs-symbols)
+;;    "t r" '("References" . lsp-treemacs-references)
+;;    "t i" '("Implementations" . lsp-treemacs-implementations)
+;;    "t c" '("Call hierarchy" . lsp-treemacs-call-hierarchy)
+;;    "t t" '("Type hierarchy" . lsp-treemacs-type-hierarchy)))
+;; ;; "T d" '("Dependencies" . lsp-treemacs-deps--icon)))
 
 (use-package lsp-tailwindcss
   :straight (lsp-tailwindcss :type git

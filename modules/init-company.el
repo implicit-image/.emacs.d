@@ -21,14 +21,20 @@
         company-quickhelp-delay 0.4
         company-quickhelp-use-propertized-text t
         company-format-margin-function 'company-text-icons-margin)
-  :general
-  (company-active-map
-   :states 'insert
-   "C-h" 'company-quickhelp-manual-begin
-   "C-s" 'company-search-mode)
-  (company-mode-map
-   :states '(insert emacs)
-   "C-SPC" 'company-complete)
+  ;; :bind*
+  ;; ( :map 'company-active-map
+  ;;   ("C-h" . 'company-quickhelp-manual-begin)
+  ;;   ("C-s" . 'company-search-mode)
+  ;;   :map 'company-mode-map
+  ;;   ("C-SPC" . 'company-complete))
+  ;; :general
+  ;; (company-active-map
+  ;;  :states 'insert
+  ;;  "C-h" 'company-quickhelp-manual-begin
+  ;;  "C-s" 'company-search-mode)
+  ;; (company-mode-map
+  ;;  :states '(insert emacs)
+  ;;  "C-SPC" 'company-complete)
   :hook
   (after-init . global-company-mode)
   (global-company-mode . company-tng-mode)

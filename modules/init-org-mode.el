@@ -117,18 +117,18 @@
   (org-mode-hook . (lambda ()
                      (interactive)
                      (whitespace-mode -1)))
-  (org-mode-hook . org-latex-preview-auto-mode)
-  :general
-  (org-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :global-prefix "M-SPC"
-   "s i" '("Navigate Org headings" . consult-org-heading)
-   "t l" '("Toggle latex preview" . org-latex-preview)
-   "t p" '("Toggle pretty symbols" . org-toggle-pretty-entities)
-   "m i t" '("Create table" . org-table-create-or-convert-from-region)
-   "m l" '(:ignore t :which-key "link")
-   "m l i" '("Insert link" . org-insert-link)))
+  (org-mode-hook . org-latex-preview-auto-mode))
+;; :general
+;; (org-mode-map
+;;  :states '(normal visual)
+;;  :prefix "SPC"
+;;  :global-prefix "M-SPC"
+;;  "s i" '("Navigate Org headings" . consult-org-heading)
+;;  "t l" '("Toggle latex preview" . org-latex-preview)
+;;  "t p" '("Toggle pretty symbols" . org-toggle-pretty-entities)
+;;  "m i t" '("Create table" . org-table-create-or-convert-from-region)
+;;  "m l" '(:ignore t :which-key "link")
+;;  "m l i" '("Insert link" . org-insert-link)))
 
 
 (use-package org-contrib)

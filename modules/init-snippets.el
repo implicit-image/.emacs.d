@@ -20,10 +20,10 @@
                                    ,(file-name-concat user-emacs-directory "snippets")
                                    ,(file-name-concat user-emacs-directory "straight" straight-build-dir "yasnippet-snippets/snippets"))))
   :hook
-  ((prog-mode-hook conf-mode-hook snippet-mode-hook text-mode-hook) . yas-minor-mode)
-  :general
-  (+leader-keys
-    "i s" '("Insert snippet" . yas-insert-snippet)))
+  ((prog-mode-hook conf-mode-hook snippet-mode-hook text-mode-hook) . yas-minor-mode))
+;; :general
+;; (+leader-keys
+;;   "i s" '("Insert snippet" . yas-insert-snippet)))
 
 (use-package doom-snippets
   :straight (doom-snippets :type git

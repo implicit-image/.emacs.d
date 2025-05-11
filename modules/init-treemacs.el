@@ -16,11 +16,11 @@
   (treemacs-mode-hook . (lambda ()
                           (interactive)
                           (toggle-truncate-lines -1)
-                          (treemacs-project-follow-mode +1)))
-  :general
-  (+leader-keys
-    "TAB" '("Switch to project tree" . treemacs-select-window)
-    "o p" '("Sidebar" . treemacs)))
+                          (treemacs-project-follow-mode +1))))
+;; :general
+;; (+leader-keys
+;;   "TAB" '("Switch to project tree" . treemacs-select-window)
+;;   "o p" '("Sidebar" . treemacs)))
 
 (use-package treemacs-projectile
   :demand

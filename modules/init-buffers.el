@@ -28,10 +28,12 @@
                                   ("help" (or
                                            (name . "^\\*Help\\*$")
                                            (name . "^\\*info\\*$")
-                                           (name . "^\\*helpful"))))))
-  :general
-  (+leader-keys
-    "b i" '("Open ibuffer" . ibuffer)))
+                                           (name . "^\\*helpful")))))))
+;; :bind*
+;; (("C-x C-b i" . ibuffer)))
+;; :general
+;; (+leader-keys
+;;   "b i" '("Open ibuffer" . ibuffer)))
 
 
 (use-package ibuffer-projectile)
@@ -46,16 +48,16 @@
   :hook
   (after-init-hook . recentf-mode))
 
-(+leader-keys
-  "b r" '("Revert" . revert-buffer)
-  "b K" '("Kill this buffer" . kill-current-buffer)
-  "b k" '("Kill buffer" . kill-buffer)
-  "f o" '("Find file in other window" . find-file-other-window)
-  "f R" '("Rename current file" . rename-visited-file)
-  "o x" '("Scratch buffer" . scratch-buffer))
-
-(general-def global-map
-  "C-x k" 'kill-current-buffer)
+;; (+leader-keys
+;;   "b r" '("Revert" . revert-buffer)
+;;   "b K" '("Kill this buffer" . kill-current-buffer)
+;;   "b k" '("Kill buffer" . kill-buffer)
+;;   "f o" '("Find file in other window" . find-file-other-window)
+;;   "f R" '("Rename current file" . rename-visited-file)
+;;   "o x" '("Scratch buffer" . scratch-buffer))
+;;
+;; (general-def global-map
+;;   "C-x k" 'kill-current-buffer)
 
 
 (provide 'init-buffers)

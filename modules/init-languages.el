@@ -169,18 +169,18 @@
   :commands
   lispy-mode
   :hook
-  ((emacs-lisp-mode-hook common-lisp-mode-hook scheme-mode-hook racket-mode-hook dune-mode-hook) . lispy-mode)
-  :general
-  (lispy-mode-map
-   :states '(insert emacs)
-   "C-c g" 'lispy-ace-paren)
-  (lispy-mode-map
-   :states '(insert emacs normal)
-   "C-c <" 'lispy-move-left
-   "C-c >" 'lispy-move-right
-   "C-M-[" 'lispy-wrap-brackets
-   "C-M-{" 'lispy-wrap-braces
-   "C-M-(" 'lispy-wrap-round))
+  ((emacs-lisp-mode-hook common-lisp-mode-hook scheme-mode-hook racket-mode-hook dune-mode-hook) . lispy-mode))
+;; :general
+;; (lispy-mode-map
+;;  :states '(insert emacs)
+;;  "C-c g" 'lispy-ace-paren)
+;; (lispy-mode-map
+;;  :states '(insert emacs normal)
+;;  "C-c <" 'lispy-move-left
+;;  "C-c >" 'lispy-move-right
+;;  "C-M-[" 'lispy-wrap-brackets
+;;  "C-M-{" 'lispy-wrap-braces
+;;  "C-M-(" 'lispy-wrap-round))
 
 ;; emacs lisp
 (use-package emacs-lisp-mode
@@ -452,13 +452,13 @@
     (save-buffer)
     (indent-tabs-mode -1))
   :hook
-  (nwscript-mode-hook . +nwscript--setup)
-  :general
-  (nwscript-mode-map
-   :states 'normal
-   :prefix "SPC"
-   :non-normal-prefix "C-c SPC"
-   "s o" '("Outline" . consult-outline)))
+  (nwscript-mode-hook . +nwscript--setup))
+;; :general
+;; (nwscript-mode-map
+;;  :states 'normal
+;;  :prefix "SPC"
+;;  :non-normal-prefix "C-c SPC"
+;;  "s o" '("Outline" . consult-outline)))
 
 ;;;; csv
 (use-package csv-mode
@@ -489,11 +489,11 @@
   :init
   (defun +md-check-gfm ()
     (interactive)
-    (if (eq )))
-  :general
-  (gfm-view-mode-map
-   :states 'normal
-   "q" 'kill-this-buffer))
+    (if (eq ))))
+;; :general
+;; (gfm-view-mode-map
+;;  :states 'normal
+;;  "q" 'kill-this-buffer))
 
 (use-package markdown-ts-mode
   :mode ("\\.md\\'" . markdown-ts-mode)

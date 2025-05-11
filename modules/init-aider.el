@@ -27,10 +27,7 @@
       (when api-version
         (exec-path-from-shell-setenv "AZURE_API_VERSION" api-version))))
 
-  (setq aider-args `("--model" "azure/DeepSeek-R1-nebbc.eastus2.models.ai.azure.com"))
-  :general
-  (+leader-keys
-    "a a" '("[AI]der menu" . aider-transient-menu)))
+  (setq aider-args `("--model" "azure/DeepSeek-R1-nebbc.eastus2.models.ai.azure.com")))
 
 (use-package aidermacs
   :straight (aidermacs :type git
@@ -41,9 +38,6 @@
   (aidermacs-setup-minor-mode)
   :custom
   (aidermacs-use-architect-mode t)
-  (aidermacs-default-model "sonnet")
-  :general
-  (+leader-keys
-    "a A" '("Aidermacs menu." . aidermacs-transient-menu)))
+  (aidermacs-default-model "sonnet"))
 
 (provide 'init-aider)

@@ -56,19 +56,19 @@
                               "#+title: %^{title}\n")
            :unnarrowed t)))
   :hook
-  (org-roam-db-autosync-mode-hook . +roam/mode-setup)
-  :general
-  (+leader-keys
-    "n r" '(:ignore t :which-key "org roam")
-    "n r f" '("Find Org Roam node" . org-roam-node-find)
-    "n r r" '("Find random Org Roam node" . org-roam-node-random)
-    "n r s" '("Sync Org Roam database" . org-roam-db-sync)
-    "n r c" '("Org Roam capture" . org-roam-capture)
-    "n r *" '("Grep in org roam dir" . +org-roam/rg-in-notes))
-  (org-roam-mode-map
-   :states '(normal visual)
-   :prefix "SPC n r"
-   :global-prefix "M-SPC n r"
-   "i" '("Insert Org Roam node" . org-roam-node-insert)))
+  (org-roam-db-autosync-mode-hook . +roam/mode-setup))
+;; :general
+;; (+leader-keys
+;;   "n r" '(:ignore t :which-key "org roam")
+;;   "n r f" '("Find Org Roam node" . org-roam-node-find)
+;;   "n r r" '("Find random Org Roam node" . org-roam-node-random)
+;;   "n r s" '("Sync Org Roam database" . org-roam-db-sync)
+;;   "n r c" '("Org Roam capture" . org-roam-capture)
+;;   "n r *" '("Grep in org roam dir" . +org-roam/rg-in-notes))
+;; (org-roam-mode-map
+;;  :states '(normal visual)
+;;  :prefix "SPC n r"
+;;  :global-prefix "M-SPC n r"
+;;  "i" '("Insert Org Roam node" . org-roam-node-insert)))
 
 (provide 'init-org-roam)

@@ -60,8 +60,8 @@
 (require 'init-base)
 
 ;; keybindings
-;; (require 'init-meow)
-(require 'init-evil)
+(require 'init-meow)
+;; (require 'init-evil)
 
 (require 'init-treesitter)
 (require 'init-utils)

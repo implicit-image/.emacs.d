@@ -23,41 +23,41 @@
 
   (defun +previous-error-no-select (&optional n)
     (interactive "p")
-    (+next-error-no-select (- (or n 1))))
+    (+next-error-no-select (- (or n 1)))))
 
-  :general
-  (grep-mode-map
-   :states 'normal
-   "M-n" '+next-error-no-select
-   "M-p" '+previous-error-no-select))
+;; :general
+;; (grep-mode-map
+;;  :states 'normal
+;;  "M-n" '+next-error-no-select
+;;  "M-p" '+previous-error-no-select))
 
 (use-package deadgrep
   :custom
   (deadgrep-display-buffer-function '+deadgrep-display-buffer-function)
   :init
   (defun +deadgrep-display-buffer-function (buffer)
-    (display-buffer-same-window buffer nil))
-  :general
-  (deadgrep-edit-mode-map
-   :states 'normal
-   "Z Z" 'deadgrep-mode)
-  (rg-global-map
-   "?" 'deadgrep))
+    (display-buffer-same-window buffer nil)))
+;; :general
+;; (deadgrep-edit-mode-map
+;;  :states 'normal
+;;  "Z Z" 'deadgrep-mode)
+;; (rg-global-map
+;;  "?" 'deadgrep))
 
 (use-package rg
   :init
-  (setq rg-align-position-numbers t)
-  :general
-  (general-override-mode-map
-   :states '(normal visual)
-   "g /" '(:which-key "rg" :keymap rg-global-map :package rg))
-  (rg-global-map
-   "d" 'ignore
-   "/" 'rg-dwim
-   "p" 'rg-project
-   "s" 'rg-isearch-project
-   "S" 'rg-isearch-current-dir
-   "f" 'rg-isearch-current-file))
+  (setq rg-align-position-numbers t))
+;; :general
+;; (general-override-mode-map
+;;  :states '(normal visual)
+;;  "g /" '(:which-key "rg" :keymap rg-global-map :package rg))
+;; (rg-global-map
+;;  "d" 'ignore
+;;  "/" 'rg-dwim
+;;  "p" 'rg-project
+;;  "s" 'rg-isearch-project
+;;  "S" 'rg-isearch-current-dir
+;;  "f" 'rg-isearch-current-file))
 
 (defun +search/rg-thing-at-point ()
   (interactive)
@@ -77,7 +77,7 @@
 (use-package isearch
   :straight nil)
 
-(+leader-keys
-  "*" '("Find thing-at-point in project" . +search/rg-thing-at-point))
+;; (+leader-keys
+;;   "*" '("Find thing-at-point in project" . +search/rg-thing-at-point))
 
 (provide 'init-search)

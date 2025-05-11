@@ -127,11 +127,7 @@
     tuareg-mode-hook)
    . display-line-numbers-mode)
   (window-setup-hook . toggle-frame-fullscreen)
-  (window-setup-hook . +insert-scratch-buffer-info)
-  :general
-  (+leader-keys
-    "t f" '+set-global-font-size
-    "t I" '("Select input method." . set-input-method)))
+  (window-setup-hook . +insert-scratch-buffer-info))
 
 ;; load $PATH from shell
 (use-package exec-path-from-shell

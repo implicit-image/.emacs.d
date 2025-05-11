@@ -35,38 +35,38 @@
   (lsp-bridge-mode-hook . (lambda ()
                             (interactive)
                             (indent-tabs-mode -1)
-                            (apheleia-mode -1)))
-  :general
-  (lsp-bridge-mode-map
-   :states '(insert)
-   "C-SPC" 'lsp-bridge-popup-complete-menu)
-  (lsp-bridge-mode-map
-   :states '(normal visual)
-   :prefix "SPC c"
-   :global-prefix "M-SPC c"
-   "a" '("Code actions" . lsp-bridge-code-action)
-   "d" '("Find definition" . lsp-bridge-find-def)
-   "D" '("Find definition other window" . lsp-bridge-find-def-other-window)
-   "t" '("Find typedef" . lsp-bridge-find-type-def)
-   "T" '("Find typedef other window" . lsp-bridge-find-type-def-other-window)
-   "f r" '("Return to symbol" . lsp-bridge-find-def-return)
-   "i" '("Find implementation" . lsp-bridge-find-impl)
-   "I" '("Find implementation other window" . lsp-bridge-find-impl-other-window)
-   "r" '("Find references" . lsp-bridge-find-references)
-   "k" '("Show doc popup" . lsp-bridge-popup-documentation)
-   "K" '("Show doc buffer" . lsp-bridge-show-documentation)
-   "s" '(:ignore t :which-key "Server")
-   "s R" '("Restart process" . lsp-bridge-restart-process)
-   "R" '("Rename" . lsp-bridge-rename)
-   "s S" '("LSP imenu" . lsp-bridge-imenu))
-  (lsp-bridge-mode-map
-   :states '(normal visual)
-   :prefix "SPC s"
-   :global-prefix "M-SPC s"
-   "S" '("List symbols" . lsp-bridge-workspace-list-symbol-at-point))
-  (lsp-bridge-doc-map
-   :states '(normal visual)
-   "q" 'quit-window))
+                            (apheleia-mode -1))))
+;; :general
+;; (lsp-bridge-mode-map
+;;  :states '(insert)
+;;  "C-SPC" 'lsp-bridge-popup-complete-menu)
+;; (lsp-bridge-mode-map
+;;  :states '(normal visual)
+;;  :prefix "SPC c"
+;;  :global-prefix "M-SPC c"
+;;  "a" '("Code actions" . lsp-bridge-code-action)
+;;  "d" '("Find definition" . lsp-bridge-find-def)
+;;  "D" '("Find definition other window" . lsp-bridge-find-def-other-window)
+;;  "t" '("Find typedef" . lsp-bridge-find-type-def)
+;;  "T" '("Find typedef other window" . lsp-bridge-find-type-def-other-window)
+;;  "f r" '("Return to symbol" . lsp-bridge-find-def-return)
+;;  "i" '("Find implementation" . lsp-bridge-find-impl)
+;;  "I" '("Find implementation other window" . lsp-bridge-find-impl-other-window)
+;;  "r" '("Find references" . lsp-bridge-find-references)
+;;  "k" '("Show doc popup" . lsp-bridge-popup-documentation)
+;;  "K" '("Show doc buffer" . lsp-bridge-show-documentation)
+;;  "s" '(:ignore t :which-key "Server")
+;;  "s R" '("Restart process" . lsp-bridge-restart-process)
+;;  "R" '("Rename" . lsp-bridge-rename)
+;;  "s S" '("LSP imenu" . lsp-bridge-imenu))
+;; (lsp-bridge-mode-map
+;;  :states '(normal visual)
+;;  :prefix "SPC s"
+;;  :global-prefix "M-SPC s"
+;;  "S" '("List symbols" . lsp-bridge-workspace-list-symbol-at-point))
+;; (lsp-bridge-doc-map
+;;  :states '(normal visual)
+;;  "q" 'quit-window))
 
 (use-package acm
   :straight nil
@@ -81,19 +81,19 @@
         acm-backend-lsp-candidate-min-length 2)
   :config
   (add-to-list 'acm-backend-capf-mode-list 'org-mode)
-  (add-to-list 'acm-backend-capf-mode-list 'nwscript-mode)
-  :general
-  (acm-mode-map
-   :states 'insert
-   "<tab>" 'acm-select-next
-   "M-j" 'acm-select-next
-   "<backtab>" 'acm-select-prev
-   "M-k" 'acm-select-prev
-   "C-<tab>" 'acm-complete
-   "C-f" 'acm-filter
-   "M-d" 'acm-doc-toggle
-   "<escape>" 'evil-normal-state
-   "C-SPC" 'acm-hide))
+  (add-to-list 'acm-backend-capf-mode-list 'nwscript-mode))
+;; :general
+;; (acm-mode-map
+;;  :states 'insert
+;;  "<tab>" 'acm-select-next
+;;  "M-j" 'acm-select-next
+;;  "<backtab>" 'acm-select-prev
+;;  "M-k" 'acm-select-prev
+;;  "C-<tab>" 'acm-complete
+;;  "C-f" 'acm-filter
+;;  "M-d" 'acm-doc-toggle
+;;  "<escape>" 'evil-normal-state
+;;  "C-SPC" 'acm-hide))
 
 (use-package popon)
 
@@ -107,15 +107,15 @@
                             :repo "twlz0ne/acm-terminal")
     :hook
     (lsp-bridge-mode-hook . (lambda ()
-                              (require 'acm-terminal)))
-    :general
-    (acm-mode-map
-     :states 'insert
-     "<tab>" 'acm-select-next
-     "TAB" 'acm-select-next
-     [tab] 'acm-select-next
-     "<backtab>" 'acm-select-prev
-     "S-TAB" 'acm-select-prev
-     [backtab] 'acm-select-prev)))
+                              (require 'acm-terminal)))))
+;; :general
+;; (acm-mode-map
+;;  :states 'insert
+;;  "<tab>" 'acm-select-next
+;;  "TAB" 'acm-select-next
+;;  [tab] 'acm-select-next
+;;  "<backtab>" 'acm-select-prev
+;;  "S-TAB" 'acm-select-prev
+;;  [backtab] 'acm-select-prev)))
 
 (provide 'init-lsp-bridge)

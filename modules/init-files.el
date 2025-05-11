@@ -27,19 +27,19 @@
   (add-to-list 'save-some-buffers-action-alist
                (list "d"
                      (lambda (buffer) (diff-buffer-with-file (buffer-file-name buffer)))
-                     "show diff between the buffer and its file"))
+                     "show diff between the buffer and its file")))
 
-  :general
-  (+leader-keys
-    "." '("Find file in cwd" . find-file)
-    "b r" '("Revert" . revert-buffer)
-    "f o" '("Find file in other window" . find-file-other-window)
-    "f R" '("Rename current file" . +rename-visited-file)
-    "f y" '("Yank current file name" . +yank-current-file)
-    "f Y" '("Yank current full path" . +yank-current-path)
-    "h l" '("Load library" . load-library)
-    "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
-    "q r" '("Restart emacs" . restart-emacs)))
+;; :general
+;; (+leader-keys
+;;   "." '("Find file in cwd" . find-file)
+;;   "b r" '("Revert" . revert-buffer)
+;;   "f o" '("Find file in other window" . find-file-other-window)
+;;   "f R" '("Rename current file" . +rename-visited-file)
+;;   "f y" '("Yank current file name" . +yank-current-file)
+;;   "f Y" '("Yank current full path" . +yank-current-path)
+;;   "h l" '("Load library" . load-library)
+;;   "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
+;;   "q r" '("Restart emacs" . restart-emacs)))
 
 (use-package autorevert
   :straight nil

@@ -8,24 +8,31 @@
   (flycheck-display-errors-delay 1)
   :hook
   ((lsp-mode-hook emacs-lisp-mode-hook merlin-mode-hook) . flycheck-mode)
-  (flycheck-error-list-mode-hook . visual-line-mode)
-  :general
-  (+mode-keys
-    :keymaps 'flycheck-mode-map
-    "C-c M-]" 'flycheck-next-error
-    "C-c M-[" 'flycheck-previous-error))
+  (flycheck-error-list-mode-hook . visual-line-mode))
+;; :bind
+;; ( :map 'flycheck-mode-map
+;;   ("C-x ]" . flycheck-next-error)
+;;   ("C-x [" . flycheck-previous-error)))
+;; :general
+;; (+mode-keys
+;;   :keymaps 'flycheck-mode-map
+;;   "C-c M-]" 'flycheck-next-error
+;;   "C-c M-[" 'flycheck-previous-error))
 
 
 (use-package consult-flycheck
   :straight (consult-flycheck :type git
                               :host github
-                              :repo "minad/consult-flycheck")
-  :general
-  (flycheck-mode-map
-   :states '(normal visual)
-   :prefix "SPC"
-   :global-prefix "M-SPC"
-   "s e" '("Consult errors" . consult-flycheck)))
+                              :repo "minad/consult-flycheck"))
+;; :bind*
+;; ( :map 'flycheck-mode-map
+;;   ("C-c ! l" . consult-flycheck)))
+;; :general
+;; (flycheck-mode-map
+;;  :states '(normal visual)
+;;  :prefix "SPC"
+;;  :global-prefix "M-SPC"
+;;  "s e" '("Consult errors" . consult-flycheck)))
 
 (use-package flyspell
   :straight nil

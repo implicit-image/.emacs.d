@@ -27,13 +27,13 @@
           (?H aw-split-window-horz "Split Horz Window")
           (?M delete-other-windows "Delete Other Windows")
           (?T aw-transpose-frame "Transpose Frame")
-          (?? aw-show-dispatch-help)))
-  :general
-  (+leader-keys
-    "w w" '("Switch" . ace-window))
-  (global-map
-   "<remap> <evil-window-next>" 'ace-window
-   "C-x w" 'ace-window))
+          (?? aw-show-dispatch-help))))
+;; :general
+;; (+leader-keys
+;;   "w w" '("Switch" . ace-window))
+;; (global-map
+;;  "<remap> <evil-window-next>" 'ace-window
+;;  "C-x w" 'ace-window))
 
 (use-package window
   :straight nil
@@ -133,13 +133,13 @@
 
   (setq switch-to-buffer-in-dedicated-window t
         switch-to-buffer-obey-display-actions nil
-        switch-to-buffer-preserve-window-point t)
-  :general
-  (general-override-mode-map
-   :states 'normal
-   "C-M-v" 'scroll-other-window
-   "M-w" 'same-window-prefix
-   "M-o" 'other-window-prefix))
+        switch-to-buffer-preserve-window-point t))
+;; :general
+;; (general-override-mode-map
+;;  :states 'normal
+;;  "C-M-v" 'scroll-other-window
+;;  "M-w" 'same-window-prefix
+;;  "M-o" 'other-window-prefix))
 
 (use-package init-wm
   :straight nil)

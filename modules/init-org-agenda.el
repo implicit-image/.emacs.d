@@ -54,13 +54,13 @@
                    (org-agenda-files org-agenda-files)))
             (todo "CANC"
                   ((org-agenda-overriding-header "Cancelled Projects")
-                   (org-agenda-files org-agenda-files)))))))
-  :general
-  (+leader-keys
-    "o A" '("Org agenda" . org-agenda)
-    "o a" `("Agenda file" . (lambda ()
-                              (interactive)
-                              (org-open-file +org/agenda-file)))
-    "X" '("Org capture" . org-capture)))
+                   (org-agenda-files org-agenda-files))))))))
+;; :general
+;; (+leader-keys
+;;   "o A" '("Org agenda" . org-agenda)
+;;   "o a" `("Agenda file" . (lambda ()
+;;                             (interactive)
+;;                             (org-open-file +org/agenda-file)))
+;;   "X" '("Org capture" . org-capture)))
 
 (provide 'init-org-agenda)

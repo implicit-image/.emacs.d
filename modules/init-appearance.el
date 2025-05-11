@@ -37,10 +37,7 @@
   :hook
   (after-init-hook . solaire-global-mode))
 
-(use-package nerd-icons
-  :general
-  (+leader-keys
-    "i i" '("Insert unicode icon" . nerd-icons-insert)))
+(use-package nerd-icons)
 
 (use-package rainbow-delimiters
   :hook ((prog-mode-hook emacs-lisp-mode-hook) . rainbow-delimiters-mode))
@@ -87,17 +84,10 @@
                                       :repo "implicit-image/doom-gruber-darker-theme"))
 
 (use-package face-remap
-  :straight nil
-  :general
-  (global-map
-   "C-=" 'text-scale-increase
-   "C--" 'text-scale-decrease))
+  :straight nil)
 
 (use-package custom
-  :straight nil
-  :general
-  (+leader-keys
-    "h t" '("Load theme" . load-theme)))
+  :straight nil)
 
 (use-package faces
   :straight nil
