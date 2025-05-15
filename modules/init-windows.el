@@ -61,15 +61,9 @@
 (use-package window
   :straight nil
   :init
-  ;; setup meow keymap
-  (setq meow-window-keymap (make-keymap))
-
-  (meow-define-state window
-    "meow state for window navigation"
-    :keymap meow-window-keymap)
 
   (meow-define-keys 'window
-    '("<escape>" . meow-normal-mode))
+                    '("<escape>" . meow-normal-mode))
 
 
   (defun +windows-cfg (&rest display-cfg-forms)

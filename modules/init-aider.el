@@ -27,7 +27,9 @@
       (when api-version
         (exec-path-from-shell-setenv "AZURE_API_VERSION" api-version))))
 
-  (setq aider-args `("--model" "azure/DeepSeek-R1-nebbc.eastus2.models.ai.azure.com")))
+  (setq aider-args `("--model" "azure/DeepSeek-R1-nebbc.eastus2.models.ai.azure.com"))
+  :bind
+  (("C-x SPC a A" . aider-transient-menu)))
 
 (use-package aidermacs
   :straight (aidermacs :type git
@@ -38,6 +40,8 @@
   (aidermacs-setup-minor-mode)
   :custom
   (aidermacs-use-architect-mode t)
-  (aidermacs-default-model "sonnet"))
+  (aidermacs-default-model "sonnet")
+  :bind*
+  (("C-x SPC a a" . aidermacs-menu)))
 
 (provide 'init-aider)
