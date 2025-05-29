@@ -49,8 +49,8 @@
 ;;                ███████╗██║ ╚═╝ ██║██║  ██║╚██████╗███████║
 ;;                ╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝
 ;;
-;;   Loading time : %s
-;;   Packages     : %s
+;;                Loading time : %s
+;;                Packages     : %s
 ;;
 "
                       (emacs-init-time)
@@ -73,23 +73,19 @@
         +base/font-weight 'semi-light
         +base/font-size (pcase system-type
                           ('windows-nt 10)
-                          (t 17))
+                          (_ 17))
         +base/font-spec (font-spec :family +base/font-family
                                    :weight +base/font-weight
                                    :size +base/font-size)
         +base/theme 'doom-gruber-darker)
 
-  ;;;; set default font.
   ;;;; setting `default-frame-alist' entry makes sure that emacsclient loads the correct font
   (add-to-list 'default-frame-alist `(font . ,(string-join `(,+base/font-family ,(number-to-string +base/font-size)) "-")))
   :config
   ;; always use short user input prompts
   (defalias 'yes-or-no-p 'y-or-n-p)
-  ;; remove toolbar and menu bar
-  (tool-bar-mode 0)
-  (menu-bar-mode 0)
-  ;; remove scroll bar
-  (toggle-scroll-bar -1)
+  ;;;; set default font.
+  (set-frame-font +base/font-spec nil t t)
   ;; insert matching parens
   (electric-pair-mode 1)
   ;; highlight current line

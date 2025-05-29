@@ -15,19 +15,19 @@
   (setq ccls-executable "ccls"))
 
 ;;;; javascript
-(use-package js-ts-mode
-  :straight nil)
+;; (use-package js-ts-mode
+;;   :straight nil)
 
 (use-package rjsx-mode)
 
-(use-package typescript-ts-mode
-  :straight nil
-  :init
-  (setq typescript-ts-mode-indent-offset 2))
+;; (use-package typescript-ts-mode
+;;   :straight nil
+;;   :init
+(setq typescript-ts-mode-indent-offset 2)
 
 ;;;; css
-(use-package css-ts-mode
-  :straight nil)
+;; (use-package css-ts-mode
+;;   :straight nil)
 
 ;;;; json
 (use-package json-ts-mode
@@ -38,7 +38,7 @@
 ;;;; typescript
 (use-package tide
   :init
-  (+lookup-set-fn 'buffer '(typescript-ts-mode . tide-documentation-at-point))
+  (+lookup-set-fn! buffer (typescript-ts-mode . tide-documentation-at-point))
   :config
   (setq tide-enable-xref t
         tide-imenu-flatten t
@@ -65,19 +65,16 @@
 ;;;; web info
 (use-package verb)
 
-(use-package know-your-http-well)
-
 ;;;; python
 (use-package anaconda-mode)
 
 
-(use-package python-ts-mode
-  :straight nil
-  :init
-  (setq python-indent-offset 4))
+;; (use-package python-ts-mode
+;;   :straight nil
+;;   :init
+;;   (setq python-indent-offset 4))
 
 (use-package pyvenv)
-
 
 ;;;; scala
 (use-package scala-mode
@@ -89,43 +86,19 @@
 
 ;;;; java
 (use-package java-ts-mode
-  :preface
-  (defun +jvm/set-up-java-environment ()
-    "Set up java environment variables and locations."
-    (setq lsp-java-java-path
-          (expand-file-name (file-name-concat (exec-path-from-shell-getenv "JAVA_HOME") "/bin/java"))
-          lsp-java-import-gradle-java-home
-          (expand-file-name (file-name-concat (exec-path-from-shell-getenv "JAVA_HOME") "/bin/java"))))
   :config
-  (setq java-ts-mode-indent-offset 4)
-  :hook
-  (java-ts-mode-hook . +jvm/set-up-java-environment))
+  (setq java-ts-mode-indent-offset 4))
 
 ;;;; kotlin
 (use-package kotlin-mode
-  :preface
-  (defun +jvm/set-up-kotlin-environment ()
-    "Set up kotlin environment variables and locations.")
   :config
-  (setq kotlin-tab-width 4)
-  :hook
-  (kotlin-mode-kotlin . +jvm/set-up-kotlin-environment))
+  (setq kotlin-tab-width 4))
 
 ;;;; groovy
-(use-package groovy-mode
-  :preface
-  (defun +jvm/set-up-groovy-environment ()
-    "Set up groovy environment variables and locations.")
-  :hook
-  (groovy-mode-hook . +jvm/set-up-groovy-environment))
+(use-package groovy-mode)
 
 ;;;; clojure
-(use-package clojure-mode
-  :preface
-  (defun +jvm/set-up-clojure-environment ()
-    "Set uo clojure environment depending on a runtime.")
-  :hook
-  (clojure-mode-hook . +jvm/set-up-clojure-environment))
+(use-package clojure-mode)
 
 (use-package cider)
 
@@ -163,37 +136,18 @@
   :init
   (setq rust-ts-mode-indent-offset 4))
 
-;;;; lisp
-(use-package lispy
-  :disabled
-  :commands
-  lispy-mode
-  :hook
-  ((emacs-lisp-mode-hook common-lisp-mode-hook scheme-mode-hook racket-mode-hook dune-mode-hook) . lispy-mode))
-;; :general
-;; (lispy-mode-map
-;;  :states '(insert emacs)
-;;  "C-c g" 'lispy-ace-paren)
-;; (lispy-mode-map
-;;  :states '(insert emacs normal)
-;;  "C-c <" 'lispy-move-left
-;;  "C-c >" 'lispy-move-right
-;;  "C-M-[" 'lispy-wrap-brackets
-;;  "C-M-{" 'lispy-wrap-braces
-;;  "C-M-(" 'lispy-wrap-round))
-
 ;; emacs lisp
-(use-package emacs-lisp-mode
-  :straight nil
-  :init
-  (+lookup-set-fn 'buffer
-                  '(emacs-lisp-mode . helpful-at-point)
-                  '(lisp-interaction-mode . helpful-at-point)))
+;; (use-package emacs-lisp-mode
+;;   :straight nil
+;;   :init
+(+lookup-set-fn! buffer
+                 (emacs-lisp-mode . helpful-at-point)
+                 (lisp-interaction-mode . helpful-at-point))
 
-(use-package lisp
-  :straight nil
-  :init
-  (setq delete-pair-blink-delay 0.03))
+;; (use-package lisp
+;;   :straight nil
+;;   :init
+;;   (setq delete-pair-blink-delay 0.03))
 
 ;; racket
 (use-package racket-mode)
@@ -208,12 +162,14 @@
 
 (use-package common-lisp-snippets)
 
-(use-package lisp-mode
-  :straight nil
-  :mode "\\.lisp\\'"
-  :hook (common-lisp-mode-hook . (lambda ()
-                                   (interactive)
-                                   (slime-mode +1))))
+;; (use-package lisp-mode
+;;   :straight nil
+;;   :mode "\\.lisp\\'"
+;;   :hook (common-lisp-mode-hook . (lambda ()
+;;                                    (interactive)
+;;                                    (slime-mode +1))))
+
+(add-hook 'common-lisp-mode-hook 'slime-mode)
 
 ;;;; dart
 (use-package dart-mode)
@@ -261,9 +217,9 @@
 (use-package robe)
 
 ;;;; dotnet
-(use-package csharp-ts-mode
-  :straight nil
-  :mode "\\.cs\\'")
+;; (use-package csharp-ts-mode
+;;   :straight nil
+;;   :mode "\\.cs\\'")
 
 (use-package csproj-mode)
 
@@ -287,8 +243,8 @@
 
 (use-package riscv-mode)
 
-(use-package asm-mode
-  :straight nil)
+;; (use-package asm-mode
+;;   :straight nil)
 
 (use-package fasm-mode)
 
@@ -323,8 +279,8 @@
 (use-package nim-mode)
 
 ;;;; gdscript
-(use-package gdscript-ts-mode
-  :straight nil)
+;; (use-package gdscript-ts-mode
+;;   :straight nil)
 
 ;;;; d
 (use-package d-mode)
@@ -340,8 +296,8 @@
                         :files ("*.el" "data")))
 
 ;;;; sql
-(use-package sql-mode
-  :straight nil)
+;; (use-package sql-mode
+;;   :straight nil)
 
 ;;;; solidity
 (use-package solidity-mode)
@@ -375,7 +331,7 @@
 
 (use-package merlin-eldoc
   :init
-  (+lookup-set-fn 'popup '(tuareg-mode . eldoc-doc-buffer))
+  (+lookup-set-fn! popup (tuareg-mode . eldoc-doc-buffer))
   (defun +ml/setup-merlin-doc ()
     "Setup local variables controlling eldoc documentation."
     (progn
@@ -409,25 +365,26 @@
 (use-package xenops)
 
 ;;;; various shell languages
-(use-package bash-ts-mode
-  :straight nil)
+;; (use-package bash-ts-mode
+;;   :straight nil)
 
 (use-package nushell-mode)
 
 (use-package powershell)
 
 ;;;; common configuration languages
-(use-package conf-mode
-  :straight nil
-  :init
-  (add-to-list 'auto-mode-alist '("/git-rebase-todo\\'" . conf-mode)))
+;; (use-package conf-mode
+;;   :straight nil
+;;   :init
+(add-to-list 'auto-mode-alist '("/git-rebase-todo\\'" . conf-mode))
 
 (use-package toml-ts-mode)
 
-(use-package nxml-mode
-  :straight nil
-  :hook
-  (nxml-mode-hook . +whitespace-off))
+;; (use-package nxml-mode
+;;   :straight nil
+;;   :hook
+;;   (nxml-mode-hook . +whitespace-off))
+(add-hook 'nxml-mode-hook '+whitespace-off)
 
 (use-package nix-mode)
 

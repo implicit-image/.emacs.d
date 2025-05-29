@@ -22,7 +22,19 @@
 
 (setq disabled-command-function nil)
 
+(setq read-process-output-max (* 500 1000))
+
 ;; override garbage collector limit
-(setq gc-cons-threshold (* 1024 1024 100))
+;; (setq gc-cons-threshold (* 1024 1024 100))
+
+(defun my-minibuffer-setup-hook ()
+  (setq gc-cons-threshold most-positive-fixnum))
+
+(defun my-minibuffer-exit-hook ()
+  (setq gc-cons-threshold 800000000))
+
+(setq gc-cons-threshold most-positive-fixnum)
+
+(run-with-idle-timer 1.2 t 'garbage-collect)
 
 ;;; early-init.el ends here

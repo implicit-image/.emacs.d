@@ -4,9 +4,6 @@
 
 (use-package mastodon)
 
-(use-package rcirc
-  :straight nil)
-
 (use-package elfeed)
 
 (provide 'init-socials)

@@ -91,12 +91,8 @@
                            (switch-to-buffer buffer nil nil))))
 
 
-(use-package shell
-  :straight nil)
-;; :general
-;; (shell-command-mode-map
-;;  :states 'normal
-;;  "q" 'quit-window))
+;; (use-package shell
+;;   :straight nil)
 
 (use-package vterm
   :init
@@ -118,11 +114,11 @@
                                    "wezterm")
                                   (t (exec-path-from-shell-getenv "TERM")))))
 
-;; (+leader-keys
-;;   "o t" '(:ignore t :which-key "Terminal")
-;;   "o t c" '("Switch to other" . +terminal/consult-vterm)
-;;   "o t p" '("Popup terminal" . +terminal/popup)
-;;   "o t r" '("Run command" . +terminal/run-command)
-;;   "o T" '("Popup terminal" . +terminal/open))
+;; (bind-keys
+;;  :map override-global-map
+;;  ("C-x <space> o t c" . +terminal/consult-vterm)
+;;  ("C-x <space> o t p" . +terminal/popup)
+;;  ("C-x <space> o t !" . +terminal/run-command)
+;;  ("C-x <space> o T" . +terminal/open))
 
 (provide 'init-terminal)

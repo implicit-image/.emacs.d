@@ -1,9 +1,9 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package corfu
-  :custom-face
-  (corfu-border ((t (:background ,(doom-color 'fg-alt)))))
-  (corfu-echo ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg)))))
+  ;; :custom-face
+  ;; (corfu-border ((t (:background ,(doom-color 'fg-alt)))))
+  ;; (corfu-echo ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg)))))
   :custom
   (corfu-cycle t)
   (corfu-doc-delay 0.1)
@@ -23,7 +23,6 @@
   :init
   (defun +corfu--setup ()
     (interactive)
-    (completion-preview-mode 1)
     (corfu-echo-mode +1)
     (corfu-history-mode +1)
     (when (not (display-graphic-p))
@@ -42,22 +41,18 @@
                            (corfu-mode -1))))
   (lsp-bridge . (lambda ()
                   (corfu-mode -1))))
-;; :general
-;; (global-map
-;;  :states 'insert
-;;  "C-TAB" 'completion-at-point
-;;  "C-SPC" 'completion-at-point)
-;; (corfu-map
-;;  :states 'insert
-;;  "M-h" 'corfu-popupinfo-documentation
-;;  "M-g" 'corfu-info-locationa
-;;  "M-e" 'corfu-expand
-;;  [tab] 'corfu-next
-;;  "<tab>" 'corfu-next
-;;  "TAB" 'corfu-next
-;;  [backtab] 'corfu-previous
-;;  "<backtab>" 'corfu-previous
-;;  "S-TAB" 'corfu-previous))
+;; :bind*
+;; (("C-TAB" . corfu-complete)
+;;  :map corfu-map
+;;  ("M-h" . corfu-popupinfo-documentation)
+;;  ("M-g" . corfu-info-location)
+;;  ("M-e" . corfu-expand)
+;;  ([tab] . corfu-next)
+;;  ("<tab>" . corfu-next)
+;;  ("TAB" . corfu-next)
+;;  ([backtab] . corfu-previous)
+;;  ("<backtab>" . corfu-previous)
+;;  ("S-TAB" . corfu-previous)))
 
 ;; emacs 31 should add tty child frames
 (when (< (string-to-number emacs-version) 31)
@@ -71,8 +66,9 @@
     (tty-setup-hook . corfu-terminal-mode))
 
   (use-package corfu-doc-terminal
-    :straight (corfu-doc-terminal :type git
-                                  :repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git")
+    :straight
+    (corfu-doc-terminal :type git
+                        :repo "https://codeberg.org/akib/emacs-corfu-doc-terminal.git")
     :hook
     (corfu-terminal-mode-hook . corfu-doc-terminal-mode)))
 

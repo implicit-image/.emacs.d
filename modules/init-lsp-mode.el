@@ -1,9 +1,9 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package lsp-mode
-  :custom-face
-  (lsp-lens-face ((t (:size ,+base/font-size))))
-  (lsp-signature-highlight-function-argument ((t (:underline t))))
+  ;; :custom-face
+  ;; (lsp-lens-face ((t (:size ,+base/font-size))))
+  ;; (lsp-signature-highlight-function-argument ((t (:underline t))))
   :config
   (setq lsp-auto-configure t
         ;; lsp-mode features
@@ -74,29 +74,37 @@
     fstar-mode-hook
     nix-mode-hook)
    . lsp))
-;; :general
-;; (lsp-mode-map
-;;  :states '(normal visual)
-;;  "g r" 'lsp-find-references)
-;; (lsp-signature-mode-map
-;;  :states '(insert emacs)
-;;  "M-a" 'lsp-signature-toggle-full-docs)
-;; (lsp-mode-map
-;;  :states '(normal visual)
-;;  :prefix "SPC"
-;;  :global-prefix "M-SPC"
-;;  "t h" '("Headerline" . lsp-headerline-breadcrumb-mode)
-;;  "c a" '("Apply code actions" . lsp-execute-code-action)
-;;  "c D" '("Show doc buffer" . lsp-describe-thing-at-point)
-;;  "c R" '("LSP rename" . lsp-rename)
-;;  "c r" '("lsp find references" . lsp-find-references)))
+;; :bind-keymap*
+;; ( :map lsp-mode-map
+;;   ("C-x <space> c l" . lsp-command-map)
+;;   ("C-c l" . lsp-command-map))
+;; :bind*
+;; ( :map lsp-command-map
+;;   ("a" . lsp-execute-code-action)
+;;   ("r" . lsp-rename)
+;;   ("g r" . lsp-find-references)
+;;   ("g d" . lsp-find-definition)
+;;   ("g i" . lsp-find-implementation)
+;;   ("g D" . lsp-find-declaration)
+;;   ("g t" . lsp-find-type-definition)
+;;   ("k" . lsp-describe-thing-at-point)
+;;   :map lsp-mode-map
+;;   ("M-?" . lsp-find-references)
+;;   :map lsp-signature-mode-map
+;;   ("M-a" . lsp-signature-toggle-full-docs)
+;;   :map lsp-mode-map
+;;   ("C-x <space> t h" . lsp-headerline-breadcrumb-mode)
+;;   ("C-x <space> c a" . lsp-execute-code-action)
+;;   ("C-x <space> c D" . lsp-describe-thing-at-point)
+;;   ("C-x <space> c R" . lsp-rename)
+;;   ("C-x <space> c r" . lsp-find-references)))
 
 
 (use-package lsp-ui
-  :custom-face
-  (lsp-ui-peek-footer ((t (:background ,(doom-color 'bg)))))
-  (lsp-ui-peek-header ((t (:background ,(doom-color 'bg)))))
-  (lsp-ui-doc-background ((t :background ,(doom-color 'base0))))
+  ;; :custom-face
+  ;; (lsp-ui-peek-footer ((t (:background ,(doom-color 'bg)))))
+  ;; (lsp-ui-peek-header ((t (:background ,(doom-color 'bg)))))
+  ;; (lsp-ui-doc-background ((t :background ,(doom-color 'base0))))
   :config
   (setq lsp-ui-peek-enable t
         lsp-ui-peek-always-show t
@@ -131,23 +139,18 @@
                      (interactive)
                      (lsp-ui-mode +1)
                      (lsp-ui-doc-mode +1))))
-;; :general
-;; (lsp-ui-mode-map
-;;  :states '(normal visual insert)
-;;  "C-c TAB" 'lsp-ui-doc-focus-frame)
-;; (lsp-ui-mode-map
-;;  :states '(normal visual)
-;;  :prefix "SPC"
-;;  :global-prefix "M-SPC"
-;;  "s i" '("LSP imenu" . lsp-ui-imenu)
-;;  "c p r" '("Peek references" . lsp-ui-peek-find-references)
-;;  "c p d" '("Peek definition" . lsp-ui-peek-find-definitions)
-;;  "c p i" '("Peek implementation" . lsp-ui-peek-find-implementation)
-;;  "c p s" '("Peek symbol" . lsp-ui-peek-find-workspace-symbol)
-;;  "c d" '("Popup documentation" . lsp-ui-doc-show))
-;; (lsp-ui-peek-mode-map
-;;  "j" 'lsp-ui-peek--select-next
-;;  "k" 'lsp-ui-peek--select-prev))
+;; :bind*
+;; ( :map lsp-ui-mode-map
+;;   ("C-c TAB" . lsp-ui-doc-focus-frame)
+;;   ("C-x <space> s i" . lsp-ui-imenu)
+;;   ("C-x <space> c p r" . lsp-ui-peek-find-references)
+;;   ("C-x <space> c p d" . lsp-ui-peek-find-definitions)
+;;   ("C-x <space> c p i" . lsp-ui-peek-find-implementation)
+;;   ("C-x <space> c p s" . lsp-ui-peek-workspace-symbol)
+;;   ("C-x <space> c d" . lsp-ui-doc-show)
+;;   :map lsp-ui-peek-map
+;;   ("j" . lsp-ui-peek--select-next)
+;;   ("k" . lsp-ui-peek--select-prev)))
 
 (use-package consult-lsp
   :config
@@ -155,14 +158,11 @@
    consult-lsp-symbols
    consult-lsp-file-symbols
    consult-lsp-diagnostics :initial ""))
-;; :general
-;; (lsp-mode-map
-;;  :states '(normal visual)
-;;  :prefix "SPC"
-;;  :global-prefix "M-SPC"
-;;  "c s" '("Local LSP symbols" . consult-lsp-file-symbols)
-;;  "c S" '("Workspace LSP symbols" . consult-lsp-symbols)
-;;  "c e" '("LSP diagnostics" . consult-lsp-diagnostics)))
+;; :bind*
+;; ( :map lsp-mode-map
+;;   ("C-x <space> c s" . consult-lsp-file-symbols)
+;;   ("C-x <space> c S" . consult-lsp-symbols)
+;;   ("C-x <space> c e" . consult-lsp-diagnostics)))
 
 (use-package lsp-treemacs
   :custom
@@ -171,18 +171,14 @@
   (lsp-treemacs-type-hierarchy-epxand-depth 3)
   :hook
   (after-init . lsp-treemacs-sync-mode))
-;;   :general
-;;   (lsp-ui-mode-map
-;;    :states '(normal visual)
-;;    :prefix "SPC c"
-;;    :global-prefix"C-c"
-;;    "t e" '("Error list" . lsp-treemacs-errors-list)
-;;    "t s" '("Symbols per file" . lsp-treemacs-symbols)
-;;    "t r" '("References" . lsp-treemacs-references)
-;;    "t i" '("Implementations" . lsp-treemacs-implementations)
-;;    "t c" '("Call hierarchy" . lsp-treemacs-call-hierarchy)
-;;    "t t" '("Type hierarchy" . lsp-treemacs-type-hierarchy)))
-;; ;; "T d" '("Dependencies" . lsp-treemacs-deps--icon)))
+;; :bind*
+;; ( :map lsp-command-map
+;;   ("t e" . lsp-treemacs-errors-list)
+;;   ("t s" . lsp-treemacs-symbols)
+;;   ("t r" . lsp-treemacs-references)
+;;   ("t i" . lsp-treemacs-implementations)
+;;   ("t c" . lsp-treemacs-call-hierarchy)
+;;   ("t t" . lsp-treemacs-type-hierarchy)))
 
 (use-package lsp-tailwindcss
   :straight (lsp-tailwindcss :type git
@@ -228,8 +224,8 @@
         lsp-haskell-plugin-eval-global-on nil
         lsp-haskell-plugin-semantic-tokens-global-on t))
 
-(use-package lsp-fsharp
-  :straight nil)
+;; (use-package lsp-fsharp
+;;   :straight nil)
 
 (use-package lsp-nwscript
   :straight (lsp-nwscript :type git

@@ -1,6 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-
 (defvar +indent/tab-jump-delims '(?\; ?\) ?\( ?\] ?\[ ?{ ?} ?> ?< ?| ?' ?` ?\. ?\"))
 
 (defvar-local +indent-tab-function nil)
@@ -130,12 +129,17 @@
           ((eolp) (yasnippet-capf))
           (t (indent-for-tab-command prefix)))))
 
-(use-package simple
-  :straight nil
-  :init
-  (setq backward-delete-char-untabify-method 'hungry)
-  :hook
-  ((help-mode-hook helpful-mode-hook lsp-ui-doc-mode-hook) . visual-line-mode))
+;; (use-package simple
+;;   :straight nil
+;;   :init
+;;   (setq backward-delete-char-untabify-method 'hungry)
+;;   :hook
+;;   ((help-mode-hook helpful-mode-hook lsp-ui-doc-mode-hook) . visual-line-mode))
+
+(setopt backward-delete-char-untabify-method 'hungry)
+(add-hook 'help-mode-hook 'visual-line-mode)
+(add-hook 'helpful-mode-hook 'visual-line-mode)
+(add-hook 'lsp-ui-doc-mode-hook 'visual-line-mode)
 
 ;; (+leader-keys
 ;;   "f D" '("Delete current file" . +utils/delete-visited-file)
@@ -145,5 +149,14 @@
 ;;   "t I" '("Select input method" . set-input-method)
 ;;   "t v" '("Visual line mode" . visual-line-mode)
 ;;   "i !" '("Shell command" . +utils/insert-shell-command-output))
+
+;; (bind-keys
+;;  :map override-global-map
+;;  ("C-x <space> f D" . +utils/delete-visited-file)
+;;  ("C-x <space> f C" . +utils/copy-visited-file)
+;;  ("C-x <space> t c" . rainbow-mode)
+;;  ("C-x <space> t I" . set-input-method)
+;;  ("C-x <space> t v" . visual-line-mode)
+;;  ("C-x <space> i !" . +utils/insert-shell-command-output))
 
 (provide 'init-utils)

@@ -44,6 +44,12 @@
   (interactive)
   (consult-ripgrep user-emacs-directory))
 
+(with-eval-after-load 'init-keybindings
+  (bind-keys*
+   :map override-global-map
+   ("C-x <space> f P" . +modules/browse)
+   ("C-x <space> f p" . +config/ripgrep)))
+
 ;; (with-eval-after-load 'init-keybindings
 ;;   (+leader-keys
 ;;     "f P" '("Open module files" . +modules/browse)

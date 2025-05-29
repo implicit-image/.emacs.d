@@ -1,5 +1,19 @@
 ;;; -*- lexical-binding: t -*-
 
+(defmacro +lookup-set-fn! (type &rest forms)
+  "Set lookup function of TYPE in FORMS."
+  (let ((fn-list (pcase type
+                   ('popup '+lookup/popup-functions-alist)
+                   ('buffer '+lookup/buffer-functions-alist)
+                   ('ref '+lookup/find-ref-functions-alist)
+                   ('def '+lookup/find-def-functions-alist)
+                   ('impl '+lookup/find-impl-functions-alist)
+                   (_ nil))))
+    (when fn-list
+      `(mapc (lambda (form)
+               (add-to-list ',fn-list form))
+             ',forms))))
+
 ;;;; Alists of lookup functions
 ;;;; each list contains (MAJOR-MODE . LOOKUP-FUNCTION) pairs
 ;;;; if current mode is not found, the default lookup mechanism, `+lookup/' is used
@@ -18,20 +32,6 @@
 
 (defvar +lookup/find-impl-functions-alist '()
   "alist of form (MAJOR-MODE . FUNCTION).")
-
-(defun +lookup-set-fn (type &rest forms)
-  ""
-  (let ((fn-list (pcase type
-                   ('popup '+lookup/popup-functions-alist)
-                   ('buffer '+lookup/buffer-functions-alist)
-                   ('ref '+lookup/find-ref-functions-alist)
-                   ('def '+lookup/find-def-functions-alist)
-                   ('impl '+lookup/find-impl-functions-alist)
-                   (_ nil))))
-    (when fn-list
-      (mapc (lambda (form)
-              (add-to-list fn-list form))
-            forms))))
 
 ;;;###autoload
 (defun +lookup/popup ()
@@ -92,8 +92,8 @@
         (+lookup--local-documentation block-major-mode))
     (message "Not in org mode")))
 
-(use-package apropos
-  :straight nil)
+;; (use-package apropos
+;;   :straight nil)
 
 (use-package dumb-jump
   :init
@@ -104,68 +104,56 @@
 ;; TODO: add :dash to use-package language mode declarations
 ;; (use-package dash-docs)
 
-(use-package devdocs
-  :custom-face
-  (devdocs-code-block ((t (:background ,(doom-color 'base4) :extend t)))))
+(use-package devdocs)
+;; :custom-face
+;; (devdocs-code-block ((t (:background ,(doom-color 'base4) :extend t)))))
 
 (use-package xref
   :custom
   (xref-search-program 'ripgrep))
-;; :general
-;; (evil-motion-state-map
-;;  "g r" 'xref-find-references)
-;; (+leader-keys
-;;   "c g f" '("Xref forward" . xref-go-forward)
-;;   "c g b" '("Xref back" . xref-go-back)))
+;; :bind*
+;; (("C-x SPC c g f" . xref-go-forward)
+;;  ("C-x SPC c g b" . xref-go-back)))
 
-(use-package info
-  :straight nil)
-
-(use-package help-mode
-  :straight nil)
-;; :general
-;; (help-mode-map
-;;  :states '(normal)
-;;  "q" 'quit-window))
+;; (use-package info
+;;   :straight nil)
+;;
+;; (use-package help-mode
+;;   :straight nil)
 
 (use-package helpful
   :init
-  (+lookup-set-fn 'buffer '(helpful-mode . helpful-at-point)))
-;; :general
-;; (+leader-keys
-;;   "h :" '("Describe command" . helpful-command)
-;;   "h v" '("Describe variable" . helpful-variable)
-;;   "h f" '("Describe function" . helpful-callable)
-;;   "h k" '("Describe key" . helpful-key)
-;;   "h s" '("Describe symbol" . helpful-symbol))
-;; (helpful-mode-map
-;;  :states 'normal
-;;  "q" 'quit-window
-;;  "<esc>" 'quit-window
-;;  "ESC" 'quit-window))
+  (+lookup-set-fn! buffer (helpful-mode . helpful-at-point)))
+;; :bind*
+;; ( :map help-map
+;;   (":" . helpful-command)
+;;   ("v" . helpful-variable)
+;;   ("f" . helpful-callable)
+;;   ("k" . helpful-key)
+;;   ("M" . helpful-mode)
+;;   ("s" . helpful-symbol)))
 
-(use-package dictionary
-  :straight nil
-  :init
-  (setq dictionary-server "dict.org"))
-;; :general
-;; (+leader-keys
-;;   "h d" '("Dictionary" . dictionary-search)))
+;; (use-package dictionary
+;;   :straight nil
+;;   :init
+;;   (setq dictionary-server "dict.org"))
+(setopt dictionary-server "dict.org")
+;; :bind*
+;; ( :map help-map
+;;   ("d" . dictionary-search)))
 
-(use-package help-fns
-  :straight nil)
-;; :general
-;; (+leader-keys
-;;   "h b" '("Describe bindings" . describe-bindings)
-;;   "h F" '("Describe face" . describe-face)
-;;   "h m" '("Describe keymap"   . describe-keymap)
-;;   "h M" '("Describe mode"     . describe-mode)
-;;   "h p" '("Describe package"  . describe-package)
-;;   "h c" '("Describe character" . describe-char)))
+;; (use-package help-fns
+;;   :straight nil)
+;; :bind*
+;; ( :map help-map
+;;   ("b" . describe-bindings)
+;;   ("F" . describe-face)
+;;   ("m" . describe-keymap)
+;;   ("p" . describe-package)
+;;   ("c" . describe-char)))
 
 (use-package eldoc
   :init
-
   (setq eldoc-echo-area-prefer-doc-buffer 'maybe
         eldoc-idle-delay 0.05
         eldoc-echo-area-use-multiline-p 0.2)
@@ -174,8 +162,8 @@
 
 (use-package eldoc-box
   :disabled
-  :custom-face
-  (eldoc-box-border ((t (:background "black"))))
+  ;; :custom-face
+  ;; (eldoc-box-border ((t (:background "black"))))
   :init
   (defvar +eldoc-minibuffer-display-modes '())
 
@@ -209,64 +197,71 @@
                                                     :win "/mnt/c/Program Files/Mozilla Firefox/firefox.exe"
                                                     :linux "firefox")))
 
-(use-package webjump
-  :straight nil
-  :custom
-  (webjump-sites
-   '(("DuckDuckGo" . [simple-query "www.duckduckgo.com" "www.duckduckgo.com/?q=" ""])
-     ("Google" . [simple-query "www.google.com" "www.google.com/search?q=" ""])
-     ("YouTube" . [simple-query "www.youtube.com/feed/subscriptions" "www.youtube.com/rnesults?search_query=" ""])
-     ("Google" . [simple-query "https://www.google.com/search" "https://www.google.com/search?hl=en&q=" ""])
-     ("Stack Overflow" . [simple-query "https://duckduckgo.com/?q=site%3Astackoverflow.com+" "https://duckduckgo.com/?q=site%3Astackoverflow.com+" ""])
-     ("MyNixos" . [simple-query "https://mynixos.com" "https://mynixos.com/search?q=" ""])
-     ("Wikipedia" . [simple-query "https://en.wikipedia.org" "https://en.wikipedia.org/w/index.php?search=" ""])
-     ("CSS Tricks" . [simple-query "https://css-tricks.com" "https://css-tricks.com/?s=" ""])
-     ("Python docs" . [simple-query "https://docs.python.org/3" "https://docs.python.org/3/search.html?q=" ""])
-     ("DevDocs.io" . [simple-query "https://devdocs.io" "https://devdocs.io/#q=" ""])
-     ("Rust STD Docs" . [simple-query "https://doc.rust-lang.org/stable" "https://doc.rust-lang.org/stable/std/index.html?search=" ""])
-     ("Hoogle" . [simple-query "https://hoogle.haskell.org" "https://hoogle.haskell.org/?hoogle=" ""])
-     ("ChatGPT" . [simple-query "https://chatgpt.com" "https://chatgpt.com/?q=" ""])))
-  :init
+(setopt webjump-sites
+        '(("DuckDuckGo" . [simple-query "www.duckduckgo.com" "www.duckduckgo.com/?q=" ""])
+          ("Google" . [simple-query "www.google.com" "www.google.com/search?q=" ""])
+          ("YouTube" . [simple-query "www.youtube.com/feed/subscriptions" "www.youtube.com/rnesults?search_query=" ""])
+          ("Google" . [simple-query "https://www.google.com/search" "https://www.google.com/search?hl=en&q=" ""])
+          ("Stack Overflow" . [simple-query "https://duckduckgo.com/?q=site%3Astackoverflow.com+" "https://duckduckgo.com/?q=site%3Astackoverflow.com+" ""])
+          ("MyNixos" . [simple-query "https://mynixos.com" "https://mynixos.com/search?q=" ""])
+          ("Wikipedia" . [simple-query "https://en.wikipedia.org" "https://en.wikipedia.org/w/index.php?search=" ""])
+          ("CSS Tricks" . [simple-query "https://css-tricks.com" "https://css-tricks.com/?s=" ""])
+          ("Python docs" . [simple-query "https://docs.python.org/3" "https://docs.python.org/3/search.html?q=" ""])
+          ("DevDocs.io" . [simple-query "https://devdocs.io" "https://devdocs.io/#q=" ""])
+          ("Rust STD Docs" . [simple-query "https://doc.rust-lang.org/stable" "https://doc.rust-lang.org/stable/std/index.html?search=" ""])
+          ("Hoogle" . [simple-query "https://hoogle.haskell.org" "https://hoogle.haskell.org/?hoogle=" ""])
+          ("ChatGPT" . [simple-query "https://chatgpt.com" "https://chatgpt.com/?q=" ""])))
 
-  (defun +webjump (&optional at-point)
-    (interactive)
-    (let* ((site (assoc-string
-                  (completing-read "Site: " webjump-sites nil t)
-                  webjump-sites t))
-           (name (car site))
-           (expr (cdr site))
-           (fun (if webjump-use-internal-browser
-                    (apply-partially #'browse-url-with-browser-kind 'internal)
-                  #'browse-url))
-           (thing (if (bound-and-true-p at-point)
-                      (thing-at-point symbol t)
-                    (webjump-url-fix
-                     (cond ((not expr) "")
-                           ((stringp expr) expr)
-                           ((vectorp expr) (webjump-builtin expr name))
-                           ((listp expr) (eval expr t))
-                           ((symbolp expr)
-                            (if (fboundp expr)
-                                (funcall expr name)
-                              (error "WebJump URL function \"%s\" undefined"
-                                     expr)))
-                           (t (error "WebJump URL expression for \"%s\" invalid"
-                                     name)))))))
-      (funcall fun thing))))
-;; :general
-;; (evil-normal-state-map
-;;  "g X" '+webjump)
-;; (+leader-keys
-;;   "s W" '("Search the web" . webjump)))
+;; (use-package webjump
+;;   :straight nil
+;;   :custom
+;;   (webjump-sites
+;;    '(("DuckDuckGo" . [simple-query "www.duckduckgo.com" "www.duckduckgo.com/?q=" ""])
+;;      ("Google" . [simple-query "www.google.com" "www.google.com/search?q=" ""])
+;;      ("YouTube" . [simple-query "www.youtube.com/feed/subscriptions" "www.youtube.com/rnesults?search_query=" ""])
+;;      ("Google" . [simple-query "https://www.google.com/search" "https://www.google.com/search?hl=en&q=" ""])
+;;      ("Stack Overflow" . [simple-query "https://duckduckgo.com/?q=site%3Astackoverflow.com+" "https://duckduckgo.com/?q=site%3Astackoverflow.com+" ""])
+;;      ("MyNixos" . [simple-query "https://mynixos.com" "https://mynixos.com/search?q=" ""])
+;;      ("Wikipedia" . [simple-query "https://en.wikipedia.org" "https://en.wikipedia.org/w/index.php?search=" ""])
+;;      ("CSS Tricks" . [simple-query "https://css-tricks.com" "https://css-tricks.com/?s=" ""])
+;;      ("Python docs" . [simple-query "https://docs.python.org/3" "https://docs.python.org/3/search.html?q=" ""])
+;;      ("DevDocs.io" . [simple-query "https://devdocs.io" "https://devdocs.io/#q=" ""])
+;;      ("Rust STD Docs" . [simple-query "https://doc.rust-lang.org/stable" "https://doc.rust-lang.org/stable/std/index.html?search=" ""])
+;;      ("Hoogle" . [simple-query "https://hoogle.haskell.org" "https://hoogle.haskell.org/?hoogle=" ""])
+;;      ("ChatGPT" . [simple-query "https://chatgpt.com" "https://chatgpt.com/?q=" ""])))
+;;   :init
+;;
+;;   (defun +webjump (&optional at-point)
+;;     (interactive)
+;;     (let* ((site (assoc-string
+;;                   (completing-read "Site: " webjump-sites nil t)
+;;                   webjump-sites t))
+;;            (name (car site))
+;;            (expr (cdr site))
+;;            (fun (if webjump-use-internal-browser
+;;                     (apply-partially #'browse-url-with-browser-kind 'internal)
+;;                   #'browse-url))
+;;            (thing (if (bound-and-true-p at-point)
+;;                       (thing-at-point symbol t)
+;;                     (webjump-url-fix
+;;                      (cond ((not expr) "")
+;;                            ((stringp expr) expr)
+;;                            ((vectorp expr) (webjump-builtin expr name))
+;;                            ((listp expr) (eval expr t))
+;;                            ((symbolp expr)
+;;                             (if (fboundp expr)
+;;                                 (funcall expr name)
+;;                               (error "WebJump URL function \"%s\" undefined"
+;;                                      expr)))
+;;                            (t (error "WebJump URL expression for \"%s\" invalid"
+;;                                      name)))))))
+;;       (funcall fun thing))))
+;; ;; :bind*
+;; (("C-x <space> s W" . webjump)
+;;  ("M-RET" . webjump)))
 
-
-;; (general-defs
-;;   global-map
-;;   :states '(visual normal)
-;;   "K" '+lookup/documentation
-;;   "M-k" '+lookup/in-buffer
-;;   help-mode-map
-;;   :states '(normal)
-;;   "q" 'quit-window)
+;; (bind-keys*
+;;  ("M-k" . +lookup/in-buffer)
+;;  ("M-K" . +lookup/documentation))
 
 (provide 'init-lookup)

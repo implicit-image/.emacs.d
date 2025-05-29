@@ -27,46 +27,46 @@
   :custom
   (vundo-compact-display t)
   (vundo-window-max-height 6))
-;; :general
-;; (global-map
-;;  "C-x u" '("Visualize undo" . vundo)))
+;; :bind*
+;; (("C-x u" . vundo)))
 
-(use-package paren
-  :straight nil
-  :custom
-  (show-paren-style 'mixed)
-  (show-paren-delay 0.05)
-  (show-paren-context-when-offscreen 'overlay)
-  (show-paren-when-point-inside-paren t)
-  (show-paren-when-point-in-periphery t)
-  :config
-  (advice-add 'show-paren--show-context-in-overlay :override '+show-paren--overlay-function)
-  :hook
-  (after-init-hook . show-paren-mode))
+;; (use-package paren
+;;   :straight nil
+;;   :custom
+;;   (show-paren-style 'mixed)
+;;   (show-paren-delay 0.05)
+;;   (show-paren-context-when-offscreen 'overlay)
+;;   (show-paren-when-point-inside-paren t)
+;;   (show-paren-when-point-in-periphery t)
+;;   :config
+;;   (advice-add 'show-paren--show-context-in-overlay :override '+show-paren--overlay-function)
+;;   :hook
+;;   (after-init-hook . show-paren-mode))
+
+(setopt show-paren-style 'mixed
+        show-paren-delay 0.05
+        show-paren-context-when-offscreen 'overlay
+        show-paren-when-point-inside-paren t
+        show-paren-when-point-in-periphery t)
+
+(with-eval-after-load 'paren
+  (advice-add 'show-paren--show-context-in-overlay :override '+show-paren--overlay-function))
+
+(add-hook 'after-init-hook 'show-paren-mode)
 
 
 (use-package drag-stuff)
-;; :general
-;; (global-map
-;;  :states 'visual
-;;  "M-k" 'drag-stuff-up
-;;  "M-j" 'drag-stuff-down))
+;; :bind*
+;; (("M-k" . drag-stuff-up)
+;;  ("M-j" . drag-stuff-down)))
 
-;; (use-package origami
-;;   :straight (origami :type git
-;;                      :host github
-;;                      :repo "elp-revive/origami.el")
-;;   :hook
-;;   (after-init-hook . global-origami-mode))
-
-(use-package tabify
-  :straight nil)
-;; :general
-;; (+leader-keys
-;;   "t TAB" 'tabify
-;;   "t <tab>" 'tabify
-;;   "t S-TAB" 'untabify
-;;   "t <backtab>" 'untabify))
+;; (use-package tabify
+;;   :straight nil)
+;; :bind*
+;; (("C-x SPC t TAB" . tabify)
+;;  ("C-x SPC t <tab>" . tabify)
+;;  ("C-x SPC t S-TAB" . untabify)
+;;  ("C-x SPC t <backtab>" . untabify)))
 
 (use-package combobulate
   :straight (combobulate :type git
@@ -81,5 +81,19 @@
   (prog-mode-hook . combobulate-mode))
 
 (use-package vlf)
+
+(setq treesit-font-lock-level 3)
+
+(use-package treesit-auto
+  :commands
+  (global-treesit-auto-mode)
+  :init
+  (setq treesit-auto-install t)
+  :hook
+  (after-init-hook . (lambda ()
+                       (require 'treesit-auto)
+                       (treesit-auto-add-to-auto-mode-alist 'all)
+                       (global-treesit-auto-mode))))
+
 
 (provide 'init-edit)

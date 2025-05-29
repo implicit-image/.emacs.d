@@ -17,10 +17,10 @@
   :hook
   (calibredb-search-mode-hook . (lambda ()
                                   (interactive)
-                                  (blink-cursor-mode -1)))
-  :bind
-  (("C-x a c" . calibredb-consult-read)
-   ("C-x a C" . calibredb)))
+                                  (blink-cursor-mode -1))))
+;; :bind
+;; (("C-x a c" . calibredb-consult-read)
+;;  ("C-x a C" . calibredb)))
 
 ;; :general
 ;; (+leader-keys
@@ -133,19 +133,16 @@
                                    (org-set-property org-noter-property-doc-file file)))))
       (save-buffer)
       (org-noter))))
-
-
 ;; :bind
-;; (
-;;  ;; ( :map 'pdf-view-mode-map
-;;  ;;   ("g n" . 'org-noter)
-;;  :map 'org-noter-doc-mode-map
-;;  ;; ("i" . 'org-noter-insert-note)
-;;  ;; ("i" . 'org-noter-insert-precise-note)
-;;  ("C-c q" . 'org-noter-kill-session)
-;;  :map 'org-noter-notes-mode-map
-;;  ("C-c n q" . 'org-noter-kill-session)
-;;  ("C-c n n" . '+books/org-noter-init-session)))
+;; ( :map pdf-view-mode-map
+;;   ("g n" . org-noter)
+;;   :map org-noter-doc-mode-map
+;;   ("i" . org-noter-insert-note)
+;;   ("i" . org-noter-insert-precise-note)
+;;   ("C-c n q" . org-noter-kill-session)
+;;   :map org-noter-notes-mode-map
+;;   ("C-c n q" . org-noter-kill-session)
+;;   ("C-c n n" . +books/org-noter-init-session)))
 
 ;; :general
 ;; (pdf-view-mode-map
@@ -174,9 +171,9 @@
 (use-package pdf-tools
   :custom
   (pdf-outline-imenu-use-flat-menus t)
-  :mode ("\\.pdf\\'" . pdf-tools-install))
+  :mode ("\\.pdf\\'" . pdf-tools-install))
 ;; :bind
-;; ( :map 'pdf-view-mode-map
+;; ( :map pdf-view-mode-map
 ;;   ("] ]" . pdf-view-next-page)
 ;;   ("[ [ " . pdf-view-prev-page)
 ;;   ("q" . kill-current-buffer)))

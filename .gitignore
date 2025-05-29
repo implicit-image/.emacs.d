@@ -4,5 +4,7 @@
 !/init.el
 !/modules/
 !/modules/**
+!/local/**
+!/local/*
 /modules/**/#*#
 /modules/#*#

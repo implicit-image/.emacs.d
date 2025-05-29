@@ -2,9 +2,9 @@
 
 
 (use-package company
-  :custom-face
-  (company-tooltip ((t (:background ,(doom-darken (doom-color 'base4) 0.3)))))
-  (company-tooltip-selection ((t (:background ,(doom-color 'bg)))))
+  ;; :custom-face
+  ;; (company-tooltip ((t (:background ,(doom-darken (doom-color 'base4) 0.3)))))
+  ;; (company-tooltip-selection ((t (:background ,(doom-color 'bg)))))
   :init
   (setq company-idle-delay 0.05
         ;; company-backends '((company-dabbrev-code company-keywords)
@@ -22,11 +22,11 @@
         company-quickhelp-use-propertized-text t
         company-format-margin-function 'company-text-icons-margin)
   ;; :bind*
-  ;; ( :map 'company-active-map
-  ;;   ("C-h" . 'company-quickhelp-manual-begin)
-  ;;   ("C-s" . 'company-search-mode)
-  ;;   :map 'company-mode-map
-  ;;   ("C-SPC" . 'company-complete))
+  ;; ( :map company-active-map
+  ;;   ("C-h" . company-quickhelp-manual-begin)
+  ;;   ("C-s" . company-search-mode)
+  ;;   :map company-mode-map
+  ;;   ("C-SPC" . company-complete))
   ;; :general
   ;; (company-active-map
   ;;  :states 'insert

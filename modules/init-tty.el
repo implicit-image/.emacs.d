@@ -1,7 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-
-
 (defun +tty-setup ()
   "Run some code to adjust emacs for tty experience."
   ;;;; set up faces for tty
@@ -18,8 +16,6 @@
          (corfu-terminal-mode (if (display-graphic-p) -1 1))))
 
 (add-hook 'tty-setup-hook '+tty-setup)
-
-
 
 (use-package kkp
   :hook

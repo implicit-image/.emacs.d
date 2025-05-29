@@ -63,7 +63,6 @@
 (require 'init-meow)
 ;; (require 'init-evil)
 
-(require 'init-treesitter)
 (require 'init-utils)
 (require 'init-search)
 
@@ -117,10 +116,7 @@
 (require 'init-remote)
 
 ;;;; org mode
-(require 'init-org-mode)
-(require 'init-org-babel)
-(require 'init-org-agenda)
-(require 'init-org-roam)
+(require 'init-org)
 
 
 ;;;; tty emacs options
@@ -130,10 +126,7 @@
 (require 'init-books)
 
 ;;;; llm integration
-(require 'init-aider)
-(require 'init-gptel)
-(require 'init-mcp)
-(require 'init-elysium)
+(require 'init-llm)
 
 ;;; social media clients
 (require 'init-socials)
@@ -144,4 +137,4 @@
   (server-start))
 
 ;; reset gc limit after init file
-(setq gc-cons-threshold (* 1024 1024 10))
+;; (setq gc-cons-threshold (* 1024 1024 10))

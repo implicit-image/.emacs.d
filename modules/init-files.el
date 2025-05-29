@@ -1,50 +1,53 @@
-(use-package files
-  :straight nil
-  :init
-  (defun +yank-current-file ()
-    "Yank the name of the current file."
-    (interactive)
-    (let ((name (buffer-file-name (current-buffer))))
-      (when name
-        (kill-new (file-name-nondirectory name)))))
+;;; -*- lexical-binding: t -*-
 
-  (defun +yank-current-path ()
-    "Yank full path of current file."
-    (interactive)
-    (let ((name (buffer-file-name (current-buffer))))
-      (when name
-        (kill-new name))))
+(defun +yank-current-file ()
+  "Yank the name of the current file."
+  (interactive)
+  (let ((name (buffer-file-name (current-buffer))))
+    (when name
+      (kill-new (file-name-nondirectory name)))))
 
-  (defun +rename-visited-file ()
-    (interactive)
-    (rename-visited-file (expand-file-name
-                          (read-file-name "Rename visited file to: "
-                                          default-directory
-                                          nil
-                                          nil
-                                          (file-name-nondirectory (buffer-file-name))))))
+(defun +yank-current-path ()
+  "Yank full path of current file."
+  (interactive)
+  (let ((name (buffer-file-name (current-buffer))))
+    (when name
+      (kill-new name))))
 
-  (add-to-list 'save-some-buffers-action-alist
-               (list "d"
-                     (lambda (buffer) (diff-buffer-with-file (buffer-file-name buffer)))
-                     "show diff between the buffer and its file")))
+(defun +rename-visited-file ()
+  (interactive)
+  (rename-visited-file (expand-file-name
+                        (read-file-name "Rename visited file to: "
+                                        default-directory
+                                        nil
+                                        nil
+                                        (file-name-nondirectory (buffer-file-name))))))
 
-;; :general
-;; (+leader-keys
-;;   "." '("Find file in cwd" . find-file)
-;;   "b r" '("Revert" . revert-buffer)
-;;   "f o" '("Find file in other window" . find-file-other-window)
-;;   "f R" '("Rename current file" . +rename-visited-file)
-;;   "f y" '("Yank current file name" . +yank-current-file)
-;;   "f Y" '("Yank current full path" . +yank-current-path)
-;;   "h l" '("Load library" . load-library)
-;;   "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
-;;   "q r" '("Restart emacs" . restart-emacs)))
+;; (use-package files
+;;   :straight nil
+;;   :init
+(add-to-list 'save-some-buffers-action-alist
+             (list "d"
+                   (lambda (buffer)
+                     (diff-buffer-with-file (buffer-file-name buffer)))
+                   "show diff between the buffer and its file"))
+;; :bind*
+;; (("C-x SPC ." . find-file)
+;;  ("C-x SPC b r" . revert-buffer)
+;;  ("C-x SPC f o" . find-file-other-window)
+;;  ("C-x SPC f R" . +rename-visited-file)
+;;  ("C-x SPC f Y" . +yank-current-path)
+;;  ("C-x SPC f y" . +yank-current-file)
+;;  ("C-x SPC h l" . load-library)
+;;  ("C-x SPC q A" . save-buffers-kill-emacs)
+;;  ("C-x SPC q r" . restart-emacs)))
 
-(use-package autorevert
-  :straight nil
-  :hook
-  ((dired-mode-hook pdf-mode-hook) . auto-revert-mode))
+;; (use-package autorevert
+;;   :straight nil
+;;   :hook
+;;   ((dired-mode-hook pdf-mode-hook) . auto-revert-mode))
+
+(add-hook 'pdf-mode-hook 'auto-revert-mode)
 
 (use-package ready-player
   :init

@@ -1,25 +1,42 @@
 ;;; -*- lexical-binding: t -*-
 
-(use-package dired
-  :straight nil
-  :custom
-  (dired-dwim-target t)
-  (dired-listing-switches "-alh --group-directories-first")
-  (dired-recursive-copies 'always)
-  (dired-recursive-deletes 'top)
-  (dired-kill-when-opening-new-dired-buffer nil)
-  (ired-auto-revert-buffer t)
-  ;; dired-auto-revert-buffer '+dired-revert-buffer-p
-  (dired-create-destination-dirs 'ask)
-  :hook (dired-mode-hook . (lambda ()
-                             (interactive)
-                             (toggle-truncate-lines +1)
-                             (setq-local case-fold-search nil))))
+;; (use-package dired
+;;   :straight nil
+;;   :custom
+;;   (dired-dwim-target t)
+;;   (dired-listing-switches "-alh --group-directories-first")
+;;   (dired-recursive-copies 'always)
+;;   (dired-recursive-deletes 'top)
+;;   (dired-kill-when-opening-new-dired-buffer nil)
+;;   (ired-auto-revert-buffer t)
+;;   ;; dired-auto-revert-buffer '+dired-revert-buffer-p
+;;   (dired-create-destination-dirs 'ask)
+;;   :hook (dired-mode-hook . (lambda ()
+;;                              (interactive)
+;;                              (toggle-truncate-lines +1)
+;;                              (setq-local case-fold-search nil))))
 
-(use-package wdired
-  :straight nil
-  :custom
-  (wdired-allow-to-change-permissions t))
+(setopt dired-dwim-target t
+        dired-listing-switches "-alh --group-directories-first"
+        dired-recursive-copies 'always
+        dired-recursive-deletes 'top
+        dired-kill-when-opening-new-dired-buffer nil
+        ired-auto-revert-buffer t
+        ;; dired-auto-revert-buffer '+dired-revert-buffer-p
+        dired-create-destination-dirs 'ask)
+
+(defun +dired--setup ()
+  (toggle-truncate-lines 1)
+  (setq-local case-fold-search nil))
+
+(add-hook 'dired-mode-hook '+dired--setup)
+
+(setopt wdired-allow-to-change-permissions t)
+
+;; (use-package wdired
+;;   :straight nil
+;;   :custom
+;;   (wdired-allow-to-change-permissions t))
 
 (use-package diredfl
   :commands

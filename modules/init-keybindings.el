@@ -3,6 +3,7 @@
 ;;;; packages for setting and exploring keybindings.
 
 (use-package which-key
+  :straight nil
   :commands
   (which-key-setup-side-window-bottom)
   :init

@@ -1,9 +1,5 @@
 ;;; -*- lexical-binding: t -*-
-
-
 ;;; Code:
-
-
 (use-package indent-bars
   :straight (indent-bars :type git
                          :host github
@@ -37,17 +33,17 @@
    . indent-bars-mode))
 
 (use-package whitespace
-  :custom-face
-  (whitespace-space ((t (:foreground ,(doom-color 'base4)))))
-  (whitespace-hspace ((t (:foreground ,(doom-color 'bg) :background ,(doom-color 'bg)))))
-  (whitespace-indentation ((t (:foreground ,(doom-color 'base4)))))
+  ;; :custom-face
+  ;; (whitespace-space ((t (:foreground ,(doom-color 'base4)))))
+  ;; (whitespace-hspace ((t (:foreground ,(doom-color 'bg) :background ,(doom-color 'bg)))))
+  ;; (whitespace-indentation ((t (:foreground ,(doom-color 'base4)))))
   :init
   (setq whitespace-global-modes '(not markdown-mode gfm-mode org-mode latex-mode dired-mode csv-mode nxml-mode ess-mode diff-mode magit-mode magit-diff-mode))
   (defun +whitespace-toggle-style ()
     "Toggle whitespace mode display style."
     (if (display-graphic-p)
         (setq whitespace-style '(face spaces indentation::space space-mark))
-      (setq whitespace-style '(face line spaces tabs indentation::space indentation::tab indentation big-indent))))
+      (setq whitespace-style '(face line spaces tabs indentation::space indentation::tab indentation))))
 
   (defun +whitespace-on ()
     (interactive)
@@ -76,15 +72,7 @@
   (whitespace-mode-hook . +whitespace-toggle-style)
   (before-save-hook . delete-trailing-whitespace))
 
-;; (general-def global-map
-;;   :states 'insert
-;;   "TAB" '+smart-tab
-;;   "<tab>" '+smart-tab
-;;   [tab] '+smart-tab)
-
 (setq tab-always-indent 'complete
       tab-first-completion 'complete)
-
-
 
 (provide 'init-indent)

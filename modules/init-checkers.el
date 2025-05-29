@@ -10,7 +10,7 @@
   ((lsp-mode-hook emacs-lisp-mode-hook merlin-mode-hook) . flycheck-mode)
   (flycheck-error-list-mode-hook . visual-line-mode))
 ;; :bind
-;; ( :map 'flycheck-mode-map
+;; ( :map flycheck-mode-map
 ;;   ("C-x ]" . flycheck-next-error)
 ;;   ("C-x [" . flycheck-previous-error)))
 ;; :general
@@ -25,7 +25,8 @@
                               :host github
                               :repo "minad/consult-flycheck"))
 ;; :bind*
-;; ( :map 'flycheck-mode-map
+;; ( :map flycheck-mode-map
+;;   ("C-x SPC s e" . consult-flycheck)
 ;;   ("C-c ! l" . consult-flycheck)))
 ;; :general
 ;; (flycheck-mode-map
@@ -34,13 +35,21 @@
 ;;  :global-prefix "M-SPC"
 ;;  "s e" '("Consult errors" . consult-flycheck)))
 
-(use-package flyspell
-  :straight nil
-  :custom
-  (flyspell-issue-welcoe-flag nil)
-  (flyspell-issue-message-flag nil)
-  :hook
-  ((prog-mode-hook emacs-lisp-mode-hook) . flyspell-prog-mode)
-  ((org-mode-hook markdown-mode-hook text-mode-hook) . flyspell-mode))
+;; (use-package flyspell
+;;   :straight nil
+;;   :custom
+;;   (flyspell-issue-welcoe-flag nil)
+;;   (flyspell-issue-message-flag nil)
+;;   :hook
+;;   ((prog-mode-hook emacs-lisp-mode-hook) . flyspell-prog-mode)
+;;   ((org-mode-hook markdown-mode-hook text-mode-hook) . flyspell-mode))
+
+(setopt flyspell-issue-welcome-flag nil
+        flyspell-issue-message-flag nil)
+
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+(add-hook 'emacs-lisp-mode-hook 'flyspell-prog-mode)
+(add-hook 'org-mode-hook 'flyspell-mode)
+(add-hook 'markdown-mode-hook 'flyspell-mode)
 
 (provide 'init-checkers)

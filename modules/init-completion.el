@@ -1,16 +1,18 @@
 ;;; -*- lexical-binding: t -*-
 
-(use-package minibuffer
-  :straight nil
-  :hook
-  (minibuffer-mode-hook . visual-line-mode))
+;; (use-package minibuffer
+;;   :straight nil
+;;   :hook
+;;   (minibuffer-mode-hook . visual-line-mode))
 
-(use-package completion-preview
-  :straight nil)
-;; :bind
-;; ( :map 'completion-preview-active-mode-map
-;;   ("C-n" 'completion-preview-next-candidate)
-;;   ("C-p" 'completion-preview-prev-candidate)))
+(add-hook 'minibuffer-mode-hook 'visual-line-mode)
+
+;; (use-package completion-preview
+;;   :straight nil)
+;; :bind*
+;; ( :map completion-preview-active-mode-map
+;;   ("C-n" . completion-preview-next-candidate)
+;;   ("C-p" . completion-preview-prev-candidate)))
 ;; :general
 ;; (completion-preview-active-mode-map
 ;;  :states '(insert emacs)
@@ -32,12 +34,12 @@
   (vertico-preselect 'first)
   (vertico-scroll-margin 5)
   :hook
-  (marginalia-mode-hook . vertico-mode)
-  :bind*
-  ( :map vertico-map
-    ("C-c f" . vertico-flat-mode)
-    ("C-c ." . vertico-repeat)
-    ("C-c i" . vertico-insert)))
+  (marginalia-mode-hook . vertico-mode))
+;; :bind*
+;; ( :map vertico-map
+;;   ("C-c f" . vertico-flat-mode)
+;;   ("C-c ." . vertico-repeat)
+;;   ("C-c i" . vertico-insert)))
 ;; :general
 ;; (+leader-keys
 ;;   "t c" '("Bring up last completion" . vertico-suspend))
@@ -93,35 +95,19 @@ targets."
   :config
   (require 'embark-consult))
 ;; :bind*
-;; (("C-x a" . 'embark-act))
-;; :bind
-;; ( :map 'vertico-map
-;;   ("C-c e" . 'embark-export)
-;;   ("C-c b" . 'embark-become)
-;;   ("C-c l" . 'embark-live)
-;;   ("C-c o" . 'embark-open-externally)
-;;   ("C-c a" . 'embark-act)
-;;   ("C-c A" . 'embark-act-all)
-;;   ("C-c d" . 'embark-dwim)
-;;   ("C-c i" . 'embark-insert)
-;;   ("C-c c" . 'embark-collect)))
-;; :general
-;; (vertico-map
-;;  "C-c e" '("Embark export" . embark-export)
-;;  "C-c b" '("Embark become" . embark-become)
-;;  "C-c l" '("Embark live" . embark-live)
-;;  "C-c o" '("Embark open" . embark-open-externally)
-;;  "C-c a" '("Embark act" . embark-act)
-;;  "C-c A" '("Embark act on all" . embark-act-all)
-;;  "C-c d" '("Embark dwim" . embark-dwim)
-;;  "C-c i" '("Embark insert" . embark-insert)
-;;  "C-c c" '("Embark collect" . embark-collect))
-;; (general-override-mode-map
-;;  :states '(normal visual)
-;;  "C-c a" 'embark-act
-;;  "C-c A" 'embark-act-all)
-;; (+leader-keys
-;;   "e" '("Embark Act" . embark-act)))
+;; (("C-x a" . embark-act)
+;;  ("C-x SPC a" . embark-act))
+;; :bind*
+;; ( :map vertico-map
+;;   ("C-c e" . embark-export)
+;;   ("C-c b" . embark-become)
+;;   ("C-c l" . embark-live)
+;;   ("C-c o" . embark-open-externally)
+;;   ("C-c a" . embark-act)
+;;   ("C-c A" . embark-act-all)
+;;   ("C-c d" . embark-dwim)
+;;   ("C-c i" . embark-insert)
+;;   ("C-c c" . embark-collect)))
 
 (use-package consult
   :autoload
@@ -141,54 +127,28 @@ targets."
    consult-grep consult-ripgrep consult-git-grep consult-line-multi
    :initial ""))
 ;; :bind*
-;; (("C-x C-m :" . 'consult-mode-command)
-;;  ("C-x C-/" . 'consult-ripgrep)
-;;  ("C-x C-b b" . 'consult-buffer)
+;; (("C-x C-m :" . consult-mode-command)
+;;  ("C-x C-/" . consult-ripgrep)
+;;  ("C-x C-b b" . consult-buffer)
 ;;  ("C-x C-c" .  consult-compile-error)
-;;  ("C-x C-f r" . 'consult-recent-file)
-;;  ("C-x C-f /" . 'consult-find)
-;;  ("C-x C-h i" . 'consult-info)
-;;  ("C-x C-h ! m" . 'consult-man)
-;;  ("C-x C-o " . 'consult-bookmark)
-;;  ("C-x C-s b" . 'consult-line)
-;;  ("C-x C-s B" . 'consult-line-multi)
-;;  ("C-x C-s i" . 'consult-imenu)
-;;  ("C-x C-s I" . 'consult-imenu-multi)
-;;  ("C-x C-s o" . 'consult-outline)
-;;  ("C-x C-t m" . 'consult-minor-mode-menu)
-;;  :map 'rg-global-map
-;;  ("?" . 'consult-ripgrep)))
-
-;; :general
-;; (rg-global-map
-;;  "?" 'consult-ripgrep)
-;; (+leader-keys
-;;   "m :" '("Run active mode command" . consult-mode-command)
-;;   "/" '("Grep directory" . consult-ripgrep)
-;;   ;; buffer
-;;   "b b" '("Find buffer" . consult-buffer)
-;;   "c e" '("Compile errors" . consult-compile-error)
-;;   ;; file
-;;   "f r" '("Recent files" . consult-recent-file)
-;;   "f /" '("Find files" . consult-find)
-;;   "h i" '("Emacs Info" . consult-info)
-;;   "h ! m" '("Manpages" . consult-man)
-;;   "o b" '("Bookmarks" . consult-bookmark)
-;;   ;; searc:96h
-;;   "s b" '("Search buffer" . consult-line)
-;;   "s B" '("Search all buffers" . consult-line-multi)
-;;   "s i" '("Imenu" . consult-imenu)
-;;   "s I" '("imenu everywhere" . consult-imenu-multi)
-;;   "s o" '("Imenu outline" . consult-outline)
-;;   "t m" '("Toggle minor mode" . consult-minor-mode-menu)))
-
+;;  ("C-x C-f r" . consult-recent-file)
+;;  ("C-x C-f /" . consult-find)
+;;  ("C-x C-h i" . consult-info)
+;;  ("C-x C-h ! m" . consult-man)
+;;  ("C-x C-o " . consult-bookmark)
+;;  ("C-x C-s b" . consult-line)
+;;  ("C-x C-s B" . consult-line-multi)
+;;  ("C-x C-s i" . consult-imenu)
+;;  ("C-x C-s I" . consult-imenu-multi)
+;;  ("C-x C-s o" . consult-outline)
+;;  ("C-x C-t m" . consult-minor-mode-menu)
+;;  :map org-mode-map
+;;  ("M-SPC s i" . consult-org-heading)
+;;  :map rg-global-map
+;;  ("?" . consult-ripgrep)))
 
 (use-package orderless
   :custom
   (completion-styles '(orderless basic)))
-
-;; (+leader-keys
-;;   ":" '("Execute command" . execute-extended-command)
-;;   "h l" '("Load library" . load-library))
 
 (provide 'init-completion)
