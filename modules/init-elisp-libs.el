@@ -5,9 +5,10 @@
 (use-package dash)
 
 (use-package async
-  :autoload (dired-async-mode)
-  :hook
-  (after-init-hook . dired-async-mode))
+  :autoload (dired-async-mode))
+
+(with-eval-after-load 'dired
+  (dired-async-mode 1))
 
 (use-package ov)
 

@@ -1,69 +1,46 @@
 ;;; -*- lexical-binding: t -*-
 
-;; (use-package frame
-;;   :straight nil
-;;   :init
+
+;; (defun +split-below-window-prefix ()
+;;   (interactive)
+;;   (display-buffer-override-next-command
+;;    (lambda (buffer alist)
+;;      (let ((alist (append '((inhibit-same-window . t)
+;;                             (window-width . 0.5)
+;;                             ()) alist))
+;;            window type)
+;;        (if (setq ))))))
+;;
+;; (defun +split-right-window-prefix)
+;;
+;; (defun +split-left-window-prefix)
+
 (setq window-divider-default-places 'right-only
       window-divider-default-right-width 1
       window-divider-default-bottom-width 1)
 
 (add-hook 'window-setup-hook 'window-divider-mode)
-;; :hook
-;; (window-setup-hook . window-divider-mode))
 
 (use-package ace-window
   :commands
   (ace-window)
   :init
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (setq aw-keys '(?a ?d ?f ?g ?h ?j ?k ?l))
   (setq aw-dispatch-alist
-        '((?d aw-delete-window "Delete Window")
+        '((?x aw-delete-window "Delete Window")
           (?S aw-swap-window "Swap Windows")
           (?m aw-move-window "Move Window")
           (?c aw-copy-window "Copy Window")
           (?b aw-switch-buffer-in-window "Select Buffer")
           (?F aw-flip-window)
-          (?B aw-switch-buffer-other-window "Switch Buffer Other Window")
           (?! aw-execute-command-other-window "Execute Command Other Window")
-          ;; (? aw-split-window-fair "Split Fair Window")
-          (?V aw-split-window-vert "Split Vert Window")
-          (?H aw-split-window-horz "Split Horz Window")
-          (?M delete-other-windows "Delete Other Windows")
-          (?T aw-transpose-frame "Transpose Frame")
-          (?? aw-show-dispatch-help))))
-;; :bind*
-;; (("C-w w" . ace-window)))
-
-(use-package windmove
-  :commands
-  (windmove-left windmove-right windmove-up windmove-down))
-;; :bind*
-;; (("C-h" . windmove-left)
-;;  ("C-j" . windmove-down)
-;;  ("C-k" . windmove-up)
-;;  ("C-l" . windmove-right)
-;;  ("C-w -" . shrink-window)
-;;  ("C-w +" . enlarge-window)
-;;  ("C-w l" . windmove-right)
-;;  ("C-w h" . windmove-left)
-;;  ("C-w j" . windmove-down)
-;;  ("C-w k" . windmove-up)))
-
-
-;; (use-package window
-;;   :straight nil
-;;   :init
-
-;; (defun +windows-cfg (&rest display-cfg-forms)
-;;   "Each one of POPWIN-CFG-FORMS is (BUFFER-NAMES . POPWIN-OPTIONS-PLIST)."
-;;   (mapc (lambda (cfg-form)
-;;           (let ((buffers (car cfg-form))
-;;                 (cfg-opts (cdr cfg-form)))
-;;             (mapc (lambda (buffer)
-;;                     (add-to-list 'popwin:special-display-config
-;;                                  (append (list buffer) cfg-opts)))
-;;                   buffers)))
-;;         popwin-cfg-forms))
+          (?v aw-split-window-vert "Split Vert Window")
+          (?s aw-split-window-horz "Split Horz Window")
+          (?o delete-other-windows "Delete Other Windows")
+          (?t aw-transpose-frame "Transpose Frame")
+          (?? aw-show-dispatch-help)))
+  :bind*
+  (("C-w w" . ace-window)))
 
 (setq display-buffer-alist '(;; no window
                              ((or . ((derived-mode . calibredb-search-mode)
@@ -71,20 +48,33 @@
                                      (derived-mode . calibredb-show-mode-hook)))
                               (display-buffer-reuse-window)
                               (window-parameters . ((mode-line-format . none))))
+                             ;; flymake
+                             ((or ((derived-mode . flymake-project-diagnostics-mode)
+                                   (derived-mode . flymake-diagnostics-buffer-mode)))
+                              (display-buffer-in-side-window)
+                              (side . bottom)
+                              (window-height . 0.35)
+                              (window-parameters . ((mode-line-format . mone))))
                              ((or . ("\*Warnings\*"))
                               (display-buffer-no-window))
                              ;; bottom side window
-                             ((or . ("\*rg\*"
+                             ((or . ((derived-mode . rg-mode)
+                                     (derived-mode . grep-mode)
                                      (derived-mode . xref--xref-buffer-mode)))
                               (display-buffer-same-window)
+                              (dedicated . t)
                               (post-command-select-window . t))
+                             ((or . ("\*Completions\*"
+                                     (derived-mode . completion-list-mode)))
+                              (display-buffer-below-selected)
+                              (preserve-size . (t . t))
+                              (window-parameters . ((mode-line-format . none))))
                              ;; popup bottom buffers
                              ((or . ("\*Org Select\*"
                                      "\*lsp-bridge-doc\*"
                                      "\*lsp-help\*"
                                      "\*tide-documentation\*"
                                      "\*eldoc\*"
-                                     (derived-mode . shell-command-mode)
                                      (derived-mode . help-mode)
                                      (derived-mode . lsp-ui-imenu-mode)
                                      (derived-mode . apropos-mode)
@@ -94,6 +84,10 @@
                               (preserve-size . (t . t))
                               (window-parameters . ((mode-line-format . none)))
                               (post-command-select-window . t))
+                             ;; shell command
+                             ((or . ((derived-mode . shell-command-mode)))
+                              (display-buffer-below-selected)
+                              (window-height . (body-lines . shrink-window-if-larger-than-buffer)))
                              ;; embark shenanigans
                              ((or . ("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                                      " *Embark Actions*"
@@ -149,15 +143,32 @@
 (setq switch-to-buffer-in-dedicated-window t
       switch-to-buffer-obey-display-actions nil
       switch-to-buffer-preserve-window-point t)
-;; :bind*
-;; ( :map override-global-map
-;;   ("C-w q" . delete-window)
-;;   ("C-w v" . split-window-horizontally)
-;;   ("C-w s" . split-window-vertically)
-;;   ("M-o" . other-window-prefix)
-;;   ("M-w" . same-window-prefix)))
 
-;; (use-package init-wm
-;;   :straight nil)
+(use-package windmove
+  :straight nil
+  :bind*
+  ( :map override-global-map
+    ("C-w h" . windmove-left)
+    ("C-w j" . windmove-down)
+    ("C-w k" . windmove-up)
+    ("C-w l" . windmove-right)))
+
+(use-package window
+  :straight nil
+  :bind*
+  ( :map override-global-map
+    ("C-w -" . shrink-window)
+    ("C-w +" . enlarge-window)
+    ("C-w q" . delete-window)
+    ("C-w v" . split-window-horizontally)
+    ("C-w s" . split-window-vertically)
+    ("C-w =" . balance-windows)
+    ("C-w O" . delete-other-windows)
+    ("C-w -" . shrink-window)
+    ("C-w +" . enlarge-window)
+    ("C-w M--" . shrink-window-horizontally)
+    ("C-w M-+" . enlarge-window-horizontally)
+    ("M-o" . other-window-prefix)
+    ("M-w" . same-window-prefix)))
 
 (provide 'init-windows)

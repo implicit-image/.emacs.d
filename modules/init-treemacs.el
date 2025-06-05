@@ -6,27 +6,31 @@
         treemacs-no-png-images t
         treemacs-icons nil
         treemacs-eldoc-display 'detailed
-        treemacs-indentation 1)
+        treemacs-file-event-delay 1000
+        treemacs-file-follow-delay 0.1
+        treemacs-tag-follow-delay 0.1
+        treemacs-follow-after-init nil
+        treemacs-expand-after-init t
+        treemacs-indentation 2)
 
   (when (bound-and-true-p eldoc-box-hover-mode)
     (add-to-list '+eldoc-minibuffer-display-modes 'treemacs-mode))
+
+  (add-hook 'treemacs-mode '+treemacs--setup)
+
+  (with-eval-after-load 'treemacs
+    (treemacs-tag-follow-mode 1)
+    (treemacs-project-follow-mode 1)
+    (treemacs-git-commit-diff-mode 1))
+
+  (with-eval-after-load 'init-meow
+    (bind-keys*
+     :map meow-toggle-global-map
+     ("T" . treemacs)))
+
   :config
   (treemacs-load-theme "Default")
-  :hook
-  (treemacs-mode-hook . (lambda ()
-                          (interactive)
-                          (toggle-truncate-lines -1)
-                          (treemacs-tag-follow-mode 1)
-                          (treemacs-project-follow-mode +1))))
-;; :bind*
-;; (("C-x <space> o p" . treemacs)))
-
-(use-package treemacs-projectile
-  :demand
-  :after (treemacs projectile))
-
-(use-package treemacs-magit
-  :demand
-  :after (treemacs magit))
+  :bind*
+  (("C-c C-t" . treemacs)))
 
 (provide 'init-treemacs)

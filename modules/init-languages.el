@@ -1,52 +1,32 @@
 ;;; -*- lexical-binding: t -*-
 
-;;;; c
-(use-package cc-mode)
-
-(use-package c-ts-mode
-  :mode "\\.c\\'"
-  :init
-  (setq c-ts-mode-indent-offset 4))
-
-(use-package rtags)
-
 (use-package ccls
   :init
   (setq ccls-executable "ccls"))
 
-;;;; javascript
-;; (use-package js-ts-mode
-;;   :straight nil)
+(setq typescript-ts-mode-indent-offset 4
+      go-ts-mode-indent-offset 4
+      c-ts-mode-indent-offset 4
+      java-ts-mode-indent-offset 4
+      rust-ts-mode-indent-offset 4)
 
-(use-package rjsx-mode)
+(add-to-list 'auto-mode-alist '("\\.cjs\\'" . json-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.json[c]*\\'" . json-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.php\\'" . php-ts-mode))
+(add-to-list 'auto-mode-alist '("\\/git-rebase-todo\\'" . conf-mode))
 
-;; (use-package typescript-ts-mode
-;;   :straight nil
+;; ;;;; typescript
+;; (use-package tide
 ;;   :init
-(setq typescript-ts-mode-indent-offset 2)
-
-;;;; css
-;; (use-package css-ts-mode
-;;   :straight nil)
-
-;;;; json
-(use-package json-ts-mode
-  :mode "\\.json\\'"
-  :init
-  (add-to-list 'auto-mode-alist '("\\.cjs\\'" . json-ts-mode)))
-
-;;;; typescript
-(use-package tide
-  :init
-  (+lookup-set-fn! buffer (typescript-ts-mode . tide-documentation-at-point))
-  :config
-  (setq tide-enable-xref t
-        tide-imenu-flatten t
-        tide-completion-detailed t)
-  :hook (typescript-ts-mode-hook . (lambda ()
-                                     (interactive)
-                                     (tide-setup)
-                                     (tide-hl-identifier-mode +1))))
+;;   (setq tide-enable-xref t
+;;         tide-imenu-flatten t
+;;         tide-completion-detailed t)
+;;   :config
+;;   (+lookup-set-fn! buffer (typescript-ts-mode . tide-documentation-at-point))
+;;   :hook (typescript-ts-mode-hook . (lambda ()
+;;                                      (interactive)
+;;                                      (tide-setup)
+;;                                      (tide-hl-identifier-mode +1))))
 
 ;;;; web mode
 (use-package web-mode
@@ -54,44 +34,25 @@
   :config
   (setq web-mode-enable-auto-expanding t))
 
-
-;;;; php
-(use-package php-ts-mode
-  :mode "\\.php\\'")
-
 (use-package composer
   :hook (php-mode-hook . composer))
 
 ;;;; web info
 (use-package verb)
 
-;;;; python
-(use-package anaconda-mode)
-
-
-;; (use-package python-ts-mode
-;;   :straight nil
-;;   :init
-;;   (setq python-indent-offset 4))
-
 (use-package pyvenv)
 
 ;;;; scala
 (use-package scala-mode
-  :config
+  :init
   (setq scala-indent:step 4
         scala-indent:align-parameters t))
 
 (use-package sbt-mode)
 
-;;;; java
-(use-package java-ts-mode
-  :config
-  (setq java-ts-mode-indent-offset 4))
-
 ;;;; kotlin
 (use-package kotlin-mode
-  :config
+  :init
   (setq kotlin-tab-width 4))
 
 ;;;; groovy
@@ -106,48 +67,30 @@
 
 (use-package clj-refactor)
 
-;;;; haskell
-(use-package haskell-mode
-  :init
-  (setq haskell-process-log t
-        haskell-process-type 'auto
-        haskell-compiler-type 'auto))
-
 (use-package haskell-ts-mode
-  :mode "\\.hs\\|.lhs\\'")
+  :custom
+  (haskell-ts-font-lock-level 3)
+  (haskell-ts-use-indent t)
+  (haskell-ts-ghci "ghci")
+  :mode "\\.hs\\|.lhs\\'"
+  :config
+  (add-to-list 'treesit-language-source-alist
+               '(haskell . ("https://github.com/tree-sitter/tree-sitter-haskell" "v0.23.1")))
+  (unless (treesit-grammar-location 'haskell)
+    (treesit-install-language-grammar 'haskell)))
 
 ;;;; rust
 (use-package cargo-mode
   :config
   (setq compilation-scroll-output t)
   :hook
-  (rust-mode-hook . cargo-minor-mode))
+  (rust-ts-mode-hook . cargo-minor-mode))
 
-(use-package rustic
-  :config
-  (setq rustic-indent-offset 4
-        rustic-lsp-server "rust-analyzer"
-        rustic-lsp-client 'lsp-mode
-        ;; formatting
-        rustic-format-trigger 'on-save))
+(with-eval-after-load 'elisp-mode
+  (+lookup-set-fn! buffer (emacs-lisp-mode . helpful-at-point)))
 
-
-(use-package rust-ts-mode
-  :init
-  (setq rust-ts-mode-indent-offset 4))
-
-;; emacs lisp
-;; (use-package emacs-lisp-mode
-;;   :straight nil
-;;   :init
-(+lookup-set-fn! buffer
-                 (emacs-lisp-mode . helpful-at-point)
-                 (lisp-interaction-mode . helpful-at-point))
-
-;; (use-package lisp
-;;   :straight nil
-;;   :init
-;;   (setq delete-pair-blink-delay 0.03))
+(with-eval-after-load 'lisp-interaction-mode
+  (+lookup-set-fn! buffer (lisp-interaction-mode . helpful-at-point)))
 
 ;; racket
 (use-package racket-mode)
@@ -161,15 +104,6 @@
   (setq inferior-lisp-program "sbcl"))
 
 (use-package common-lisp-snippets)
-
-;; (use-package lisp-mode
-;;   :straight nil
-;;   :mode "\\.lisp\\'"
-;;   :hook (common-lisp-mode-hook . (lambda ()
-;;                                    (interactive)
-;;                                    (slime-mode +1))))
-
-(add-hook 'common-lisp-mode-hook 'slime-mode)
 
 ;;;; dart
 (use-package dart-mode)
@@ -205,21 +139,11 @@
 (use-package mix
   :hook (elixir-mode-hook . mix-minor-mode))
 
-;;;; go
-(use-package go-ts-mode
-  :mode "\\.go\\'"
-  :init
-  (setq go-ts-mode-indent-offset 4))
 
 ;;;; ruby
 (use-package enh-ruby-mode)
 
 (use-package robe)
-
-;;;; dotnet
-;; (use-package csharp-ts-mode
-;;   :straight nil
-;;   :mode "\\.cs\\'")
 
 (use-package csproj-mode)
 
@@ -243,9 +167,6 @@
 
 (use-package riscv-mode)
 
-;; (use-package asm-mode
-;;   :straight nil)
-
 (use-package fasm-mode)
 
 (use-package masm-mode)
@@ -261,7 +182,6 @@
   (setq ada-indent-use 4
         ada-indent-when 4))
 
-
 ;;;; Editing GNAT files.
 (use-package gpr-mode)
 
@@ -272,15 +192,10 @@
         elm-indent-offset 4
         elm-format-on-save t))
 
-;;;; lua
-(use-package lua-ts-mode)
-
 ;;;; nim
 (use-package nim-mode)
 
-;;;; gdscript
-;; (use-package gdscript-ts-mode
-;;   :straight nil)
+(use-package gdscript-mode)
 
 ;;;; d
 (use-package d-mode)
@@ -294,10 +209,6 @@
   :straight (lean4-mode :type git :host github
                         :repo "leanprover-community/lean4-mode"
                         :files ("*.el" "data")))
-
-;;;; sql
-;; (use-package sql-mode
-;;   :straight nil)
 
 ;;;; solidity
 (use-package solidity-mode)
@@ -322,26 +233,14 @@
   :hook
   (tuareg-mode-hook . merlin-mode))
 
-(use-package flycheck-ocaml
-  :hook
-  ((merlin-mode-hook reason-mode-hook) . (lambda ()
-                                           (interactive)
-                                           (setq-local merlin-error-after-save nil)
-                                           (flycheck-ocaml-setup))))
-
 (use-package merlin-eldoc
   :init
-  (+lookup-set-fn! popup (tuareg-mode . eldoc-doc-buffer))
-  (defun +ml/setup-merlin-doc ()
-    "Setup local variables controlling eldoc documentation."
-    (progn
-      (setq-local eldoc-echo-area-use-multiline-p t
-                  merlin-eldoc-max-lines 10)))
   (setq merlin-eldoc-max-lines 10
         merlin-eldoc-delimiter "  \n  ")
+  :config
+  (+lookup-set-fn! popup (tuareg-mode . eldoc-doc-buffer))
   :hook
-  ((reason-mode-hook tuareg-mode-hook) . merlin-eldoc-setup)
-  ((merlin-mode-hook) . +ml/setup-merlin-doc))
+  ((merlin-mode-hook) . +merlin-mode--setup))
 
 (use-package ocaml-ts-mode)
 
@@ -364,27 +263,9 @@
 
 (use-package xenops)
 
-;;;; various shell languages
-;; (use-package bash-ts-mode
-;;   :straight nil)
-
 (use-package nushell-mode)
 
 (use-package powershell)
-
-;;;; common configuration languages
-;; (use-package conf-mode
-;;   :straight nil
-;;   :init
-(add-to-list 'auto-mode-alist '("/git-rebase-todo\\'" . conf-mode))
-
-(use-package toml-ts-mode)
-
-;; (use-package nxml-mode
-;;   :straight nil
-;;   :hook
-;;   (nxml-mode-hook . +whitespace-off))
-(add-hook 'nxml-mode-hook '+whitespace-off)
 
 (use-package nix-mode)
 
@@ -400,76 +281,37 @@
                            :branch "master"
                            :repo "implicit-image/nwscript-mode.el")
   :init
-  (defun +nwscript--setup ()
-    (interactive)
-    (setq-local case-fold-search t)
-    (add-hook 'completion-at-point-functions (cape-capf-super (cape-company-to-capf 'company-dabbrev-code)
-                                                              'cape-file))
-    (funcall-interactively 'untabify (point-min) (point-max))
-    (save-buffer)
-    (indent-tabs-mode -1))
   :hook
-  (nwscript-mode-hook . +nwscript--setup))
-;; :general
-;; (nwscript-mode-map
-;;  :states 'normal
-;;  :prefix "SPC"
-;;  :non-normal-prefix "C-c SPC"
-;;  "s o" '("Outline" . consult-outline)))
+  (nwscript-mode-hook . +nwscript-mode--setup))
 
 ;;;; csv
 (use-package csv-mode
   :init
   (add-to-list 'auto-mode-alist '("\\.2da\\'" . csv-mode))
-
-  (defun +csv/setup ()
-    "setup `csv-mode' options for 2da files."
-    (interactive)
-    (cond ((string-equal (file-name-extension (buffer-file-name)) "2da")
-           (csv-align-mode 1)
-           ;; find row with id 0
-           (search-forward-regexp "^0 ")
-           ;; go line up to header line
-           (previous-line)
-           ;; set csv header
-           (csv-header-line t))))
-
-  :config
-  (with-eval-after-load 'dabbrev
-    (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
-
   :hook
-  (csv-mode-hook . +csv/setup))
+  (csv-mode-hook . +csv-mode--setup))
 
 ;;;; markdown
-(use-package markdown-mode
-  :init
-  (defun +md-check-gfm ()
-    (interactive)
-    (if (eq ))))
-;; :general
-;; (gfm-view-mode-map
-;;  :states 'normal
-;;  "q" 'kill-this-buffer))
+(use-package markdown-mode)
+
+;; (use-package yuck-mode
+;;   :straight nil
+;;   :commands
+;;   yuck-mode)
 
 (use-package markdown-ts-mode
   :mode ("\\.md\\'" . markdown-ts-mode)
-  :defer 't
-  :config
-  (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
-  (add-to-list 'treesit-language-source-alist '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src")))
-
-;;;; crystal
+  :init
+  (with-eval-after-load 'treesit
+    (add-to-list 'treesit-language-source-alist
+                 '(markdown . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src")))
+    (add-to-list 'treesit-language-source-alist
+                 '(markdown-inline . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src")))))
 
 (use-package crystal-mode
   :init
   (setq crystal-indent-level 4))
 
-;;;; plantuml
-
 (use-package plantuml-mode)
-
-(use-package flycheck-plantuml)
-
 
 (provide 'init-languages)

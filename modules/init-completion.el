@@ -1,53 +1,63 @@
 ;;; -*- lexical-binding: t -*-
 
-;; (use-package minibuffer
-;;   :straight nil
-;;   :hook
-;;   (minibuffer-mode-hook . visual-line-mode))
-
 (add-hook 'minibuffer-mode-hook 'visual-line-mode)
 
-;; (use-package completion-preview
-;;   :straight nil)
-;; :bind*
-;; ( :map completion-preview-active-mode-map
-;;   ("C-n" . completion-preview-next-candidate)
-;;   ("C-p" . completion-preview-prev-candidate)))
-;; :general
-;; (completion-preview-active-mode-map
-;;  :states '(insert emacs)
-;;  "C-n" 'completion-preview-next-candidate
-;;  "C-p" 'completion-preview-prev-candidate))
+(setopt read-buffer-completion-ignore-case t
+        read-file-name-completion-ignore-case t
+        ;; for normal completion mechanism to make sense
+        completions-format 'one-column
+        completions-max-height 15
+        completions-header-format nil
+        completions-detailed t
+        completions-sort 'historical)
+
+(use-package minibuffer
+  :straight nil
+  :bind*
+  ( :map completion-in-region-mode-map
+    ("RET" . minibuffer-choose-completion)
+    ("M-n" . minibuffer-next-completion)
+    ("M-p" . minibuffer-previous-completion)))
+
+(use-package dabbrev
+  :straight nil
+  :init
+  (setopt dabbrev-upcase-means-case-search t
+          dabbrev-ignored-buffer-modes '(archive-mode image-mode docview-mode pdf-view-mode tags-table-mode csv-mode)))
 
 (use-package marginalia
   :custom
   (marginalia-align 'center)
-  (marginalia-align-offset -3)
+  (marginalia-align-offset 0)
   :hook
   (after-init-hook . marginalia-mode))
 
 (use-package vertico
   :custom
   (vertico-count 13)
-  (vertico-resize nil)
+  (vertico-resize t)
   (vertico-cycle t)
   (vertico-preselect 'first)
   (vertico-scroll-margin 5)
+  (vertico-grid-annotate 0)
+  (vertico-grid-max-columns 2)
+  (vertico-grid-lookahead 250)
   :hook
-  (marginalia-mode-hook . vertico-mode))
-;; :bind*
-;; ( :map vertico-map
-;;   ("C-c f" . vertico-flat-mode)
-;;   ("C-c ." . vertico-repeat)
-;;   ("C-c i" . vertico-insert)))
-;; :general
-;; (+leader-keys
-;;   "t c" '("Bring up last completion" . vertico-suspend))
-;; (vertico-map
-;;  "C-c f" '("Toggle flat mode" . vertico-flat-mode)
-;;  "C-c ." '("Repeat last vertico session" . vertico-repeat)
-;;  "C-c i" '("Insert candidate" . vertico-insert)
-;;  "C-c s" '("Suspend current session" . vertico-suspend)))
+  (marginalia-mode-hook . vertico-mode)
+  (vertico-mode . vertico-grid-mode)
+  :bind*
+  (("M-`" . vertico-suspend)
+   :map meow-search-global-map
+   ("s" . vertico-suspend)
+   :map vertico-map
+   ("M-j" . vertico-next)
+   ("C-J" . vertico-next-group)
+   ("M-k" . vertico-previous)
+   ("C-K" . vertico-previous-group)
+   ("C-c f" . vertico-flat-mode)
+   ("C-c s" . vertico-suspend)
+   ("C-c ." . vertico-repeat)
+   ("C-c i" . vertico-insert)))
 
 (use-package embark-consult)
 
@@ -60,54 +70,21 @@
                        embark-highlight-indicator
                        embark-isearch-highlight-indicator))
   :init
-  (defun embark-which-key-indicator ()
-    "An embark indicator that displays keymaps using which-key.
-The which-key help message will show the type and value of the
-current target followed by an ellipsis if there are further
-targets."
-    (lambda (&optional keymap targets prefix)
-      (if (null keymap)
-          (which-key--hide-popup-ignore-command)
-        (which-key--show-keymap
-         (if (eq (plist-get (car targets) :type) 'embark-become)
-             "Become"
-           (format "Act on %s '%s'%s"
-                   (plist-get (car targets) :type)
-                   (embark--truncate-target (plist-get (car targets) :target))
-                   (if (cdr targets) "…" "")))
-         (if prefix
-             (pcase (lookup-key keymap prefix 'accept-default)
-               ((and (pred keymapp) km) km)
-               (_ (key-binding prefix 'accept-default)))
-           keymap)
-         nil nil t (lambda (binding)
-                     (not (string-suffix-p "-argument" (cdr binding))))))))
-
-  (defun embark-hide-which-key-indicator (fn &rest args)
-    "Hide the which-key indicator immediately when using the completing-read prompter."
-    (which-key--hide-popup-ignore-command)
-    (let ((embark-indicators
-           (remq #'embark-which-key-indicator embark-indicators)))
-      (apply fn args)))
-
-  (advice-add #'embark-completing-read-prompter
-              :around #'embark-hide-which-key-indicator)
-  :config
-  (require 'embark-consult))
-;; :bind*
-;; (("C-x a" . embark-act)
-;;  ("C-x SPC a" . embark-act))
-;; :bind*
-;; ( :map vertico-map
-;;   ("C-c e" . embark-export)
-;;   ("C-c b" . embark-become)
-;;   ("C-c l" . embark-live)
-;;   ("C-c o" . embark-open-externally)
-;;   ("C-c a" . embark-act)
-;;   ("C-c A" . embark-act-all)
-;;   ("C-c d" . embark-dwim)
-;;   ("C-c i" . embark-insert)
-;;   ("C-c c" . embark-collect)))
+  (advice-add 'embark-completing-read-prompter
+              :around 'embark-hide-which-key-indicator)
+  :bind*
+  (("M-." . embark-dwim)
+   ("M-'" . embark-act)
+   :map vertico-map
+   ("C-c C-e" . embark-export)
+   ("C-c C-b" . embark-become)
+   ("C-c C-l" . embark-live)
+   ("C-c C-o" . embark-open-externally)
+   ("C-c C-a" . embark-act)
+   ("C-c C-d" . embark-dwim)
+   ("C-c C-i" . embark-insert)
+   ("C-c C-s" . embark-select)
+   ("C-c C-c" . embark-collect)))
 
 (use-package consult
   :autoload
@@ -121,34 +98,43 @@ targets."
                                                           find-program)
                                            :win (format "%s . -not ( -path */.[A-Za-z]* -prune )"
                                                         find-program)))
-
-  :config
-  (consult-customize
-   consult-grep consult-ripgrep consult-git-grep consult-line-multi
-   :initial ""))
-;; :bind*
-;; (("C-x C-m :" . consult-mode-command)
-;;  ("C-x C-/" . consult-ripgrep)
-;;  ("C-x C-b b" . consult-buffer)
-;;  ("C-x C-c" .  consult-compile-error)
-;;  ("C-x C-f r" . consult-recent-file)
-;;  ("C-x C-f /" . consult-find)
-;;  ("C-x C-h i" . consult-info)
-;;  ("C-x C-h ! m" . consult-man)
-;;  ("C-x C-o " . consult-bookmark)
-;;  ("C-x C-s b" . consult-line)
-;;  ("C-x C-s B" . consult-line-multi)
-;;  ("C-x C-s i" . consult-imenu)
-;;  ("C-x C-s I" . consult-imenu-multi)
-;;  ("C-x C-s o" . consult-outline)
-;;  ("C-x C-t m" . consult-minor-mode-menu)
-;;  :map org-mode-map
-;;  ("M-SPC s i" . consult-org-heading)
-;;  :map rg-global-map
-;;  ("?" . consult-ripgrep)))
+  :bind*
+  ( :map vertico-map
+    ("C-c C-h" . consult-history)
+    :map project-prefix-map
+    ("b" . consult-project-buffer)
+    :map vertico-map
+    ("M-s s" . consult-isearch-forward)
+    ("M-s S-s" . consult-isearch-backward)
+    :map meow-insert-global-map
+    ("r" . consult-register)
+    :map meow-toggle-global-map
+    ("m" . consult-minor-mode-menu)
+    :map meow-buffer-global-map
+    ("b" . consult-buffer)
+    ("l" . consult-focus-lines)
+    ("L" . consult-keep-lines)
+    :map meow-jump-global-map
+    ("m" . consult-mark)
+    ("M" . consult-global-mark)
+    ("b" . consult-bookmark)
+    ("\"" . consult-register)
+    (";" . consult-goto-line)
+    :map meow-search-global-map
+    ("i" . consult-imenu)
+    ("I" . consult-imenu-multi)
+    ("b" . consult-line)
+    ("B" . consult-line-multi)
+    ("o" . consult-outline)
+    ("e" . consult-flymake)
+    ("c" . consult-compile-error)
+    :map meow-grep-global-map
+    ("/" . consult-ripgrep)
+    ("f" . consult-find)))
 
 (use-package orderless
   :custom
   (completion-styles '(orderless basic)))
+
 
 (provide 'init-completion)

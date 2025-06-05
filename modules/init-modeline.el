@@ -1,13 +1,13 @@
 ;;; -*- lexical-binding: t -*-
 
-;; (use-package emacs
-;;   :init
-
 ;;; Code:
 
+(defvar +mode-line--vc-text "")
+
+(defvar +mode-line--lsp-text "")
 
 (defmacro +defconstruct! (name &rest body)
-  "Define mode-line construct NAME with BODY."
+  "Define mode-line construct +mode-line-NAME with BODY."
   (declare (indent defun))
   (let ((name (intern (concat "+mode-line-" (symbol-name name)))))
     `(progn (defvar-local ,name
@@ -15,86 +15,78 @@
             (put ',name 'risky-local-variable t))))
 
 (+defconstruct! modal
-  '(:eval (propertize (cond (evil-mode evil-mode-line-tag)
-                            (meow-global-mode meow--indicator))
-                      'face `(:background ,(doom-color 'yellow)))))
+  '(:eval meow--indicator))
 
 (+defconstruct! buffer-directory
-  '(:propertize (:eval (or (projectile-project-name)
-                           default-directory))
-                'face 'success))
+  '(:propertize (:eval
+                 (or (and (fboundp 'project-name)
+                          (project-current)
+                          (concat (project-name (project-current))
+                                  "/"))
+                     default-directory))
+                face success))
 
 (+defconstruct! flyspell
   '(flyspell-mode flyspell-mode-line))
 
 (+defconstruct! position
-  "L%l:%C")
+  '(:eval "L%l:%C"))
+
+(add-hook 'find-file-hook #'+mode-line--vc-update)
+(add-hook 'after-save-hook #'+mode-line--vc-update)
+(advice-add #'vc-refresh-state :after #'+mode-line--vc-update)
+
+(add-hook 'pdf-view-mode-hook '+mode-line--pdf-update)
+(add-hook 'pdf-view-change-page-hook '+mode-line--pdf-update)
+
+(+defconstruct! vc
+  '(:eval +mode-line--vc-text))
+
+(+defconstruct! flymake
+  '(flymake-mode flymake-mode-line-counters))
+
+(+defconstruct! compilation
+  '(compilation-mode compilation-mode-line-errors))
+
+(+defconstruct! buffer-status
+  '(:eval
+    (propertize (if (or buffer-file-read-only
+                        (buffer-modified-p))
+                    "%*"
+                  "")
+                'face 'error)
+    (propertize (if (file-remote-p)
+                    "%@"
+                  ""))))
+
+(+defconstruct! major-mode
+  '(:eval (:propertize mode-name
+                       face bold)))
 
 (setq-default mode-line-format
               '("%e"
-                mode-line-front-space
+                " "
                 +mode-line-modal
-                +mode-line-buffer-status
-                (:propertize
-                 (""
-                  "%*"
-                  "%@")
-                 (min-width (6.0)))
+                " "
                 +mode-line-buffer-directory
-                "/"
+                +mode-line-buffer-status
+                "%["
                 mode-line-buffer-identification
+                "%]"
                 " "
                 +mode-line-position
                 " "
                 "%o"
+                " "
                 mode-line-format-right-align
-                (vc-mode vc-mode)
+                (text-scale-mode (:eval (concat  "[" text-scale-mode-lighter "] ")))
+                (pdf-view-mode (:eval ))
+                +mode-line-flymake
                 " "
-                ;; checkers
+                +mode-line-vc
                 " "
-                +mode-line-flyspell
-                " "
-                mode-name
-                mode-line-misc-info
-                mode-line-end-spaces
+                (:propertize mode-name face bold)
+                mode-line-process
                 " "))
-
-;; (use-package mood-line
-;;   :custom-face
-;;   (mood-line-unimportant ((t (:foreground ,(doom-color 'base6)))))
-;;   :init
-;;   (defun +mood-line-evil-mc-segment ()
-;;     ""
-;;     (when (> (evil-mc-get-cursor-count) 1)
-;;       (evil-mc-active-mode-line nil)))
-;;
-;;   (defun +mood-line--setup ()
-;;     (require 'mood-line)
-;;     (require 'mood-line-segment-checker)
-;;     (require 'mood-line-segment-vc)
-;;     (require 'mood-line-segment-indentation)
-;;     (setq-default mood-line-format
-;;                   (mood-line-defformat
-;;                    :left
-;;                    (((mood-line-segment-modal) . " ")
-;;                     ((mood-line-segment-region) . " ")
-;;                     ((+mood-line-evil-mc-segment) . " ")
-;;                     ((mood-line-segment-anzu) . " ")
-;;                     ((propertize (mood-line-segment-project)
-;;                                  'face 'mood-line-status-success)
-;;                      . "/")
-;;                     ((mood-line-segment-buffer-status) . ":")
-;;                     ((mood-line-segment-buffer-name) . " ")
-;;                     ((format-mode-line "L%l:%C") . " ")
-;;                     ((format-mode-line "%o") . " "))
-;;                    :right
-;;                    (((mood-line-segment-misc-info) . " ")
-;;                     ((mood-line-segment-checker) . " ")
-;;                     ((mood-line-segment-vc) . " ")
-;;                     ((mood-line-segment-major-mode) . " "))))
-;;     (mood-line-mode 1))
-;;   :hook
-;;   (window-setup-hook . +mood-line--setup))
-
 
 (provide 'init-modeline)

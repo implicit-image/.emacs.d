@@ -1,12 +1,10 @@
 ;;; -*- lexical-binding: t -*-
 
+(use-package cape)
+
 (use-package corfu
-  ;; :custom-face
-  ;; (corfu-border ((t (:background ,(doom-color 'fg-alt)))))
-  ;; (corfu-echo ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg)))))
   :custom
   (corfu-cycle t)
-  (corfu-doc-delay 0.1)
   (corfu-echo-delay '(0.3 . 0.15))
   (corfu-auto-delay 0.2)
   (corfu-preselect 'prompt)
@@ -20,39 +18,29 @@
   (corfu-max-width 50)
   (corfu-quit-no-match t)
   (corfu-on-exact-match 'insert)
-  :init
-  (defun +corfu--setup ()
-    (interactive)
-    (corfu-echo-mode +1)
-    (corfu-history-mode +1)
-    (when (not (display-graphic-p))
-      (setq-local global-corfu-minibuffer t)
-      (corfu-terminal-mode +1))
-    (corfu-popupinfo-mode +1))
+  (global-corfu-minibuffer nil)
   :config
-  (setf (alist-get 'child-frame-border-width corfu--frame-parameters) 2)
+  ;; remove child frame border
+  (setf (alist-get 'child-frame-border-width corfu--frame-parameters) 0)
   :hook
   (after-init-hook . global-corfu-mode)
-  (nwscript-mode-hook . corfu-mode)
-  (corfu-mode-hook . +corfu--setup)
-  (company-mode-hook . (lambda ()
-                         (interactive)
-                         (when (bound-and-true-p corfu-mode)
-                           (corfu-mode -1))))
-  (lsp-bridge . (lambda ()
-                  (corfu-mode -1))))
-;; :bind*
-;; (("C-TAB" . corfu-complete)
-;;  :map corfu-map
-;;  ("M-h" . corfu-popupinfo-documentation)
-;;  ("M-g" . corfu-info-location)
-;;  ("M-e" . corfu-expand)
-;;  ([tab] . corfu-next)
-;;  ("<tab>" . corfu-next)
-;;  ("TAB" . corfu-next)
-;;  ([backtab] . corfu-previous)
-;;  ("<backtab>" . corfu-previous)
-;;  ("S-TAB" . corfu-previous)))
+  (global-corfu-mode-hook . +global-corfu-mode--setup)
+  :bind*
+  (("C-TAB" . corfu-complete)
+   ("C-SPC" . completion-at-point)
+   :map meow-toggle-global-map
+   ("a" . +corfu-toggle-auto)
+   :map corfu-map
+   ("M-h" . corfu-popupinfo-documentation)
+   ("M-g" . corfu-info-location)
+   ("M-e" . corfu-expand)
+   ("M-<space>" . corfu-insert-separator)
+   ([tab] . corfu-next)
+   ("<tab>" . corfu-next)
+   ("TAB" . corfu-next)
+   ([backtab] . corfu-previous)
+   ("<backtab>" . corfu-previous)
+   ("S-TAB" . corfu-previous)))
 
 ;; emacs 31 should add tty child frames
 (when (< (string-to-number emacs-version) 31)
@@ -61,9 +49,7 @@
     :custom
     (corfu-terminal-enable-on-minibuffer t)
     (corfu-terminal-disable-on-gui t)
-    (corfu-terminal-position-right-margin 5)
-    :hook
-    (tty-setup-hook . corfu-terminal-mode))
+    (corfu-terminal-position-right-margin 5))
 
   (use-package corfu-doc-terminal
     :straight

@@ -1,36 +1,61 @@
 ;;; -*- lexical-binding: t -*-
+(require 'cl-extra)
 
-(defvar +indent/tab-jump-delims '(?\; ?\) ?\( ?\] ?\[ ?{ ?} ?> ?< ?| ?' ?` ?\. ?\"))
+(defun any-bound-and-true (symbols)
+  (cl-some (lambda (sym)
+             (when (bound-and-true-p sym) t))
+           symbols))
 
-(defvar-local +indent-tab-function nil)
+(defun +default-directory ()
+  "Get a reasonable guess at a default directory."
+  (cond ((bound-and-true-p projectile-project-root) (projectile-project-root))
+        ((bound-and-true-p project-root) (project-root))
+        (t default-directory)))
 
-(defmacro +contrast-color! (color)
-  "Return a color contrasting well with COLOR."
-  `(apply
-    ,(if (< (color-distance color "#000000") 180000)
-         'doom-lighten
-       'doom-darken)
-    color
-    0.3
-    nil))
+(defun +get-region-contents ()
+  "Get the contents in region."
+  (when (use-region-p)
+    (buffer-substring-no-properties (region-beginning) (region-end))))
 
-(defmacro +setq! (&rest symbols)
-  "Set SYMBOLS to associated values while taking care of setting default options."
-  `(dolist (binding ,( symbols))))
+(defun +utils-whole-buffer-as-string (buffer)
+  (with-current-buffer buffer
+    (save-restriction
+      (widen)
+      (buffer-substring-no-properties (point-min) (point-max)))))
 
+;;;###autoload
+(defun +utils/yank-current-file ()
+  "Yank the name of the current file."
+  (interactive)
+  (let ((name (file-name-nondirectory (buffer-file-name (current-buffer)))))
+    (when name
+      (message "Yanked %s" name)
+      (kill-new name))))
 
-(defun +toggle-var (var)
-  (set var (not (symbol-value var))))
+;;;###autoload
+(defun +utils/yank-current-path ()
+  "Yank full path of current file."
+  (interactive)
+  (let ((name (buffer-file-name (current-buffer))))
+    (when name
+      (message "Yanked %s" name)
+      (kill-new name))))
+
+;;;###autoload
+(defun +utils/rename-visited-file ()
+  (interactive)
+  (rename-visited-file (expand-file-name
+                        (read-file-name "Rename visited file to: "
+                                        default-directory
+                                        nil
+                                        nil
+                                        (file-name-nondirectory (buffer-file-name))))))
 
 (defun +utils/toggle-mode (mode)
   (interactive)
   (if (and (bound-and-true-p mode))
       (funcall-interactively mode -1)
     (funcall-interactively mode -1)))
-
-(defmacro +nth (n list)
-  "Returnd nth element of `list'. If `n' is greater than length of `list' takes `(mod n (length list))' instead."
-  (nth (mod (length list) n) list))
 
 ;;;###autoload
 (defun +utils/delete-visited-file ()
@@ -78,85 +103,42 @@
                                  (set-frame-font selected-font t t t))))
     (message "Cant change font family on tty")))
 
-(defun +utils-whole-buffer-as-string (buffer)
-  (with-current-buffer buffer
-    (save-restriction
-      (widen)
-      (buffer-substring-no-properties (point-min) (point-max)))))
-
+;;;###autoload
 (defun +utils/insert-shell-command-output ()
   "Insert output of shell command as string."
   (interactive)
   (insert (shell-command-to-string (concat (read-shell-command "Command: ") " &"))))
 
+;;;###autoload
 (defun +utils/insert-shell-command-output-with-preview ()
   "Insert output of shell command as string."
   (interactive)
   (let ((res (shell-command-to-string (concat (read-shell-command "Command: ")))))
     (popon-create res `(1 . 1))))
 
-(defun +default-directory ()
-  "Get a reasonable guess at a default directory."
-  (cond ((bound-and-true-p projectile-project-root) (projectile-project-root))
-        ((bound-and-true-p project-root) (project-root))
-        (t default-directory)))
-
-(defun +char-whitespace? (char)
-  (memq char '(32 160 9)))
-
-(defun +get-region-contents ()
-  "Get the contents in region."
+;;;###autoload
+(defun +utils/browse-modules ()
+  "Open user init module file."
   (interactive)
-  (when (use-region-p)
-    (buffer-substring-no-properties (region-beginning) (region-end))))
+  (consult--read (mapcar (lambda (path)
+                           (string-trim-left path (format "^%s/" +init-module-path)))
+                         (-filter (lambda (path)
+                                    (string-suffix-p ".el" path))
+                                  (directory-files-recursively +init-module-path ".*\\.el")))
+                 :prompt "Open init module file: "
+                 :require-match t
+                 :lookup (lambda (name &rest args)
+                           ;; (message (format "entry is %s" (file-name-concat +init-module-path name)))
+                           (find-file (file-name-concat +init-module-path name)))))
 
-(defmacro +set-tab-function! (mode function &optional hook)
-  "Set default tab function FUNCTION for MODE in HOOK."
-  (let ((fun (intern (concat "+" (symbol-name mode) "-indent-setup")))
-        (hook (or (when (bound-and-true-p hook) hook)
-                  (intern (concat (symbol-name mode) "-hook")))))
-    `(progn (defun ,fun ()
-              (setq-local +indent-tab-function ',function))
-            (add-hook (quote ,hook) (quote ,fun)))))
+;;;###autoload
+(defun +utiles/ripgrep-modules ()
+  (interactive)
+  (consult-ripgrep +init-module-path))
 
-(defun +smart-tab (&optional prefix)
-  ""
-  (interactive "P")
-  (let ((next (char-after (point))))
-    (cond ((bound-and-true-p +indent-tab-function) (funcall-interactively +indent-tab-function))
-          ((memq next +indent/tab-jump-delims) (forward-char))
-          ((+char-whitespace? next) (forward-whitespace 1))
-          ((eolp) (yasnippet-capf))
-          (t (indent-for-tab-command prefix)))))
-
-;; (use-package simple
-;;   :straight nil
-;;   :init
-;;   (setq backward-delete-char-untabify-method 'hungry)
-;;   :hook
-;;   ((help-mode-hook helpful-mode-hook lsp-ui-doc-mode-hook) . visual-line-mode))
-
-(setopt backward-delete-char-untabify-method 'hungry)
-(add-hook 'help-mode-hook 'visual-line-mode)
-(add-hook 'helpful-mode-hook 'visual-line-mode)
-(add-hook 'lsp-ui-doc-mode-hook 'visual-line-mode)
-
-;; (+leader-keys
-;;   "f D" '("Delete current file" . +utils/delete-visited-file)
-;;   "f C" '("Copy current file" . +utils/copy-visited-file)
-;;   "q A" '("Save all and kill emacs" . save-buffers-kill-emacs)
-;;   "t c" '("Colorize color strings" . rainbow-mode)
-;;   "t I" '("Select input method" . set-input-method)
-;;   "t v" '("Visual line mode" . visual-line-mode)
-;;   "i !" '("Shell command" . +utils/insert-shell-command-output))
-
-;; (bind-keys
-;;  :map override-global-map
-;;  ("C-x <space> f D" . +utils/delete-visited-file)
-;;  ("C-x <space> f C" . +utils/copy-visited-file)
-;;  ("C-x <space> t c" . rainbow-mode)
-;;  ("C-x <space> t I" . set-input-method)
-;;  ("C-x <space> t v" . visual-line-mode)
-;;  ("C-x <space> i !" . +utils/insert-shell-command-output))
+;;;###autoload
+(defun +utils/ripgrep-user-directory ()
+  (interactive)
+  (consult-ripgrep user-emacs-directory))
 
 (provide 'init-utils)

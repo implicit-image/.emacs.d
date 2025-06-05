@@ -2,71 +2,62 @@
 
 
 
-(setopt ibuffer-show-empty-filter-groups nil
-        ibuffer-saved-filter-groups '(("default"
-                                       ("org" (or
-                                               (mode . org-mode)
-                                               (name . "^\\*Org Src")
-                                               (name . "^\\*Org Agenda\\*$")))
-                                       ("tramp" (name . "^\\*tramp.*"))
-                                       ("emacs" (or
-                                                 (name . "^\\*scratch\\*$")
-                                                 (name . "^\\*Messages\\*$")
-                                                 (name . "^\\*Warnings\\*$")
-                                                 (name . "^\\*Shell Command Output\\*$")
-                                                 (name . "^\\*Async-native-compile-log\\*$")
-                                                 (name . "^\\*straight-")))
-                                       ("ediff" (or
-                                                 (name . "^\\*ediff.*")
-                                                 (name . "^\\*Ediff.*")))
-                                       ("dired" (mode . dired-mode))
-                                       ("terminal" (or
-                                                    (mode . term-mode)
-                                                    (mode . shell-mode)
-                                                    (mode . eshell-mode)))
-                                       ("help" (or
-                                                (name . "^\\*Help\\*$")
-                                                (name . "^\\*info\\*$")
-                                                (name . "^\\*helpful"))))))
+(use-package ibuffer
+  :straight nil
+  :init
+  (setopt ibuffer-show-empty-filter-groups nil
+          ;; ibuffer-fontification-alist
+          ;; '((10 buffer-read-only font-lock-constant-face)
+          ;;   (15
+          ;;    (and buffer-file-name
+          ;;         (string-match ibuffer-compressed-file-name-regexp
+          ;;                       buffer-file-name))
+          ;;    font-lock-doc-face)
+          ;;   (20 (string-match "^\\*" (buffer-name)) font-lock-keyword-face)
+          ;;   (25 (and (string-match "^ " (buffer-name)) (null buffer-file-name))
+          ;;       italic)
+          ;;   (30 (memq major-mode ibuffer-help-buffer-modes)
+          ;;       font-lock-comment-face)
+          ;;   (35 (derived-mode-p 'dired-mode) font-lock-function-name-face)
+          ;;   (40 (and (boundp 'emacs-lock-mode) emacs-lock-mode)
+          ;;       ibuffer-locked-buffer))
+          ibuffer-saved-filter-groups
+          '(("default"
+             ("org" (or
+                     (mode . org-mode)
+                     (name . "^\\*Org Src")
+                     (name . "^\\*Org Agenda\\*$")))
+             ("tramp" (name . "^\\*tramp.*"))
+             ("emacs" (or
+                       (name . "^\\*scratch\\*$")
+                       (name . "^\\*Messages\\*$")
+                       (name . "^\\*Warnings\\*$")
+                       (name . "^\\*Shell Command Output\\*$")
+                       (name . "^\\*Async-native-compile-log\\*$")
+                       (name . "^\\*straight-")))
+             ("ediff" (or
+                       (name . "^\\*ediff.*")
+                       (name . "^\\*Ediff.*")))
+             ("dired" (mode . dired-mode))
+             ("terminal" (or
+                          (mode . term-mode)
+                          (mode . shell-mode)
+                          (mode . eshell-mode)))
+             ("help" (or
+                      (name . "^\\*Help\\*$")
+                      (name . "^\\*info\\*$")
+                      (name . "^\\*helpful")))))))
 
-;; (use-package ibuffer
-;;   :straight nil
-;;   :custom
-;;   (ibuffer-show-empty-filter-groups nil)
-;;   (ibuffer-saved-filter-groups '(("default"
-;;                                   ("org" (or
-;;                                           (mode . org-mode)
-;;                                           (name . "^\\*Org Src")
-;;                                           (name . "^\\*Org Agenda\\*$")))
-;;                                   ("tramp" (name . "^\\*tramp.*"))
-;;                                   ("emacs" (or
-;;                                             (name . "^\\*scratch\\*$")
-;;                                             (name . "^\\*Messages\\*$")
-;;                                             (name . "^\\*Warnings\\*$")
-;;                                             (name . "^\\*Shell Command Output\\*$")
-;;                                             (name . "^\\*Async-native-compile-log\\*$")
-;;                                             (name . "^\\*straight-")))
-;;                                   ("ediff" (or
-;;                                             (name . "^\\*ediff.*")
-;;                                             (name . "^\\*Ediff.*")))
-;;                                   ("dired" (mode . dired-mode))
-;;                                   ("terminal" (or
-;;                                                (mode . term-mode)
-;;                                                (mode . shell-mode)
-;;                                                (mode . eshell-mode)))
-;;                                   ("help" (or
-;;                                            (name . "^\\*Help\\*$")
-;;                                            (name . "^\\*info\\*$")
-;;                                            (name . "^\\*helpful")))))))
-;; :bind*
-;; (("C-x SPC b i" . ibuffer)
-;;  ("C-x C-b" . ibuffer)))
-;; :general
-;; (+leader-keys
-;;   "b i" '("Open ibuffer" . ibuffer)))
-
-
-(use-package ibuffer-projectile)
+(with-eval-after-load 'init-meow
+  (bind-keys*
+   ("C-x k" . kill-current-buffer)
+   ("C-x K" . kill-buffer)
+   :map meow-buffer-global-map
+   ("k" . kill-buffer)
+   ("K" . kill-current-buffer)
+   ("r" . revert-buffer)
+   ("i" . ibuffer)
+   ("x" . scratch-buffer)))
 
 (use-package ibuffer-vc
   :after ibuffer
@@ -75,26 +66,9 @@
 
 (use-package recentf
   :hook
-  (after-init-hook . recentf-mode))
-;; :bind*
-;; (("C-x SPC b r" . revert-buffer)
-;;  ("C-x SPC b K" . kill-current-buffer)
-;;  ("C-x SPc b k" . kill-buffer)
-;;  ("C-x SPC f o" . find-file-other-window)
-;;  ("C-x SPC f R" . rename-visited-file)
-;;  ("C-x SPC o x" . scratch-buffer)
-;;  ("C-x k" . kill-current-buffer)))
-
-;; (+leader-keys
-;;   "b r" '("Revert" . revert-buffer)
-;;   "b K" '("Kill this buffer" . kill-current-buffer)
-;;   "b k" '("Kill buffer" . kill-buffer)
-;;   "f o" '("Find file in other window" . find-file-other-window)
-;;   "f R" '("Rename current file" . rename-visited-file)
-;;   "o x" '("Scratch buffer" . scratch-buffer))
-;;
-;; (general-def global-map
-;;   "C-x k" 'kill-current-buffer)
-
+  (after-init-hook . recentf-mode)
+  :bind*
+  ( :map meow-file-global-map
+    ("r" . recentf)))
 
 (provide 'init-buffers)

@@ -1,82 +1,27 @@
 ;;; -*-lexical-binding: t-*-
 
-(defun +meow-command (&optional insert)
-  (interactive)
-  (minibuffer-with-setup-hook
-      (lambda ()
-        (set-syntax-table emacs-lisp-mode-syntax-table)
-        (add-hook 'completion-at-point-functions
-                  #'elisp-completion-at-point nil t)
-        (setq-local trusted-content :all))
-    ;; (run-hooks 'eval-expression-minibuffer-setup-hook))
-    (let ((command (read-from-minibuffer ":"
-                                         nil
-                                         read--expression-map
-                                         nil
-                                         'read-expression-history)))
-      (cond ((string-match-p "[wqa!]+.*" command)
-             (let ((write (s-contains-p "w" command))
-                   (quit (s-contains-p "q" command))
-                   (all (s-contains-p "a" command))
-                   (force (s-contains-p "!" command)))
-               (if write
-                   (if all
-                       (save-some-buffers)
-                     (save-buffer)))))
-            (t (let ((expr (read command)))
-                 (cond ((commandp expr) (funcall expr))
-                       (t (eval-expression expr)))))))))
-
-(defun +meow-mark-word (&optional n)
-  "Make meow-mark-word act like helix."
-  (interactive "p")
-  (when (region-active-p)
-    (deactivate-mark)
-    (forward-word n))
-  (meow-mark-word n))
-
-(defun +meow-mark-symbol (&optional n)
-  (interactive "p")
-  (when (region-active-p)
-    (deactivate-mark)
-    (forward-symbol n))
-  (meow-mark-symbol n))
-
-(defun +meow-back-word (&optional n)
-  (interactive "p")
-  (when (region-active-p)
-    (deactivate-mark)
-    (backward-word n))
-  (meow-back-word n))
-
-(defun +meow-back-symbol (&optional n)
-  (interactive "p")
-  (when (region-active-p)
-    (deactivate-mark)
-    (backward-symbol n))
-  (meow-back-symbol n))
-
-(defun +meow-search (&optional regexp)
-  (interactive "p")
-  (if (region-active-p)
-      (progn (meow-grab)
-             (isearch-forward regexp))
-    (isearch-forward regexp)))
-
 (use-package meow-tree-sitter
   :config
   (meow-tree-sitter-register-defaults))
 
 (use-package meow
   :custom
-  (meow-use-keypad-when-execute-kbd nil)
+  (meow-use-keypad-when-execute-kbd t)
   :init
+
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+
     (meow-motion-define-key
      '("q" . meow-quit)
      '("j" . meow-next)
      '("k" . meow-prev)
+     '("C-h" . windmove-left)
+     '("C-j" . windmove-down)
+     '("C-k" . windmove-up)
+     '("C-l" . windmove-right)
+     '("/" . isearch-forward)
+     '("?" . +lookup/documentation)
      '("<escape>" . ignore))
     (meow-leader-define-key
      ;; Use SPC (0-9) for digit arguments.
@@ -90,7 +35,22 @@
      '("8" . meow-digit-argument)
      '("9" . meow-digit-argument)
      '("0" . meow-digit-argument)
-     '("?" . meow-keypad-describe-key))
+     '("`" . meow-last-buffer)
+     (cons "/" meow-grep-global-map)
+     '("?" . +lookup/documentation)
+     (cons "a" meow-llm-global-map)
+     (cons "b" meow-buffer-global-map)
+     (cons "f" meow-file-global-map)
+     (cons "h" help-map)
+     (cons "i" meow-insert-global-map)
+     (cons "j" meow-jump-global-map)
+     (cons "n" meow-notes-global-map)
+     (cons "p" project-prefix-map)
+     (cons "t" meow-toggle-global-map)
+     (cons "o" meow-special-global-map)
+     (cons "v" meow-vc-global-map)
+     (cons "s" meow-search-global-map)
+     '("." . find-file))
     (meow-normal-define-key
      '("0" . meow-expand-0)
      '("9" . meow-expand-9)
@@ -103,7 +63,7 @@
      '("2" . meow-expand-2)
      '("1" . meow-expand-1)
      '("-" . negative-argument)
-     '(":" . +meow-command)
+     '(":" . +meow/command)
      '(";" . meow-reverse)
      '("," . meow-inner-of-thing)
      '("." . meow-bounds-of-thing)
@@ -113,8 +73,8 @@
      '("{" . "M-{")
      '("a" . meow-append)
      '("A" . meow-open-below)
-     '("b" . +meow-back-word)
-     '("B" . +meow-back-symbol)
+     '("b" . meow-back-word)
+     '("B" . meow-back-symbol)
      '("c" . meow-change)
      '("d" . meow-kill)
      '("D" . meow-backward-delete)
@@ -138,46 +98,85 @@
      '("o" . meow-block)
      '("O" . meow-to-block)
      '("p" . meow-yank)
+     '("P" . meow-yank-pop)
      '("q" . quoted-insert)
      '("Q" . meow-goto-line)
      '("r" . meow-replace)
      '("R" . meow-swap-grab)
-     '("s" . +meow-select)
+     '("s" . +meow/select-for-mc-string)
+     '("S" . +meow/select-for-mc-regex)
      '("t" . meow-till)
-     '("u" . +meow-undo)
+     '("u" . meow-undo)
      '("U" . undo-redo)
      '("v" . meow-visit)
-     '("w" . +meow-mark-word)
-     '("W" . +meow-mark-symbol)
+     '("w" . meow-mark-word)
+     '("W" . meow-mark-symbol)
      '("x" . meow-line)
      '("X" . meow-goto-line)
      '("y" . meow-save)
-     '("y" . meow-sync-grab)
+     '("Y" . meow-sync-grab)
      '("z" . meow-pop-selection)
      '("'" . repeat)
-     '("<escape>" . ignore)
+     '("\"" . +meow/surround-thing)
+     '("<escape>" . keyboard-quit)
      '("/" . isearch-forward)
-     '("?" . isearch-backward))
+     (cons "|" meow-mc-global-map)
+     '("?" . +lookup/documentation)
+     (cons "M-?" meow-jump-global-map)
+     '("C-r" . meow-redo)
+     '("C-j" . windmove-down)
+     '("C-k" . windmove-up)
+     '("C-h" . windmove-left)
+     '("C-l" . windmove-right))
 
-    ;; setup custom meow keymaps
-    (setq meow-combobulate-keymap (make-keymap))
+    ;; kbd macro overrides
+    (setq meow--kbd-kill-region "S-<delete>"
+          meow--kbd-kill-ring-save "C-<insertchar>"
+          meow-keypad-leader-dispatch nil)
 
-    (setq meow-keypad-leader-dispatch "C-x SPC")
+    (setf (alist-get 'meow-kill meow-selection-command-fallback)
+          'meow-delete)
 
-    (meow-define-state combobulate
-      "meow state for combobulate"
-      :keymap meow-combobulate-keymap))
-
-  ;; kbd macro overrides
-  (setq meow--kbd-kill-region "S-<delete>")
-
-  (setf (alist-get 'meow-kill meow-selection-command-fallback)
-        'meow-delete)
+    (setopt meow-mode-state-list (append meow-mode-state-list
+                                         '((pdf-view-mode . motion)
+                                           (calibredb-search-mode . motion)
+                                           (ediff-mode . motion)
+                                           (calibredb-show-mode . motion)
+                                           (nov-mode . motion)
+                                           (vterm-mode . insert)
+                                           (shell-mode . insert)
+                                           (eat-mode . insert)
+                                           (shell-command-mode . motion)))))
 
   (defun +load-meow ()
     (require 'meow)
     (meow-setup)
     (meow-global-mode 1))
+  :bind-keymap*
+  (("C-x C-/" . meow-grep-global-map)
+   ("C-x M-s" . meow-search-global-map))
+  :bind*
+  (("M-g <" . beginning-of-buffer)
+   ("M-g >" . end-of-buffer)
+   ("M-g f" . find-file-at-point)
+   ("M-g W" . browse-url-at-point)
+   ("M-<backspace>" . meow-backward-kill-symbol)
+   ("C-o" . meow-pop-or-unpop-to-mark)
+   ("C-v" . rectangle-mark-mode)
+   :map meow-jump-global-map
+   ("f" . find-file-at-point)
+   ("W" . browse-url-at-point)
+   :map meow-toggle-global-map
+   ("c" . rainbow-mode)
+   ("wm" . menu-bar-mode)
+   ("wt" . tool-bar-mode)
+   ("v" . visual-line-mode)
+   :map help-map
+   ("l" . load-library)
+   :map meow-insert-global-map
+   ("f" . insert-file)
+   ("c" . insert-char)
+   ("b" . insert-buffer))
   :hook
   (after-init-hook . +load-meow))
 

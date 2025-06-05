@@ -1,5 +1,5 @@
-;;; -*- lexical-binding: t -*-
 
+;;;###autoload
 (defun +tty-setup ()
   "Run some code to adjust emacs for tty experience."
   ;;;; set up faces for tty
@@ -13,26 +13,8 @@
          (set-display-table-slot standard-display-table 'truncation ?\u2192)
          (setq visible-cursor nil)
 ;;;; corfu-terminal
-         (corfu-terminal-mode (if (display-graphic-p) -1 1))))
+         (when (and (not (bound-and-true-p corfu-terminal-mode))
+                    (display-graphic-p))
+           (corfu-terminal-mode 1))))
 
-(add-hook 'tty-setup-hook '+tty-setup)
-
-(use-package kkp
-  :hook
-  (tty-setup-hook . (lambda ()
-                      (interactive)
-                      (global-kkp-mode +1))))
-
-(use-package evil-terminal-cursor-changer
-  :commands
-  (etcc-on)
-  :init
-  (setq evil-motion-state-cursor 'box
-        evil-visual-state-cursor 'box
-        evil-normal-state-cursor 'box
-        evil-insert-state-cursor 'bar
-        evil-emacs-state-cursor  'hbar)
-  :hook
-  (tty-setup-hook . etcc-on))
-
-(provide 'init-tty)
+(provide 'init-tty-impl)

@@ -41,9 +41,7 @@
 ;;;; collection of evil bindings for popular modes
 (use-package evil-collection
   :hook
-  (after-init-hook . (lambda ()
-                       (interactive)
-                       (evil-collection-init))))
+  (after-init-hook . evil-collection-init))
 
 ;;;; highlight the AOE of vim motions
 (use-package evil-goggles
@@ -93,11 +91,9 @@
 (use-package evil-mc
   :init
   (setq evil-mc-undo-cursors-on-keyboard-quit t)
+  (add-to-list 'evil-mc-incompatible-minor-modes 'lispy-mode)
   :hook
-  (after-init-hook . (lambda ()
-                       (interactive)
-                       (global-evil-mc-mode 1)
-                       (add-to-list 'evil-mc-incompatible-minor-modes 'lispy-mode))))
+  (after-init-hook . global-evil-mc-mode))
 
 (use-package evil-nerd-commenter)
 ;; :general
@@ -115,6 +111,18 @@
         anzu-replace-threshold nil)
   :hook
   (after-init-hook . global-anzu-mode))
+
+(use-package evil-terminal-cursor-changer
+  :commands
+  (etcc-on)
+  :init
+  (setq evil-motion-state-cursor 'box
+        evil-visual-state-cursor 'box
+        evil-normal-state-cursor 'box
+        evil-insert-state-cursor 'bar
+        evil-emacs-state-cursor  'hbar)
+  :hook
+  (tty-setup-hook . etcc-on))
 ;; :general
 ;; (+leader-keys
 ;;   "c R" '("Rename" . anzu-query-replace)

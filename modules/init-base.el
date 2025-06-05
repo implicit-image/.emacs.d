@@ -1,31 +1,47 @@
 ;;; -*- lexical-binding: t -*-
+(setq meow-leader-global-map (make-sparse-keymap)
+      meow-llm-global-map (make-sparse-keymap)
+      meow-special-global-map (make-sparse-keymap)
+      meow-jump-global-map (make-sparse-keymap)
+      meow-notes-global-map (make-sparse-keymap)
+      meow-toggle-global-map (make-sparse-keymap)
+      meow-mc-global-map (make-sparse-keymap)
+      meow-vc-global-map (make-sparse-keymap)
+      flymake-prefix-map (make-sparse-keymap)
+      meow-insert-global-map (make-sparse-keymap)
+      meow-search-global-map (make-sparse-keymap)
+      meow-file-global-map (make-sparse-keymap)
+      meow-grep-global-map (make-sparse-keymap)
+      meow-buffer-global-map (make-sparse-keymap))
 
+
+;;; Code:
 (use-package emacs
   :demand
   :custom
-
   ;;;; built-in global options.
   (user-full-name "Błażej Niewiadomski")
   (user-mail-address "blaz.nie@protonmail.com") ;; raised to allow better lsp speeds)
-  (read-process-output-max (* 1024 16)) ;;startup screen)
-  (inhibit-startup-screen t)
   (visible-bell nil)
   (ring-bell-function 'ignore)
   (display-line-numbers-type 'relative)
-  (truncate-lines t)
+  (truncate-lines 40)
+  (hl-line-sticky-flag nil)
+  (global-hl-line-sticky-flag nil)
   (truncate-partial-width-windows t)
   (create-lockfiles nil)
+  (x-stretch-cursor nil)
   (backup-inhibited t)
   (make-backup-files nil)
-  (backup-directory-alist `(("." . ,(expand-file-name "backups" user-emacs-directory))))
   (enable-recursive-minibuffers t)
   (scroll-step 1)
-  (scroll-margin 15)
   (find-file-wildcards nil)
   (comment-multi-line t)
+  (read-extended-command-predicate 'command-completion-default-include-p)
   (comment-empty-lines t)
   (lazy-highlight-initial-delay 0)
   (completion-ignore-case t)
+  (sentence-end-double-space nil)
   (use-dialog-box nil)
   (use-file-dialog nil)
   (use-short-answers t)
@@ -37,66 +53,26 @@
   (word-wrap t)
   (indent-tabs-mode nil)
   (tab-width 4)
-  :init
-  (defun +insert-scratch-buffer-info ()
-    (interactive)
-    (with-current-buffer (get-buffer-create "*scratch*")
-      (insert (format ";;
-;;                ███████╗███╗   ███╗ █████╗  ██████╗███████╗
-;;                ██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝
-;;                █████╗  ██╔████╔██║███████║██║     ███████╗
-;;                ██╔══╝  ██║╚██╔╝██║██╔══██║██║     ╚════██║
-;;                ███████╗██║ ╚═╝ ██║██║  ██║╚██████╗███████║
-;;                ╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝
-;;
-;;                Loading time : %s
-;;                Packages     : %s
-;;
-"
-                      (emacs-init-time)
-                      (number-to-string (hash-table-count straight--recipe-cache)))))
-
-    (message (emacs-init-time))
-    (lisp-interaction-mode))
-
-  (defun +set-global-font-size ()
-    (interactive)
-    (let* ((weight +base/font-weight)
-           (family +base/font-family)
-           (size (read-number "Font size: "))
-           (spec (font-spec :family family
-                            :weight weight
-                            :size size)))
-      (set-frame-font spec nil t t)))
-  ;;;; Custom global options
-  (setq +base/font-family "Comic Code Ligatures"
-        +base/font-weight 'semi-light
-        +base/font-size (pcase system-type
-                          ('windows-nt 10)
-                          (_ 17))
-        +base/font-spec (font-spec :family +base/font-family
-                                   :weight +base/font-weight
-                                   :size +base/font-size)
-        +base/theme 'doom-gruber-darker)
-
-  ;;;; setting `default-frame-alist' entry makes sure that emacsclient loads the correct font
-  (add-to-list 'default-frame-alist `(font . ,(string-join `(,+base/font-family ,(number-to-string +base/font-size)) "-")))
+  (delete-selection-save-to-register t)
+  (next-screen-context-lines 0)
+  (auto-window-vscroll nil)
+  ;; (scroll-conservatively )
+  (scroll-preserve-screen-position t)
+  (scroll-error-top-bottom t)
+  (save-place-file (expand-file-name "saveplace" user-emacs-directory))
+  (save-place-limit 600)
+  (tab-always-indent 'complete)
+  (tab-first-completion 'complete)
   :config
-  ;; always use short user input prompts
-  (defalias 'yes-or-no-p 'y-or-n-p)
-  ;;;; set default font.
-  (set-frame-font +base/font-spec nil t t)
   ;; insert matching parens
   (electric-pair-mode 1)
   ;; highlight current line
   (global-hl-line-mode 1)
-  ;; save window layout changes
-  (winner-mode 1)
-  ;; dont auto-revert buffers
-  (global-auto-revert-mode -1)
-  ;; dont show scroll-bars
-  (add-to-list 'default-frame-alist
-               '(vertical-scroll-bars . nil))
+  (repeat-mode 1)
+  (savehist-mode 1)
+  (save-place-mode 1)
+  (context-menu-mode 1)
+  (blink-cursor-mode -1)
   ;; write customizations to seperate file
   (let ((customization-file
          (expand-file-name "custom.el" user-emacs-directory)))
@@ -104,13 +80,28 @@
       (write-region "" nil customization-file))
     (setq custom-file customization-file)
     (load custom-file 'noerror))
-
+  ;; setup fonts
+  (set-frame-font +base/font-spec nil t t)
+  (set-frame-font +base/font-spec)
+  (set-face-attribute 'default t
+                      :font +base/font-spec)
+  ;; add an option to diff current buffer with its file on disk
+  (add-to-list 'save-some-buffers-action-alist
+               (list "d"
+                     (lambda (buffer)
+                       (diff-buffer-with-file (buffer-file-name buffer)))
+                     "show diff between the buffer and its file"))
+  :bind
+  (("M-RET" . recenter)
+   ("M-<return>" . recenter)
+   ("M-]" . forward-paragraph)
+   ("M-[" . backward-paragraph))
   :hook
   ;; truncate lines in modes derived from prog-mode
   ;; better to see all of the code
-  (prog-mode-hook . (lambda ()
-                      (interactive)
-                      (visual-wrap-prefix-mode 1)))
+  (prog-mode-hook . visual-wrap-prefix-mode)
+  ((help-mode-hook helpful-mode-hook lsp-ui-doc-hook) . visual-line-mode)
+  (tty-setup . +tty-setup)
   ;; display line numbers in text-editing modes
   ((prog-mode-hook
     markdown-ts-mode-hook
@@ -122,12 +113,29 @@
     conf-mode-hook
     tuareg-mode-hook)
    . display-line-numbers-mode)
-  (window-setup-hook . toggle-frame-fullscreen)
-  (after-init-hook . +insert-scratch-buffer-info))
+  (after-init-hook . (lambda () (message (emacs-init-time)))))
+
+(use-package init-utils
+  :straight nil
+  :bind*
+  (("M-<backspace>" . backward-kill-word)
+   :map meow-file-global-map
+   ("C" . +utils/copy-visited-file)
+   ("D" . +utils/delete-visited-file)
+   ("P" . +utils/browse-modules)
+   ("p" . +utils/ripgrep-user-directory)
+   ("R" . +utils/rename-visited-file)
+   ("y" . +utils/yank-current-file)
+   ("Y" . +utils/yank-current-path)
+   :map meow-toggle-global-map
+   ("f" . +utils/consult-set-font-family)
+   :map meow-insert-global-map
+   ("!" . +utils/insert-shell-command-output)))
 
 ;; load $PATH from shell
 (use-package exec-path-from-shell
   :commands exec-path-from-shell-initialize
+  :functions exec-path-from-shell-getenv
   :if (+os/is-linux-p)
   :init
   (setq exec-path-from-shell-variables '("PATH" "TERM" "MANPATH" "JAVA_HOME")
@@ -136,6 +144,32 @@
                                                "zsh")
                                               ((+os/is-windows-p) "powershell")))
   :hook
-  (after-init . exec-path-from-shell-initialize))
+  (after-init-hook . exec-path-from-shell-initialize))
+
+;; which key display
+(use-package which-key
+  :straight nil
+  :commands
+  (which-key-setup-side-window-right-bottom)
+  :init
+  (setq which-key-popup-type 'side-window
+        which-key-preserve-window-configuration t
+        which-key-side-window-max-width 0.2
+        which-key-idle-delay 0.8
+        which-key-idle-secondary-delay 0.05
+        which-key-separator " -> "
+        which-key-max-display-columns 5
+        which-key-add-column-padding 5
+        which-key-show-remaining-keys t
+        which-key-min-column-description-width 30)
+  ;; display `which-key' window on bottom side of the frame
+  (which-key-setup-side-window-right-bottom)
+  :hook
+  ;; load after loading user init
+  (after-init-hook . which-key-mode))
+
+(use-package kkp
+  :hook
+  (tty-setup-hook . global-kkp-mode))
 
 (provide 'init-base)

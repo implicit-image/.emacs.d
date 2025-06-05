@@ -1,27 +1,13 @@
 ;;; -*- lexical-binding: t -*-
 
-;; (use-package project
-;;   :disabled
-;;   :straight nil)
+(setq project-buffers-viewer 'project-list-buffers-consult
+      project-vc-ignores '("straight/")
+      project-vc-extra-root-markers (append project-vc-extra-root-markers
+                                            '("package.json" "cargo.toml" ".+\.cabal")))
 
-(use-package projectile
-  :init
-  (setq projectile-keymap-prefix "C-c p")
-
-  (defun +projects/revert-buffers (&optional choose-project)
-    "Reverts all buffers asociated wit current project. If CHOOSE-PROJECT is t\
-query for known project and revert its buffers instead."
-    (interactive)
-    (let ((project (if choose-project
-                       (completing-read "Revert buffers:"
-                                        projectile-known-projects)
-                     (projectile-project-root))))
-      (dolist (buff (projectile-project-buffers project))
-        (if (buffer-file-name buff)
-            (revert-buffer-quick buff)))))
-
-  :config
-  (projectile-mode +1))
+(add-hook 'project-find-functions '+project--git-root-finder)
+;; to fix weird slow down
+(advice-add 'project-try-vc :override 'ignore)
 
 (use-package direnv
   :if (+os/is-linux-p)

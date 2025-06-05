@@ -1,47 +1,23 @@
 ;;; -*- lexical-binding: t -*-
 
-(defun +show-paren--overlay-function (text)
-  "Show TEXT in an overlay at the top-left of the current window with nice face spec."
-  (setq text (replace-regexp-in-string "\n" " " text))
-  (show-paren--delete-context-overlay)
-  (let* ((beg (window-start))
-         (end (save-excursion
-                (goto-char beg)
-                (line-end-position))))
-    (setq show-paren--context-overlay (make-overlay beg end)))
-  (overlay-put show-paren--context-overlay 'display text)
-  ;; Use the (default very high) `show-paren-priority' ensuring that
-  ;; not other overlays shine through (bug#59527).
-  (overlay-put show-paren--context-overlay 'priority
-               show-paren-priority)
-  (overlay-put show-paren--context-overlay
-               'face `(:box
-                       ( :line-width (1 . -1)
-                         :color ,(face-attribute 'shadow :foreground))
-                       :foreground ,(doom-color 'red)))
-  (add-hook 'post-command-hook #'show-paren--delete-context-overlay
-            nil 'local))
-
+(use-package avy
+  :bind*
+  ( :map meow-jump-global-map
+    ("s" . avy-goto-symbol-1)
+    ("w" . avy-goto-word-1)
+    ("l" . avy-goto-line)))
 
 (use-package vundo
   :custom
-  (vundo-compact-display t)
-  (vundo-window-max-height 6))
-;; :bind*
-;; (("C-x u" . vundo)))
-
-;; (use-package paren
-;;   :straight nil
-;;   :custom
-;;   (show-paren-style 'mixed)
-;;   (show-paren-delay 0.05)
-;;   (show-paren-context-when-offscreen 'overlay)
-;;   (show-paren-when-point-inside-paren t)
-;;   (show-paren-when-point-in-periphery t)
-;;   :config
-;;   (advice-add 'show-paren--show-context-in-overlay :override '+show-paren--overlay-function)
-;;   :hook
-;;   (after-init-hook . show-paren-mode))
+  (vundo-window-max-height 6)
+  :bind*
+  (("C-/" . vundo)
+   :map vundo-mode-map
+   ("r" . vundo-forward)
+   ("q" . vundo-confirm)
+   ("u" . vundo-backward)
+   ("C-/" . vundo-backward)
+   ("C-?" . vundo-forward)))
 
 (setopt show-paren-style 'mixed
         show-paren-delay 0.05
@@ -49,24 +25,21 @@
         show-paren-when-point-inside-paren t
         show-paren-when-point-in-periphery t)
 
-(with-eval-after-load 'paren
-  (advice-add 'show-paren--show-context-in-overlay :override '+show-paren--overlay-function))
-
-(add-hook 'after-init-hook 'show-paren-mode)
 
 
-(use-package drag-stuff)
-;; :bind*
-;; (("M-k" . drag-stuff-up)
-;;  ("M-j" . drag-stuff-down)))
+;; use the custom function instead of the provided one
+(advice-add 'show-paren--show-context-in-overlay :override '+paren--overlay-function)
 
-;; (use-package tabify
-;;   :straight nil)
-;; :bind*
-;; (("C-x SPC t TAB" . tabify)
-;;  ("C-x SPC t <tab>" . tabify)
-;;  ("C-x SPC t S-TAB" . untabify)
-;;  ("C-x SPC t <backtab>" . untabify)))
+(add-hook 'prog-mode-hook 'show-paren-local-mode)
+
+(use-package drag-stuff
+  :bind
+  (("M-k" . drag-stuff-up)
+   ("M-j" . drag-stuff-down))
+  :bind*
+  ( :map prog-mode-map
+    ("M-k" . drag-stuff-up)
+    ("M-j" . drag-stuff-down)))
 
 (use-package combobulate
   :straight (combobulate :type git
@@ -80,20 +53,42 @@
   :hook
   (prog-mode-hook . combobulate-mode))
 
+(use-package multiple-cursors
+  :init
+  (setq mc/always-run-for-all t)
+
+  (setq mc/cmds-to-run-once (append (when (boundp 'mc/cmds-to-run-once)
+                                      mc/cmds-to-run-once)
+                                    '()))
+  :bind-keymap
+  ("C-x |" . meow-mc-global-map)
+  :bind*
+  ( :repeat-map meow-mc-global-map
+    ("l" . mc/edit-beginnings-of-lines)
+    ("L" . mc/edit-ends-of-lines)
+    ("w" . mc/mark-all-words-like-this)
+    ("n" . mc/insert-numbers)
+    ("W" . mc/mark-all-symbols-like-this)
+    ("}" . mc/mark-next-like-this)
+    ("{" . mc/mark-previous-like-this)
+    ("v" . mc/vertical-align)
+    :exit
+    ("i" . meow-insert)))
+
 (use-package vlf)
 
-(setq treesit-font-lock-level 3)
+(setq treesit-font-lock-level 3
+      set-mark-command-repeat-pop t
+      backward-delete-char-untabify-method 'hungry)
 
 (use-package treesit-auto
   :commands
   (global-treesit-auto-mode)
   :init
   (setq treesit-auto-install t)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
   :hook
-  (after-init-hook . (lambda ()
-                       (require 'treesit-auto)
-                       (treesit-auto-add-to-auto-mode-alist 'all)
-                       (global-treesit-auto-mode))))
-
+  (after-init-hook . global-treesit-auto-mode))
 
 (provide 'init-edit)

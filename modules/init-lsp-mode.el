@@ -1,10 +1,10 @@
 ;;; -*- lexical-binding: t -*-
 
+(+when-idle! 3.0 (require 'lsp-mode))
+(+when-idle! 4.0 (require 'lsp-ui))
+
 (use-package lsp-mode
-  ;; :custom-face
-  ;; (lsp-lens-face ((t (:size ,+base/font-size))))
-  ;; (lsp-signature-highlight-function-argument ((t (:underline t))))
-  :config
+  :init
   (setq lsp-auto-configure t
         ;; lsp-mode features
         lsp-keymap-prefix "C-c l"
@@ -22,13 +22,13 @@
         lsp-enable-text-document-color t
         ;; modeline
         lsp-modeline-code-actions-enable nil
-        lsp-modeline-diagnostics-enable nil
+        lsp-modeline-diagnostics-enable t
         ;;signature
         lsp-signature-auto-activate '(:on-trigger-char
                                       :on-server-request
                                       :after-completion)
         lsp-signature-render-documentation t
-        lsp-signature-doc-lines 1
+        lsp-signature-doc-lines t
         lsp-signature-cycle t
         ;; completion
         lsp-completion-enable t
@@ -61,124 +61,81 @@
         lsp-typescript-auto-closing-tags t
         ;;nix
         lsp-nix-nixd-server-path (executable-find "nixd"))
-  :hook
-  ((c-ts-mode-hook
-    c++-ts-mode-hook
-    java-ts-mode-hook
-    kotlin-mode-hook
-    python-ts-mode-hook
-    typescript-ts-mode-hook
-    rust-ts-mode-hook
-    js-ts-mode-hook
-    tsx-ts-mode-hook
-    fstar-mode-hook
-    nix-mode-hook)
-   . lsp))
-;; :bind-keymap*
-;; ( :map lsp-mode-map
-;;   ("C-x <space> c l" . lsp-command-map)
-;;   ("C-c l" . lsp-command-map))
-;; :bind*
-;; ( :map lsp-command-map
-;;   ("a" . lsp-execute-code-action)
-;;   ("r" . lsp-rename)
-;;   ("g r" . lsp-find-references)
-;;   ("g d" . lsp-find-definition)
-;;   ("g i" . lsp-find-implementation)
-;;   ("g D" . lsp-find-declaration)
-;;   ("g t" . lsp-find-type-definition)
-;;   ("k" . lsp-describe-thing-at-point)
-;;   :map lsp-mode-map
-;;   ("M-?" . lsp-find-references)
-;;   :map lsp-signature-mode-map
-;;   ("M-a" . lsp-signature-toggle-full-docs)
-;;   :map lsp-mode-map
-;;   ("C-x <space> t h" . lsp-headerline-breadcrumb-mode)
-;;   ("C-x <space> c a" . lsp-execute-code-action)
-;;   ("C-x <space> c D" . lsp-describe-thing-at-point)
-;;   ("C-x <space> c R" . lsp-rename)
-;;   ("C-x <space> c r" . lsp-find-references)))
+  :bind*
+  ( :map lsp-mode-map
+    ("M-g r" . lsp-find-references)
+    ("M-g d" . lsp-find-definition)
+    ("M-g D" . lsp-find-declaration)
+    ("M-g i" . lsp-find-implementation)
+    ("M-g t" . lsp-find-type-definition)
+    :map lsp-signature-mode-map
+    ("M-a" . lsp-signature-toggle-full-docs)))
 
 
 (use-package lsp-ui
-  ;; :custom-face
-  ;; (lsp-ui-peek-footer ((t (:background ,(doom-color 'bg)))))
-  ;; (lsp-ui-peek-header ((t (:background ,(doom-color 'bg)))))
-  ;; (lsp-ui-doc-background ((t :background ,(doom-color 'base0))))
   :config
   (setq lsp-ui-peek-enable t
         lsp-ui-peek-always-show t
         lsp-ui-peek-list-width 40
-        lsp-ui-peek-peek-height 15
-        lsp-ui-peek-show-directory nil
+        lsp-ui-peek-peek-height 25
+        lsp-ui-peek-show-directory t
         ;; sideline
         lsp-ui-sideline-enable nil
-        lsp-ui-sideline-show-diagnostics t
-        lsp-ui-sideline-show-code-actions t
-        lsp-ui-sideline-ignore-duplicate t
-        lsp-ui-sideline-show-hover nil
-        lsp-ui-sideline-show-symbol t
-        lsp-ui-sideline-update-mode 'point
-        lsp-ui-sideline-diagnostic-max-line-length 200
+        ;; diagnostics
+        lsp-diagnostics-provider :flymake
         ;; docs
-        lsp-ui-doc-enable nil
-        lsp-ui-doc-use-childframe t
+        lsp-ui-doc-enable t
+        lsp-ui-doc-use-childframe nil
         lsp-ui-doc-alignment 'window
-        lsp-ui-doc-max-width 70
+        lsp-ui-doc-max-width 60
         lsp-ui-doc-max-height 10
-        lsp-ui-doc-header nil
+        lsp-ui-doc-header t
         lsp-ui-doc-include-signature t
-        lsp-ui-doc-show-with-cursor nil
+        lsp-ui-doc-show-with-cursor t
         lsp-ui-doc-show-with-mouse nil
         lsp-ui-doc-position 'at-point
         lsp-ui-doc-delay nil
         lsp-ui-imenu-enable t
         lsp-ui-imenu-buffer-position 'right)
-  :hook
-  (lsp-mode-hook . (lambda ()
-                     (interactive)
-                     (lsp-ui-mode +1)
-                     (lsp-ui-doc-mode +1))))
-;; :bind*
-;; ( :map lsp-ui-mode-map
-;;   ("C-c TAB" . lsp-ui-doc-focus-frame)
-;;   ("C-x <space> s i" . lsp-ui-imenu)
-;;   ("C-x <space> c p r" . lsp-ui-peek-find-references)
-;;   ("C-x <space> c p d" . lsp-ui-peek-find-definitions)
-;;   ("C-x <space> c p i" . lsp-ui-peek-find-implementation)
-;;   ("C-x <space> c p s" . lsp-ui-peek-workspace-symbol)
-;;   ("C-x <space> c d" . lsp-ui-doc-show)
-;;   :map lsp-ui-peek-map
-;;   ("j" . lsp-ui-peek--select-next)
-;;   ("k" . lsp-ui-peek--select-prev)))
+  :bind*
+  (:map lsp-command-map
+        ("tf" . lsp-ui-doc-focus-frame)
+        ("i" . lsp-ui-imenu)
+        :map lsp-ui-mode-map
+        ("M-g Pr" . lsp-ui-peek-find-references)
+        ("M-g Pd" . lsp-ui-peek-find-definitions)
+        ("M-g Pi" . lsp-ui-peek-find-implementation)
+        ("M-g Ps" . lsp-ui-peek-workspace-symbol)
+        ("M-g k" . lsp-ui-doc-show)
+        :map lsp-ui-peek-mode-map
+        ("j" . lsp-ui-peek--select-next)
+        ("k" . lsp-ui-peek--select-prev)))
 
 (use-package consult-lsp
   :config
   (consult-customize
    consult-lsp-symbols
    consult-lsp-file-symbols
-   consult-lsp-diagnostics :initial ""))
-;; :bind*
-;; ( :map lsp-mode-map
-;;   ("C-x <space> c s" . consult-lsp-file-symbols)
-;;   ("C-x <space> c S" . consult-lsp-symbols)
-;;   ("C-x <space> c e" . consult-lsp-diagnostics)))
+   consult-lsp-diagnostics :initial "")
+  :bind*
+  ( :map lsp-command-map
+    ("ss" . consult-lsp-file-symbols)
+    ("sS" . consult-lsp-symbols)
+    ("se" . consult-lsp-diagnostics)))
 
 (use-package lsp-treemacs
   :custom
   (lsp-treemacs-call-hierarchy-expand-depth t)
   (lsp-treemacs-error-list-expand-depth 3)
   (lsp-treemacs-type-hierarchy-epxand-depth 3)
-  :hook
-  (after-init . lsp-treemacs-sync-mode))
-;; :bind*
-;; ( :map lsp-command-map
-;;   ("t e" . lsp-treemacs-errors-list)
-;;   ("t s" . lsp-treemacs-symbols)
-;;   ("t r" . lsp-treemacs-references)
-;;   ("t i" . lsp-treemacs-implementations)
-;;   ("t c" . lsp-treemacs-call-hierarchy)
-;;   ("t t" . lsp-treemacs-type-hierarchy)))
+  :bind*
+  ( :map lsp-command-map
+    ("te" . lsp-treemacs-errors-list)
+    ("ts" . lsp-treemacs-symbols)
+    ("tr" . lsp-treemacs-references)
+    ("ti" . lsp-treemacs-implementations)
+    ("tc" . lsp-treemacs-call-hierarchy)
+    ("tt" . lsp-treemacs-type-hierarchy)))
 
 (use-package lsp-tailwindcss
   :straight (lsp-tailwindcss :type git
@@ -223,9 +180,6 @@
         lsp-haskell-completion-in-comments nil
         lsp-haskell-plugin-eval-global-on nil
         lsp-haskell-plugin-semantic-tokens-global-on t))
-
-;; (use-package lsp-fsharp
-;;   :straight nil)
 
 (use-package lsp-nwscript
   :straight (lsp-nwscript :type git

@@ -25,6 +25,7 @@
       ;; lazy load by default
       use-package-always-defer t)
 
+
 ;; early org mode declaration to make sure the correct version gets loaded
 (use-package org
   :straight `(org
@@ -52,89 +53,77 @@
                    "(provide 'org-version)\n")))
               :pin nil))
 
+(defvar +init-module-path (expand-file-name "modules" user-emacs-directory))
+(defvar +init-autoload-path (expand-file-name "local" +init-module-path))
+(add-to-list 'load-path +init-module-path)
+(add-to-list 'load-path +init-autoload-path)
 
-(require 'init-modules (format "%smodules/init-modules.el" user-emacs-directory))
-(require 'init-os)
-(require 'init-elisp-libs)
-(require 'init-keybindings)
+(require 'init-autoloads)
+(require 'init-config-lib)
 (require 'init-base)
-
-;; keybindings
+;; ;; ;; keybindings
 (require 'init-meow)
-;; (require 'init-evil)
-
-(require 'init-utils)
 (require 'init-search)
-
-;;;; appearance
+;; ;;
+;; ;; ;;;; appearance
 (require 'init-appearance)
 (require 'init-windows)
 (require 'init-modeline)
-
-;;; minibuffer completion
+;; ;;
+;; ;; ;;; minibuffer completion
 (require 'init-completion)
-
-;;;; programming utilities
+;; ;;
+;; ;; ;;;; programming utilities
 (require 'init-lookup)
 (require 'init-format)
-(require 'init-edit)
-;;;; validating code and showing errors
-(require 'init-checkers)
-;;;; inserting and managing snippets
-(require 'init-snippets)
-(require 'init-indent)
-;;;; debugging code
-(require 'init-debug)
-;;;; compiling and running code
-(require 'init-compile)
-;;;; custom LSP integration and utils
-;; (require 'init-lsp)
-
-;;;; standard elisp lsp client
-;; (require 'init-lsp-mode)
-(require 'init-cape)
-(require 'init-corfu)
-;; (require 'init-eglot)
-;; (require 'init-lsp-bridge)
-(require 'init-lsp-mode)
-
-(require 'init-ui)
 (require 'init-languages)
+;; ;;
+(require 'init-edit)
+;; ;; ;;;; validating code and showing errors
+(require 'init-checkers)
+;; ;; ;;;; inserting and managing snippets
+(require 'init-snippets)
+;; ;; ;;;; compiling, running and debugging code
+(require 'init-compile)
+;; ;;
+;; ;; ;;;; standard elisp lsp client
+(require 'init-corfu)
+(require 'init-lsp-mode)
+;; (require 'init-eglot)
+;; ;;
+(require 'init-ui)
 (require 'init-projects)
-
-;;;; version control
+;; ;;
+;; ;; ;;;; version control
 (require 'init-vc)
-
-;;;; terminal
+;; ;;
+;; ;; ;;;; terminal
 (require 'init-terminal)
-
-;;;; browsing
-(require 'init-files)
+;; ;;
+;; ;; ;;;; browsing
 (require 'init-buffers)
 (require 'init-treemacs)
 (require 'init-dired)
 (require 'init-remote)
-
-;;;; org mode
+;; ;;
+;; ;; ;;;; org mode
 (require 'init-org)
-
-
-;;;; tty emacs options
-(require 'init-tty)
-
-;;;; books
+;; ;;
+;; ;; ;;;; books
 (require 'init-books)
-
-;;;; llm integration
+;; ;;
+;; ;; ;;;; llm integration
 (require 'init-llm)
-
-;;; social media clients
+;; ;;
+;; ;; ;;; social media clients
 (require 'init-socials)
 (require 'init-media)
-;;; start server
-(require 'server)
-(when (not (server-running-p))
-  (server-start))
+
+(+when-idle! 0.4
+  (require 'server)
+  (if (not(server-running-p))
+      (server-start)))
 
 ;; reset gc limit after init file
 ;; (setq gc-cons-threshold (* 1024 1024 10))
+;;; init.el ends here;;

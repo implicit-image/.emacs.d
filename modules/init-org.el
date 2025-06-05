@@ -1,5 +1,8 @@
 ;;; -*- lexical-binding: t -*-
 
+(+when-idle! 5.0 (require 'org))
+(+when-idle! 6.0 (require 'org-roam))
+
 (use-package org
   :straight `(org
               :fork (:host nil
@@ -34,6 +37,8 @@
         org-inhibit-logging t
         org-startup-with-inline-images t
         org-image-actual-width t
+        org-latex-preview-process-default 'dvipng
+        org-latex-preview-process-precompiled t
         org-latex-preview-live-throttle 0.5
         org-latex-preview-live-debounce 0.5
         org-latex-preview-live t
@@ -41,10 +46,8 @@
         +org/agenda-file (substitute-in-file-name "$HOME/org/agenda/agenda.org")
         +org/tasks-file (substitute-in-file-name "$HOME/org/agenda/tasks.org")
         +org/journal-file (substitute-in-file-name "$HOME/org/journal.org")
-        +org/metrics-file (substitute-in-file-name "$HOME/org/metrics.org"))
-
-  :config
-  (setq org-hide-emphasis-markers 1
+        +org/metrics-file (substitute-in-file-name "$HOME/org/metrics.org")
+        org-hide-emphasis-markers 1
         org-directory "~/org/"
         org-hide-macro-markers 1
         org-latex-packages-alist '(("" "color" t) ("" "tikz" t))
@@ -54,17 +57,16 @@
         org-return-follows-link t
         ;; agenda
         org-log-done 'time
-        org-log-into-drawer t)
+        org-log-into-drawer t
+        org-refile-targets '(("archive.org" :maxlevel . 1)
+                             ("tasks.org" :maxlevel . 1))
+        org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+  :config
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit)
   (setq org-habit-graph-column 60)
-  (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
-
-  (setq org-refile-targets
-        '(("archive.org" :maxlevel . 1)
-          ("tasks.org" :maxlevel . 1)))
 
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
@@ -114,22 +116,8 @@
            "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
   :hook
   (org-mode-hook . visual-line-mode)
-  (org-mode-hook . (lambda ()
-                     (interactive)
-                     (whitespace-mode -1)))
+  (org-mode-hook . org-indent-mode)
   (org-mode-hook . org-latex-preview-auto-mode))
-;; :general
-;; (org-mode-map
-;;  :states '(normal visual)
-;;  :prefix "SPC"
-;;  :global-prefix "M-SPC"
-;;  "s i" '("Navigate Org headings" . consult-org-heading)
-;;  "t l" '("Toggle latex preview" . org-latex-preview)
-;;  "t p" '("Toggle pretty symbols" . org-toggle-pretty-entities)
-;;  "m i t" '("Create table" . org-table-create-or-convert-from-region)
-;;  "m l" '(:ignore t :which-key "link")
-;;  "m l i" '("Insert link" . org-insert-link)))
-
 
 (use-package org-contrib)
 
@@ -166,10 +154,6 @@
    '("~/org-special-block-extras/documentation.org")
    "The places where I keep my ‘#+documentation’"))
 
-(defun +org-roam/rg-in-notes ()
-  (interactive)
-  (consult-ripgrep org-roam-directory ""))
-
 
 (use-package org-roam
   :custom
@@ -180,29 +164,6 @@
                                          :target (file+head "%<%Y-%m-%d>.org"
                                                             "#+title: %Y=%m-%d\n"))))
   :init
-  (defun +roam/template-fn--file-in-subdir (&optional dir)
-    (let* ((root-dir (file-name-as-directory (file-name-concat (expand-file-name org-roam-directory)
-                                                               (if (boundp 'dir)
-                                                                   (concat dir "/")
-                                                                 ""))))
-           (subdir (read-directory-name "subdirectory: "
-                                        root-dir))
-           (filename (read-file-name "file: "
-                                     (file-name-as-directory subdir))))
-      (file-name-concat root-dir
-                        subdir
-                        filename)))
-
-  (defun +roam/mode-setup ()
-    "Setup `org-roam' related variables and modes."
-    (interactive)
-    (setq-local org-attach-id-dir (f-join org-roam-directory "data/")))
-  :config
-  (org-roam-db-autosync-mode)
-  (require 'org-roam-protocol)
-  (require 'org-roam-export)
-
-
   (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:20}" 'face 'org-tag))
         org-roam-db-node-include-function
         (lambda ()
@@ -221,16 +182,19 @@
            :target (file+head "%(+roam/template-fn--file-in-subdir \"/learning\")"
                               "#+title: %^{title}\n")
            :unnarrowed t)))
+  :config
+  (require 'org-roam-protocol)
+  (require 'org-roam-export)
+  (org-roam-db-autosync-mode)
   :hook
-  (org-roam-db-autosync-mode-hook . +roam/mode-setup))
-;; :bind*
-;; (("C-x <space> n r f" . org-roam-node-find)
-;;  ("C-x <space> n r r" . org-roamm-node-random)
-;;  ("C-x <space> n r s" . org-roam-db-sync)
-;;  ("C-x <space> n r c" . org-roam-capture)
-;;  ("C-x <space> n r *" . +org-roam/rg-in-notes)
-;;  :map org-roam-mode-map
-;;  ("C-c n i" . org-roam-node-insert)))
+  (org-roam-mode-hook . +org-roam-mode--setup)
+  :bind*
+  ( :map meow-notes-global-map
+    ("f" . org-roam-node-find)
+    ("r" . org-roam-node-random)
+    ("c" . org-roam-capture)
+    ("*" . +org/rg-in-roam-notes)
+    ("s" . org-roam-db-sync)))
 
 (use-package ob
   :straight nil
@@ -240,48 +204,12 @@
         org-src-preserve-indentation nil)
 
   (defvar +org-babel-temp-dir (file-name-concat (expand-file-name user-emacs-directory) "+org-babel"))
-
-  (defun +ob--setup ()
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((C . t)
-       (R . t)
-       (python . t)
-       (shell . t)
-       (emacs-lisp . t)
-       ;; (rust . t)
-       (awk . t)
-       (calc . t)
-       (clojure . t)
-       (css . t)
-       (ditaa . t)
-       (forth . t)
-       (gnuplot . t)
-       (dot . t)
-       (haskell . t)
-       (java . t)
-       (latex . t)
-       (lisp . t)
-       (lua . t)
-       (makefile . t)
-       (matlab . t)
-       (js . t)
-       (ocaml . t)
-       (org . t)
-       (perl . t)
-       (scheme . t)
-       (sql . t)
-       (sqlite . t)))
-    (add-to-list 'org-src-lang-modes (cons "jsx" 'rjsx))
-    (add-to-list 'org-src-lang-modes (cons "nwscript" 'nwscript)))
-  :hook
-  (after-init-hook . +ob--setup))
+  :config
+  (add-to-list 'org-src-lang-modes (cons "nwscript" 'nwscript)))
 
 (use-package jupyter
   :hook
-  (org-mode-hook . (lambda ()
-                     (require 'ob-jupyter)
-                     (org-babel-jupyter-override-src-block "haskell"))))
+  (org-mode-hook . +org-mode--jupyter-setup))
 
 (use-package ob-sql-mode)
 
@@ -340,6 +268,5 @@
             (todo "CANC"
                   ((org-agenda-overriding-header "Cancelled Projects")
                    (org-agenda-files org-agenda-files))))))))
-
 
 (provide 'init-org)

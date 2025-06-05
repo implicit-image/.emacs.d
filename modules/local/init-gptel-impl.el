@@ -1,0 +1,2 @@
+
+(provide 'init-gptel-impl)

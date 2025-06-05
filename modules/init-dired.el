@@ -1,42 +1,26 @@
 ;;; -*- lexical-binding: t -*-
 
-;; (use-package dired
-;;   :straight nil
-;;   :custom
-;;   (dired-dwim-target t)
-;;   (dired-listing-switches "-alh --group-directories-first")
-;;   (dired-recursive-copies 'always)
-;;   (dired-recursive-deletes 'top)
-;;   (dired-kill-when-opening-new-dired-buffer nil)
-;;   (ired-auto-revert-buffer t)
-;;   ;; dired-auto-revert-buffer '+dired-revert-buffer-p
-;;   (dired-create-destination-dirs 'ask)
-;;   :hook (dired-mode-hook . (lambda ()
-;;                              (interactive)
-;;                              (toggle-truncate-lines +1)
-;;                              (setq-local case-fold-search nil))))
+(use-package dired
+  :straight nil
+  :init
+  (setopt dired-dwim-target t
+          dired-listing-switches "-alh --group-directories-first"
+          dired-recursive-copies 'always
+          dired-recursive-deletes 'top
+          dired-kill-when-opening-new-dired-buffer nil
+          dired-auto-revert-buffer t
+          dired-create-destination-dirs 'ask
+          wdired-allow-to-change-permissions t
+          wdired-use-dired-vertical-movement 'sometimes))
 
-(setopt dired-dwim-target t
-        dired-listing-switches "-alh --group-directories-first"
-        dired-recursive-copies 'always
-        dired-recursive-deletes 'top
-        dired-kill-when-opening-new-dired-buffer nil
-        ired-auto-revert-buffer t
-        ;; dired-auto-revert-buffer '+dired-revert-buffer-p
-        dired-create-destination-dirs 'ask)
+(add-hook 'dired-mode-hook '+dired-mode--setup)
 
-(defun +dired--setup ()
-  (toggle-truncate-lines 1)
-  (setq-local case-fold-search nil))
-
-(add-hook 'dired-mode-hook '+dired--setup)
-
-(setopt wdired-allow-to-change-permissions t)
-
-;; (use-package wdired
-;;   :straight nil
-;;   :custom
-;;   (wdired-allow-to-change-permissions t))
+(bind-keys*
+ ("M-g M-d" . dired-at-point)
+ :map dired-mode-map
+ ("C-e" . wdired-change-to-wdired-mode)
+ ("i" . wdired-change-to-wdired-mode)
+ ("-" . dired-up-directory))
 
 (use-package diredfl
   :commands
