@@ -18,7 +18,7 @@
       straight-use-package-version 'straight
       straight-check-for-modifications '(find-when-checking check-on-save)
       read-process-output-max (* 500 1000)
-      process-adaptive-read-buffering t
+      process-adaptive-read-buffering nil
       ;; a bit of performance optimization on startup
       frame-inhibit-implied-resize t
       inhibit-x-resources nil
@@ -52,19 +52,19 @@
 ;; to increase lsp-mode performance
 (setenv "LSP_USE_PLISTS" "true")
 (setq +base/font-family (pcase system-type
-                          ('gnu/linux "Iosevka Nerd Font Mono")
+                          ('gnu/linux "Comic Code Ligatures")
                           ('windows-nt "Cas"))
-      +base/font-weight 'semi-light
+      +base/font-weight 'light
       +base/font-size (pcase system-type
                         ('windows-nt 10)
-                        (_ 17))
+                        (_ 16))
       +base/font-spec (font-spec :family +base/font-family
                                  :weight +base/font-weight
                                  :size +base/font-size)
       +base/theme 'doom-gruber-darker)
 
 
-;; Don't flicker GUI elements on startup
+;; default frame parameters
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars . nil) default-frame-alist)
@@ -73,7 +73,7 @@
                                ,(number-to-string +base/font-size))
                              "-"))
       default-frame-alist)
-
+;; initial frame parameters
 (push '(menu-bar-lines . 0) initial-frame-alist)
 (push '(tool-bar-lines . 0) initial-frame-alist)
 (push '(vertical-scroll-bars . nil) initial-frame-alist)
@@ -93,9 +93,9 @@
 (add-hook 'minibuffer-setup-hook 'my-minibuffer-setup-hook)
 
 ;; run garbage collection on idle
-(run-with-idle-timer 1.0 t 'garbage-collect)
+(run-with-idle-timer 0.8 t 'garbage-collect)
 
-(defun +set-global-font-size ()
+(defun +font--setup ()
   (set-frame-font (font-spec :family +base/font-family
                              :weight +base/font-weight
                              :size +base/font-size)
