@@ -15,12 +15,12 @@
 (defvar-local +mode-transient-menu '+transient--default-menu)
 
 (defvar +buffer-functions-var-alist '((+indent-tab-function . :indent-tab)
-                                      (+search-buffer-function . :search-buffer)
-                                      (+lookup-definition-function . :lookup-definition)
-                                      (+lookup-references-function . :lookup-references)
-                                      (+lookup-documentation-function . :lookup-documentation)
-                                      (compile-command . :compile-command)
-                                      (+mode-transient-menu . :transient-menu)))
+				      (+search-buffer-function . :search-buffer)
+				      (+lookup-definition-function . :lookup-definition)
+				      (+lookup-references-function . :lookup-references)
+				      (+lookup-documentation-function . :lookup-documentation)
+				      (compile-command . :compile-command)
+				      (+mode-transient-menu . :transient-menu)))
 
 (defvar +package-deps-alist nil)
 
@@ -28,7 +28,7 @@
   "Return a color contrasting well with COLOR."
   `(apply
     ,(if (< (color-distance color "#000000") 180000)
-         'doom-lighten
+	 'doom-lighten
        'doom-darken)
     color
     0.3
@@ -38,9 +38,9 @@
   "Toggle variable VAR between VAL1 and VAL2. If VAL1 is not supplied, its\
 value is `t'. If VAL2 is not supplied, its value is `nil'."
   (let ((val1 (or val1
-                  t))
-        (val2 (or val2
-                  nil)))
+		  t))
+	(val2 (or val2
+		  nil)))
     `(setopt ,var (if (eq ,var ,val1) ,val2 ,val1))))
 
 
@@ -48,29 +48,29 @@ value is `t'. If VAL2 is not supplied, its value is `nil'."
   "Toggle variable VAR between VAL1 and VAL2. If VAL1 is not supplied, its\
 value is `t'. If VAL2 is not supplied, its value is `nil'."
   (let ((val1 (or val1
-                  t))
-        (val2 (or val2
-                  nil)))
+		  t))
+	(val2 (or val2
+		  nil)))
     `(setq-local ,var (if (eq ,var ,val1) ,val2 ,val1))))
 
 (defmacro +lookup-set-fn! (type &rest forms)
   "Set lookup function of TYPE according to FORMS."
   (let ((fn-list (pcase type
-                   ('popup '+lookup/popup-functions-alist)
-                   ('buffer '+lookup/buffer-functions-alist)
-                   ('ref '+lookup/find-ref-functions-alist)
-                   ('def '+lookup/find-def-functions-alist)
-                   ('impl '+lookup/find-impl-functions-alist)
-                   (_ nil))))
+		   ('popup '+lookup/popup-functions-alist)
+		   ('buffer '+lookup/buffer-functions-alist)
+		   ('ref '+lookup/find-ref-functions-alist)
+		   ('def '+lookup/find-def-functions-alist)
+		   ('impl '+lookup/find-impl-functions-alist)
+		   (_ nil))))
     (when fn-list
       `(mapc (lambda (form)
-               (add-to-list ',fn-list form))
-             ',forms))))
+	       (add-to-list ',fn-list form))
+	     ',forms))))
 
 (defmacro +os/per-system! (&rest args)
   (let ((val (cond ((+os/is-windows-p) (plist-get args :win))
-                   ((+os/is-wsl-p) (plist-get args :wsl))
-                   ((+os/is-linux-p) (plist-get args :linux)))))
+		   ((+os/is-wsl-p) (plist-get args :wsl))
+		   ((+os/is-linux-p) (plist-get args :linux)))))
     val))
 
 (defmacro +autoloads! (file functions)
@@ -79,14 +79,14 @@ symbol representing a function or a list where the first element is the function
 and up to next 3 are values representing consecutive `autoload' arguments\
 starting at the third one. The `autoload' docstring can be omitted."
   (let ((exprs (mapcar (lambda (fn)
-                         (cond ((symbolp fn) `(autoload ',fn ,file))
-                               ((listp fn)
-                                (let ((func (car fn))
-                                      (rest (cdr fn)))
-                                  (cond ((and rest (not (stringp (car rest))))
-                                         `(autoload ',func ,file ,@(take 2 rest)))
-                                        (t `(autoload ',func ,file ,@(take 3 rest))))))))
-                       functions)))
+			 (cond ((symbolp fn) `(autoload ',fn ,file))
+			       ((listp fn)
+				(let ((func (car fn))
+				      (rest (cdr fn)))
+				  (cond ((and rest (not (stringp (car rest))))
+					 `(autoload ',func ,file ,@(take 2 rest)))
+					(t `(autoload ',func ,file ,@(take 3 rest))))))))
+		       functions)))
     `(progn ,@exprs)))
 
 (defmacro +when-idle! (min-time &rest body)
@@ -99,41 +99,41 @@ starting at the third one. The `autoload' docstring can be omitted."
   (declare (indent defun))
   (let ((name (intern (concat "+mode-line-" (symbol-name name)))))
     `(progn (defvar-local ,name
-              ,@body)
-            (put ',name 'risky-local-variable t))))
+		,@body)
+	    (put ',name 'risky-local-variable t))))
 
 (defmacro +set-buffer-functions! (&rest args)
   "Set buffer local utility functions (see `+buffer-functions-var-alist')."
   (if  (not (eq (mod (length args) 2) 0))
       (error "Each option should have an associated value")
     `(progn ,@(+mapcar-non-nil!
-               (lambda (cell)
-                 (let* ((var (car cell))
-                        (key (cdr cell))
-                        (val (plist-get args key)))
-                   (if val
-                       `(setq-local ,var ,val)
-                     val)))
-               +buffer-functions-var-alist))))
+	       (lambda (cell)
+		 (let* ((var (car cell))
+			(key (cdr cell))
+			(val (plist-get args key)))
+		   (if val
+		       `(setq-local ,var ,val)
+		     val)))
+	       +buffer-functions-var-alist))))
 
 (defmacro +add-directories-to-exec-path! (&rest dirs)
   `(progn ,@(mapcar (lambda (path)
-                      `(add-to-list 'exec-path ,path))
-                    dirs)))
+		      `(add-to-list 'exec-path ,path))
+		    dirs)))
 
 (defun +from-shell--getenv-linux (varname)
   "Get environment variable VARNAME in SHELL. If shell is nil, use `'."
   (let* ((shell-file-name (or (executable-find "zsh")
-                              (executable-find "bash"))) ;; TODO: add handling for nonstandard shells
-         (var (string-trim (shell-command-to-string (format "echo $%s" varname)))))
+			      (executable-find "bash"))) ;; TODO: add handling for nonstandard shells
+	 (var (string-trim (shell-command-to-string (format "echo $%s" varname)))))
     (if (string-empty-p var)
-        (getenv varname)
+	(getenv varname)
       var)))
 
 (defun +getenv-from-shell (varname)
   "Get environment variable VARNAME from shell."
   (if (or (+os/is-linux-p)
-          (+os/is-wsl-p))
+	  (+os/is-wsl-p))
       (+from-shell--getenv-linux varname)
     (user-error "Wrong OS")))
 
@@ -141,24 +141,24 @@ starting at the third one. The `autoload' docstring can be omitted."
   "Add entries from $PATH to variable `exec-path'."
   (let ((paths (+getenv-from-shell "PATH")))
     (if (string-empty-p paths)
-        (user-error "$PATH empty")
+	(user-error "$PATH empty")
       (mapc (lambda (path)
-              (message path)
-              (add-to-list 'exec-path path))
-            (string-split paths ":")))))
+	      (message path)
+	      (add-to-list 'exec-path path))
+	    (string-split paths ":")))))
 
 (defun +set-env-vars-from-shell (&rest vars)
   "Set all environment variables in VARS."
   (let ((assocs (mapcar
-                 (lambda (assoc)
-                   (let* ((binding (string-split (string-trim assoc) "="))
-                          (symbol (car binding))
-                          (val (cadr binding)))
-                     (cons symbol val)))
-                 (string-split (shell-command-to-string "env") "\n"))))
+		 (lambda (assoc)
+		   (let* ((binding (string-split (string-trim assoc) "="))
+			  (symbol (car binding))
+			  (val (cadr binding)))
+		     (cons symbol val)))
+		 (string-split (shell-command-to-string "env") "\n"))))
     (dolist (assoc assocs)
       (when (memq (car assoc) vars)
-        (setenv (car assoc) (cadr assoc))))))
+	(setenv (car assoc) (cadr assoc))))))
 
 (defun +char-whitespace? (char)
   "Check if CHAR is whitespace."
@@ -211,16 +211,5 @@ starting at the third one. The `autoload' docstring can be omitted."
 ;;
 ;; (defun use-package-handler/:treesit ())
 
-(defmacro ii/add-hooks! (fn hooks)
-  `(progn ,@(mapcar (lambda (hook)
-                      `(add-hook ,hook ',fn))
-                    hooks)))
-
-(defmacro ii/define-prefix-command (&rest args)
-  "Define prefix command."
-  (let* ((cmd-var ))
-    `(progn
-       (define-prefix-command ,cmd-var ,map-var ,name)
-       (bind-key ,binding ,map))))
 
 (provide 'implicit-config-lib)
