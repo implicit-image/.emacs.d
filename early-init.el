@@ -38,9 +38,6 @@
       menu-bar-mode nil
       tool-bar-mode nil)
 
-(defalias 'yes-or-no-p 'y-or-n-p
-  "Always use short user confirmation prompts.")
-
 (defun +init-reset-inhibit-redisplay ()
   (setq inhibit-redisplay nil))
 
