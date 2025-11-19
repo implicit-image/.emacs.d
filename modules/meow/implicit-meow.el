@@ -38,13 +38,6 @@
       (push-mark))
     (remove-hook 'post-self-insert-hook 'ii/meow--next-change-callback t)))
 
-(defun +meow--select-for-mc (&optional regexp)
-  (interactive "p")
-  (apply (if regexp
-             'mc/mark-all-in-region
-           'mc/mark-all-in-region-regexp)
-         (list (region-beginning) (region-end))))
-
 (defun ii/meow--search-bounds (regex-p)
   "Return bounds for last regexp search."
   (isearch-forward regex-p)
@@ -86,6 +79,23 @@
 
 (defun ii/meow--string-search-bounds ()
   (ii/meow--search-bounds nil))
+
+(defun ii/meow-next-defun (arg)
+  (beginning-of-defun arg)
+  (point))
+
+(defun ii/meow-next-line (arg)
+  (beginning-of-line arg)
+  (point))
+
+(defun ii/meow-next-paragraph (arg)
+  (forward-paragraph arg)
+  (point))
+
+(defun ii/meow-next-sentence (arg)
+  (forward-sentence arg)
+  (point))
+
 
 ;;;; Commands
 
@@ -140,14 +150,6 @@
       (meow-grab)))
   (meow-mark-symbol 1))
 
-(defun +meow/select-for-mc-string ()
-  (interactive)
-  (funcall-interactively '+meow--select-for-mc nil))
-
-(defun +meow/select-for-mc-regex ()
-  (interactive)
-  (funcall-interactively '+meow--select-for-mc t))
-
 (defun ii/meow-surround-with-char ())
 
 (defun ii/meow-surround-with-string ())
@@ -155,9 +157,6 @@
 (defun ii/meow-delete-surrounding-char ())
 
 (defun ii/meow-delete-surrounding-string ())
-
-
-
 
 (defun +meow/match (where &optional arg)
   ""
@@ -280,4 +279,41 @@
   (interactive "p")
   (ii/meow--change-number-at-point (- (or arg 1))))
 
+(defun ii/meow-change-number-at-point (arg)
+  "Change number at point by ARG, 1 by default."
+  (interactive "p")
+  (ii/meow--change-number-at-point (or arg 1)))
+
+(defun ii/meow-edit-regexp-query ()
+  "Edit last regexp query."
+  (interactive)
+  (let* ((rg (pop regexp-search-ring))
+         (new-rg (read-string "Regexp:" rg 'regexp-history rg)))
+    (if (not (string-blank-p new-rg))
+        (push new-rg regexp-search-ring)
+      (message "New regexp is blank"))))
+
+;; (defvar ii/meow-next-thing-function-alist nil
+;;   "Alist of `meow' THING and functions to find next occurrence of THING.")
+;;
+;; (defun ii/meow-next-thing (thing &optional arg)
+;;   "THING."
+;;   (interactive (list (meow-thing-prompt "next")
+;;                      prefix-arg))
+;;   (when-let* ((fn (alist-get thing ii/meow-next-thing-function-alist)))
+;;     (meow-cancel-selection)
+;;     (funcall-interactively fn arg)))
+;;
+;; (defvar-local ii/meow--last-selected-thing nil
+;;   "Stores last thing selected from `meow-thing-prompt'.")
+;;
+;; (defun ii/meow--thing-prompt-advice (thing)
+;;   (setq-local ii/meow--last-selected-place this-command
+;;               ii/meow--last-selected-thing thing))
+;;
+;; (advice-add 'meow-thing-prompt :filter-return 'ii/meow--thing-prompt-advice)
+
 (provide 'implicit-meow)
+
+
+

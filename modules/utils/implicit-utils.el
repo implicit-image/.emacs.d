@@ -204,4 +204,9 @@
   (interactive)
   (consult-ripgrep user-emacs-directory))
 
+(defun ii/negate-repeat-prefix-arg ()
+  "Negate "
+  (interactive)
+  (setq-local last-prefix-arg (- last-prefix-arg)))
+
 (provide 'implicit-utils)

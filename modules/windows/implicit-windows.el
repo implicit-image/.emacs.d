@@ -86,59 +86,78 @@ If BODY is non-nil, it is executed before returning window."
     (when window
       (window--display-buffer buffer (window-in-direction 'below) 'reuse alist))))
 
+(defun ii/display-buffer-in-sidebar-window (buffer alist)
+  "Display BUFFER in side bar on the right."
+  (display-buffer-in-side-window buffer (concat (assq-delete-all 'window-width alist)
+                                                (assoc 'window-width 0.2))))
+
 (+define-display-buffer-prefix! +windows/left-vsplit-prefix
-                                +windows/display-buffer-in-left-vsplit
-                                "[vsplit-left]")
+  +windows/display-buffer-in-left-vsplit
+  "[vsplit-left]")
 
 (+define-display-buffer-prefix! +windows/right-vsplit-prefix
-                                +windows/display-buffer-in-right-vsplit
-                                "[vsplit-right]")
+  +windows/display-buffer-in-right-vsplit
+  "[vsplit-right]")
 
 (+define-display-buffer-prefix! +windows/above-hsplit-prefix
-                                +windows/display-buffer-in-top-hsplit
-                                "[hsplit-top]")
+  +windows/display-buffer-in-top-hsplit
+  "[hsplit-top]")
 
 (+define-display-buffer-prefix! +windows/below-hsplit-prefix
-                                +windows/display-buffer-in-bot-hsplit
-                                "[hsplit-bot]")
+  +windows/display-buffer-in-bot-hsplit
+  "[hsplit-bot]")
 
 (+define-display-buffer-prefix! +windows/below-selected-prefix
-                                display-buffer-below-selected
-                                "[below-selected]"
-                                ((window-height . 0.5)))
+  display-buffer-below-selected
+  "[below-selected]"
+  ((window-height . 0.5)))
 
 (+define-display-buffer-prefix! +windows/bottom-window-prefix
-                                display-buffer-at-bottom
-                                "[at-bottom-window]"
-                                ((window-height . 0.3)))
+  display-buffer-at-bottom
+  "[at-bottom-window]"
+  ((window-height . 0.3)))
 
 (+define-display-buffer-prefix! +windows/right-side-window-prefix
-                                display-buffer-in-side-window
-                                "[in-right-side-window]"
-                                ((window-width . 0.5)
-                                 (side . right)
-                                 (slot . 1)))
+  display-buffer-in-side-window
+  "[in-right-side-window]"
+  ((window-width . 0.5)
+   (side . right)
+   (slot . 1)))
 
 (+define-display-buffer-prefix! +windows/left-side-window-prefix
-                                display-buffer-in-side-window
-                                "[in-left-side-window]"
-                                ((window-width . 0.5)
-                                 (side . left)
-                                 (slot . 1)))
+  display-buffer-in-side-window
+  "[in-left-side-window]"
+  ((window-width . 0.5)
+   (side . left)
+   (slot . 1)))
 
 (+define-display-buffer-prefix! +windows/top-side-window-prefix
-                                display-buffer-in-side-window
-                                "[in-top-side-window]"
-                                ((window-height . 0.5)
-                                 (side . top)
-                                 (slot . 1)))
+  display-buffer-in-side-window
+  "[in-top-side-window]"
+  ((window-height . 0.5)
+   (side . top)
+   (slot . 1)))
 
 (+define-display-buffer-prefix! +windows/bottom-side-window-prefix
-                                display-buffer-in-side-window
-                                "[in-botoom-side-window]"
-                                ((window-height . 0.5)
-                                 (side . bottom)
-                                 (slot . 1)))
+  display-buffer-in-side-window
+  "[in-botoom-side-window]"
+  ((window-height . 0.5)
+   (side . bottom)
+   (slot . 1)))
+
+(+define-display-buffer-prefix! ii/right-sidebar-window-prefix
+  display-buffer-in-side-window
+  "[right-sidebar]"
+  ((window-width . 0.2)
+   (side . right)
+   (slot . 1)))
+
+(+define-display-buffer-prefix! ii/left-sidebar-window-prefix
+  display-buffer-in-side-window
+  "[left-sidebar]"
+  ((window-width . 0.2)
+   (side . left)
+   (slot . 1)))
 
 (defun +windows/toggle-modeline (buffer)
   "Toggle modeline visibility in BUFFER."

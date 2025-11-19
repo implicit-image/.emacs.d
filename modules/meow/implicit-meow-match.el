@@ -19,6 +19,27 @@
     (?m . ("pair" . +meow-mark-matching)))
   "TODO.")
 
+(defvar ii/meow-surround-mode-specific-pair-alist nil
+  "Mapping from major mode to mode-specific surround pairs.")
+
+(defvar-local ii/meow-surround-local-char-pairs nil
+  "Buffer local char pair for surrounding.")
+
+(defvar-local ii/meow-surround-local-string-pairs nil
+  "Buffer local string pair templates for surrounding.")
+
+(defmacro ii/meow-define-pair (&rest args)
+  ""
+  (let ((local (plist-get args :mode)))
+    (if (not local)
+        `(progn
+           (add-to-list insert-pair-alist (,first ,second)))
+      `(progn
+         (add-to-list ii/meow-surround-mode-specific-pair-alist )))))
+
+(defun ii/meow--format-surround-template-string (str)
+  "Format STR ")
+
 (defun ii/meow--match-prompt ()
   "Return a prompt for `+meow/match'."
   (ii/make-key-prompt "Match: " ii/meow--match-functions))
@@ -101,7 +122,6 @@ one, indenting the region afterwards."
   (when (not (region-active-p))
     (meow-inner-of-thing (meow-thing-prompt "Surround: ")))
   (let* ((string (read-string "")))
-    (+meow--surround-with))
-  )
+    (+meow--surround-with)))
 
 (provide 'implicit-meow-match)

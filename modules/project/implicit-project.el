@@ -38,4 +38,11 @@
                              bufs))))
     (multi-occur bufs regexp)))
 
+(defun ii/project-diff-hl-next-hunk ()
+  (interactive))
+
+(defun ii/project-diff-hl-previous-hunk ()
+  (interactive)
+  )
+
 (provide 'implicit-project)

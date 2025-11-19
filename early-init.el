@@ -11,7 +11,6 @@
 (setq command-line-args (append command-line-args '("-bg" "#121212" "-fg" "#f1f1f1" "--mouse-color" "#f1f1f1"))
       ;; We're using straight.el instead of package.el, no need to load it
       package-enable-at-startup nil
-      use-package-compute-statistics nil
       use-package-enable-imenu-support t
       ;; dont bother with disabled commands
       disabled-command-function nil
@@ -54,7 +53,7 @@
       +base/font-weight 'light
       +base/font-size (pcase system-type
                         ('windows-nt 10)
-                        (_ 16))
+                        (_ 15))
       +base/font-spec (font-spec :family +base/font-family
                                  :weight +base/font-weight
                                  :size +base/font-size)
