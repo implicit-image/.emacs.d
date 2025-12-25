@@ -872,13 +872,14 @@
 
 (use-package doom-themes
   :demand
+  :preface
+  (add-to-list 'custom-theme-load-path (file-name-concat (expand-file-name straight-base-dir)
+                                                         "straight"
+                                                         "repos"
+                                                         "doom-gruber-darker-theme/"))
   :init
   (defun ii/appearance-setup-doom-themes ()
     (progn
-      (add-to-list 'custom-theme-load-path (file-name-concat straight-base-dir
-                                                             "straight"
-                                                             straight-build-dir
-                                                             "doom-gruber-darker-theme/"))
       (setq doom-themes-enable-bold nil
             doom-themes-enable-italic t
             doom-themes-treemacs-enable-variable-pitch nil
@@ -936,8 +937,9 @@
     (global-hl-todo-mode 1)))
 
 (use-package doom-gruber-darker-theme
-  :straight (doom-gruber-darker-theme :type nil
-                                      :local-repo "/home/b/repos/doom-gruber-darker-theme")
+  :straight (doom-gruber-darker-theme :type git
+                                      :host github
+                                      :repo "implicit-image/doom-gruber-darker-theme")
   :config
   ;; these faces are modified by meow and need to be overridden here
   (custom-set-faces `(region ((t (:extend nil))))
