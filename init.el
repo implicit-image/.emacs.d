@@ -26,7 +26,9 @@
       use-package-hook-name-suffix nil
       ;; lazy load by default
       use-package-always-defer t
-      use-package-compute-statistics t)
+      use-package-ignore-unknown-keywords (not init-file-debug)
+      use-package-compute-statistics init-file-debug
+      use-package-expand-minimally (not init-file-debug))
 
 ;; early org mode declaration to make sure the correct version gets loaded
 (use-package org
@@ -56,7 +58,11 @@
               :pin nil))
 
 (defvar +init-module-path (expand-file-name "modules" user-emacs-directory))
+
+(defvar ii/elisp-path (expand-file-name "elisp" user-emacs-directory))
+
 (defvar +init-autoload-path (expand-file-name "local" +init-module-path))
+
 (add-to-list 'load-path +init-module-path)
 
 (defvar +per-machine-config-feature (intern (concat "implicit-" (system-name))))
@@ -74,12 +80,15 @@
 
 ;;;; Elisp Libraries
 (use-package async
-  :after dired
   :init
   (setq dired-async-skip-fast t
         dired-async-small-file-max 5000000)
-  :config
-  (dired-async-mode))
+  (with-eval-after-load 'dired
+    (dired-async-mode 1)))
+
+(defun ii/hide-modeline ()
+  (if mode-line-format
+      (setq-local mode-line-format nil)))
 
 ;;;; base Config
 (setq meow-leader-global-map (make-sparse-keymap)
@@ -98,73 +107,97 @@
 (define-prefix-command 'meow-vc-prefix-command 'meow-vc-prefix-map "vc")
 (define-prefix-command 'meow-window-prefix-command 'meow-window-prefix-map "window")
 (define-prefix-command 'meow-code-prefix-command 'meow-code-prefix-map "code")
+(define-prefix-command 'meow-music-prefix-command 'meow-music-prefix-map "music")
 (bind-key "C-c t" meow-toggle-prefix-map)
 (bind-key "C-c q" meow-quit-prefix-map)
 (bind-key "C-c g" meow-vc-prefix-map)
-(bind-key "C-w" meow-window-prefix-map)
+(bind-key "C-w" 'meow-window-prefix-command)
 (bind-key "C-c c" meow-code-prefix-map)
+(bind-key "C-c m" meow-music-prefix-map)
+(setopt indent-tabs-mode nil
+        blink-cursor-mode nil)
 
-(setopt indent-tabs-mode nil)
+(setq-default backup-inhibited t
+              create-lockfiles nil
+              truncate-lines t
+              truncate-partial-width-windows nil
+              indicate-buffer-boundaries nil
+              cursor-in-non-selected-windows nil
+              indicate-empty-lines nil
+              tab-width 4)
 
 (setq user-full-name "Błażej Niewiadomski"
       user-mail-address "blaz.nie@protonmail.com"
       visible-bell nil
       display-line-numbers-type 'relative
-      truncate-lines 40
       hl-line-sticky-flag nil
       global-hl-line-sticky-flag nil
-      truncate-partial-width-windows t
-      create-lockfiles nil
+      global-hl-line-buffers '(not
+                               (or (lambda (b) (buffer-local-value 'cursor-face-highlight-mode b))
+                                   (lambda (b) (string-match-p "\\` " (buffer-name b))) minibufferp
+                                   (major-mode . eat-mode)
+                                   (major-mode . dired-sidebar-mode)))
+      truncate-partial-width-windows nil
       x-stretch-cursor nil
-      backup-inhibited t
       make-backup-files nil
+      backup-by-copying t
+      echo-keystrokes 0.01
       scroll-step 0
-      scroll-conservatively 7
-      scroll-preserve-screen-position t
+      scroll-conservatively 100
+      scroll-preserve-screen-position nil
       scroll-margin 7
       scroll-error-top-bottom t
       comment-multi-line t
-      read-extended-command-predicate 'command-completion-default-include-p
       comment-empty-lines t
       lazy-highlight-initial-delay 0
       completion-ignore-case t
       sentence-end-double-space nil
+      read-extended-command-predicate 'command-completion-default-include-p
       use-dialog-box nil
       use-file-dialog nil
       use-short-answers t
       read-answer-short t
-      indicate-buffer-boundaries nil
-      indicate-empty-lines nil
-      word-wrap t
-      tab-width 4
       delete-selection-save-to-register t
+      register-use-preview t
       next-screen-context-lines 0
       warning-minimum-level :error
       auto-window-vscroll nil
       save-place-file (expand-file-name "saveplace" user-emacs-directory)
       save-place-limit 600
       tab-always-indent 'complete
-      tab-first-completion '
+      tab-first-completion 'word
       desktop-dirname user-emacs-directory
       desktop-restore-frames nil
       desktop-restore-reuse-frames nil
+      desktop-modes-not-to-save '(fundamental-mode tags-table-mode image-mode pdf-view-mode nov-mode org-mode)
       large-file-warning-threshold (* 30 1000 1000)
-      desktop-modes-not-to-save '(fundamental-mode tags-table-mode image-mode pdf-view-mod nov-mode org-mode)
-      global-mark-ring-max 32
-      mark-ring-size 32
-      fill-column 80
       duplicate-line-final-position -1
       duplicate-region-final-position -1
       proced-enable-color-flag t
       proced-auto-update-flag 'visible
       visible-cursor nil
+      global-mark-ring-max 32
+      mark-ring-size 32
+      speedbar-use-images nil
+      speedbar-prefer-window t
+      speedbar-window-default-width 40
+      speedbar-window-max-width 40
       savehist-additional-variables
       '(kill-ring
         register-alist
         mark-ring
         global-mark-ring
         search-ring
-        regexp-search-ring))
+        regexp-search-ring
+        kmacro-ring)
+      kmacro-ring-max 32
+      kmacro-counter-value-start 1
+      imenu-auto-rescan t
+      imenu-use-popup-menu 'on-mouse
+      text-scale-mode-step 1.1)
+
+(bind-keys* ("C-=" . text-scale-increase)
+            ("C--" . text-scale-decrease))
 
 (let ((customization-file (expand-file-name "custom.el" user-emacs-directory)))
   (unless (file-exists-p customization-file)
@@ -172,14 +205,14 @@
   (setq custom-file customization-file)
   (load custom-file 'noerror))
 
+
 (electric-pair-mode 1)
 (global-hl-line-mode 1)
 (repeat-mode 1)
 (savehist-mode 1)
 (save-place-mode 1)
 (column-number-mode 1)
-(blink-cursor-mode -1)
-(tooltip-mode -1)
+(delete-selection-mode 1)
 ;; (desktop-save-mode 1)
 (set-frame-font +base/font-spec nil t t)
 (set-face-attribute 'default t
@@ -191,12 +224,13 @@
                      (diff-buffer-with-file (buffer-file-name buffer)))
                    "show diff between the buffer and its file"))
 
-
 (use-package emacs
   :config
   (require 'server)
   (if (not (server-running-p))
       (server-start))
+  :bind-keymap*
+  ("`" . esc-map)
   :bind*
   (("M-RET" . recenter)
    ("M-<return>" . recenter)
@@ -205,7 +239,7 @@
    ("M-g g" . beginning-of-buffer)
    ("M-g e" . end-of-buffer)
    ("M-g f" . find-file-at-point)
-   ("M-g W" . browse-url-at-point)
+   ("M-g w" . browse-url-at-point)
    ("M-g j" . next-line)
    ("M-g k" . previous-line)
    ("M-g TAB" . nil)
@@ -227,9 +261,16 @@
    ("C-c [f" . beginning-of-defun)
    ("C-c ]s" . forward-sexp)
    ("C-c [s" . backward-sexp)
+   ("C-c ]]" . forward-list)
+   ("C-c [[" . backward-list)
+   ("C-c ]}" . up-list)
+   ("C-c [}" . backward-up-list)
+   ("C-c ]i" . forward-to-indentation)
+   ("C-c [i" . backward-to-indentation)
+   ("C-c ]l" . forward-line)
+   ("C-c [l" . backward-line)
    ("C-x K" . kill-buffer)
    ("C-c bk" . kill-buffer))
-
   :hook
   ;; better to see all of the code
   ((window-setup-hook server-after-make-frame-hook) . +font--setup)
@@ -237,8 +278,8 @@
   ;; display line numbers in text-editing modes
   (prog-mode-hook . visual-line-mode)
   (visual-line-mode-hook . visual-wrap-prefix-mode)
+  (gfm-mode-hook . display-line-numbers-mode)
   (prog-mode-hook . display-line-numbers-mode)
-  (display-line-numbers-mode-hook . header-line-indent-mode)
   (after-init-hook . (lambda () (message (emacs-init-time)))))
 
 (use-package implicit-utils
@@ -267,20 +308,11 @@
    ("\]" . +utils/forward-defun)
    ("\[" . +utils/backward-defun)))
 
-(with-eval-after-load (intern (concat (symbol-name +base/theme) "-theme"))
-  (custom-set-faces `(vertical-border ((t (:background ,(doom-color 'bg) :foreground ,(doom-color 'fg-alt) :width narrow))))
-                    `(border ((t (:background ,(doom-color  'bg) :foreground ,(doom-color 'fg) :width narrow))))
-                    `(internal-border ((t (:background ,(doom-color 'bg) :width narrow))))))
-
-(set-display-table-slot standard-display-table
-                        'vertical-border
-                        (make-glyph-code ?┃))
-(set-display-table-slot standard-display-table
-                        'truncation
-                        (make-glyph-code ?⮐))
+;;(set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?┃))
+(set-display-table-slot standard-display-table 'truncation (make-glyph-code 32))
 
 (setq which-key-popup-type 'side-window
-      which-key-preserve-window-configuration t
+      which-key-preserve-window-configuration nil
       which-key-side-window-max-width 0.2
       which-key-idle-delay 0.6
       which-key-side-window-max-height 0.2
@@ -290,14 +322,17 @@
       which-key-side-window-slot 2
       which-key-max-display-columns 5
       which-key-prefix-prefix "[M] "
-      which-key-add-column-padding 5
-      which-key-show-remaining-keys t
+      which-key-add-column-padding 2
+      which-key-show-remaining-keys nil
+      which-key-frame-max-width 2
+      which-key-frame-max-height 10
       which-key-min-column-description-width 30)
 
-(add-hook 'meow-global-mode-hook (defun ii/which-key--setup ()
-                                   (require 'which-key)
-                                   (which-key-mode)
-                                   (which-key-setup-side-window-bottom)))
+(add-hook 'meow-global-mode-hook
+          (defun ii/which-key--setup ()
+            (require 'which-key)
+            (which-key-mode)
+            (which-key-setup-side-window-bottom)))
 
 (use-package kkp
   :hook
@@ -315,17 +350,13 @@
   :hook
   (tty-setup-hook . xclip-mode))
 
-;;;; meow
-;; meow utilities and extensions
 (use-package implicit-meow
   :straight `(implicit-meow :type nil
                             :local-repo ,(expand-file-name "meow" +init-module-path))
+  :after meow
   :commands
   (+meow/command
-   +meow/match
    +meow/yank
-   +meow/grab
-   ii/meow--setup-mark-on-insert-change
    ii/meow--next-change-callback
    ii/meow-switch-char-case
    ii/meow-switch-case
@@ -334,31 +365,21 @@
    ii/meow-downcase-dwim
    ii/meow-change-number-at-point
    ii/meow-increment-number-at-point
-   ii/meow-decrement-number-at-point)
+   ii/meow-decrement-number-at-point
+   ii/meow--setup-local-pairs)
   :autoload
   (ii/meow--beacon-mode-setup)
   :preface
-  (setq ii/meow-toggle-case-repeat-map (make-sparse-keymap)
-        ii/meow-surround-map (make-sparse-keymap)
-        ii/meow-surround-char-map (make-sparse-keymap))
-  :init
-  (advice-add 'meow-insert :after 'ii/meow--setup-mark-on-insert-change)
-  (add-to-list 'insert-pair-alist '(?| ?|))
-  (add-to-list 'insert-pair-alist '(?\\ ?\\))
-  (add-to-list 'insert-pair-alist '(?/ ?/))
-  (add-to-list 'insert-pair-alist '(?* ?*))
-  (add-to-list 'insert-pair-alist '(?_ ?_))
+  (setq ii/meow-toggle-case-repeat-map (make-sparse-keymap))
   :config
   (add-to-list 'meow-selection-command-fallback '(ii/meow-toggle-case . ii/meow-toggle-char-case))
   :bind*
-  (("C-c tc" . ii/meow-switch-case)
-   ("M-g C-c" . ii/meow-switch-case)
+  (("M-g C-c" . ii/meow-switch-case)
    ("M-g ~" . ii/meow-toggle-case-region)
    ("M-g u" . ii/meow-downcase-dwim)
-   ("M-g u" . ii/meow-upcase-dwim)
+   ("M-g U" . ii/meow-upcase-dwim)
    ("C-c ei" . ii/meow-increment-number-at-point)
    ("C-c ed" . ii/meow-decrement-number-at-point)
-   ("C-c e")
    :repeat-map ii/meow-toggle-case-repeat-map
    ("~" . ii/meow-toggle-case-region)
    ("C-c" . ii/meow-switch-case)
@@ -366,20 +387,35 @@
    ("u" . ii/meow-downcase-dwim)
    ("U" . ii/meow-upcase-dwim))
   :hook
-  (meow-beacon-mode-hook . ii/meow--beacon-mode-setup))
-
-(setq kmacro-ring-max 16
-      kmacro-counter-value-start 1)
+  (meow-beacon-mode-hook . ii/meow--beacon-mode-setup)
+  (after-change-major-mode-hook . ii/meow--setup-local-pairs))
 
 (use-package meow-tree-sitter
   :init
+
+  (defun ii/meow-tree-sitter-register-thing (key types &optional query)
+    "Register `meow-tree-sitter' THING without adding it to `meow-char-thing-table'."
+    (when (stringp types)
+      (setq types (list types)))
+    (let* ((sym (intern (string-join types "/")))
+           (inner (mapcar (lambda (type)
+                            (intern (concat type ".inside")))
+                          types))
+           (outer (mapcar (lambda (type)
+                            (intern (concat type ".around")))
+                          types)))
+      (meow-thing-register
+       sym
+       (lambda () (meow-tree-sitter--select-thing inner query))
+       (lambda () (meow-tree-sitter--select-thing outer query)))))
+
   (defvar ii/meow-treesitter-table '((?a . "class")
                                      (?f . "function")
-                                     (?t . "test")
                                      (?y . "entry")
                                      (?, . "parameter")
                                      (?\; . "comment"))
     "Characters associated with `meow-tree-sitter' things.")
+
   (defun ii/meow-treesitter-setup-local-defaults ()
     "Register `meow-tree-sitter' defaults as buffer-local if local buffer has a treesit parser."
     (when (treesit-parser-list)
@@ -394,6 +430,9 @@
                       (assoc-delete-all (car bind)
                                         meow-char-thing-table))
           (cl-pushnew bind meow-char-thing-table)))))
+
+  (setq meow-tree-sitter-can-expand t
+        meow-tree-sitter-can-jump-forward t)
   :config
   ;; register `meow-treesitter' things without adding them to `meow-char-thing-table'.
   (dolist (bind ii/meow-treesitter-table)
@@ -416,49 +455,86 @@
   :hook
   (after-change-major-mode-hook . ii/meow-treesitter-setup-local-defaults))
 
+(use-package surround
+  :after meow
+  :init
+  (use-package-autoload-keymap
+   'surround-keymap 'surround t)
+  :bind*
+  ( :map surround-keymap
+    ("a" . surround-insert)))
+
+;; operating on numbers
+(use-package operate-on-number
+  :straight ( :type git
+              :host github
+              :repo "knu/operate-on-number.el")
+  :init
+  (setq ii/operate-on-number-map (make-sparse-keymap))
+  :bind-keymap*
+  (("C-c e C-n" . ii/operate-on-number-map))
+  :bind*
+  ( :map ii/operate-on-number-map
+    ("+" . apply-operation-to-number-at-point)
+    ("-" . apply-operation-to-number-at-point)
+    ("*" . apply-operation-to-number-at-point)
+    ("/" . apply-operation-to-number-at-point)
+    ("\\" . apply-operation-to-number-at-point)
+    ("^" . apply-operation-to-number-at-point)
+    ("<" . apply-operation-to-number-at-point)
+    (">" . apply-operation-to-number-at-point)
+    ("#" . apply-operation-to-number-at-point)
+    ("%" . apply-operation-to-number-at-point)
+    ("'" . operate-on-number-at-point)
+    ("C-u" . operate-on-number-read-operand)))
+
+(use-package iedit)
+
 (use-package meow
   :custom
   (meow-use-keypad-when-execute-kbd t)
   :init
-  (setq meow-use-dynamic-face-color nil
-        meow-update-display-in-macro nil
-        meow-expand-selection-type 'expand
-        meow-pop-or-unpop-to-mark-repeat-unpop t
-        meow-mode--set-explicitly nil
-        meow-select-on-change nil)
+  (setopt meow-use-dynamic-face-color nil
+          meow-update-display-in-macro nil
+          meow-use-clipboard t
+          meow-esc-delay 0
+          meow-expand-selection-type 'expand
+          meow-use-cursor-position-hack t
+          meow-pop-or-unpop-to-mark-repeat-unpop t
+          meow-mode--set-explicitly nil
+          meow-select-on-change nil)
+
+  (defun ii/meow--line-numbers-toggle (&rest args)
+    (when (bound-and-true-p display-line-numbers-mode)
+      (pcase display-line-numbers-type
+        ('relative (when meow-insert-mode
+                     (setq-local display-line-numbers-type t)
+                     (display-line-numbers--turn-on)))
+        (_ (when (not meow-insert-mode)
+             (setq-local display-line-numbers-type 'relative)
+             (display-line-numbers--turn-on))))))
 
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-
-    (meow-define-state vterm
-      "meow state for `vterm-mode'"
-      :keymap meow-vterm-state-map)
 
     (meow-define-state eat
       "meow state for `eat-mode'."
       :keymap meow-eat-state-map)
 
-    (setq meow-cursor-type-eat 'hollow)
-    (setq meow-cursor-type-vterm 'hollow)
+    (setq meow-cursor-type-eat 'bar)
 
     (meow-define-keys 'eat
+      '("<escape>" . eat-self-input)
       '("M-SPC" . meow-keypad)
       '("C-g" . eat-self-input)
+      (cons "C-w" meow-window-prefix-map)
       (cons "C-t" meow-eat-toggle-map))
-
-    (meow-define-keys 'vterm
-      '("M-SPC" . meow-keypad)
-      '("C-g" . vterm--self-insert))
 
     (meow-motion-define-key
      '("j" . meow-next)
      '("k" . meow-prev)
-     '("C-h" . "C-w h")
-     '("C-j" . "C-w j")
-     '("C-k" . "C-w k")
-     '("C-l" . "C-w l")
      '("C-s" . +search/buffer)
-     '("<escape>" . ignore))
+     (cons "C-w" meow-window-prefix-map))
 
     (meow-leader-define-key
      ;; Use SPC (0-9) for digit arguments.
@@ -483,7 +559,6 @@
      (cons "h" help-map)
      '("i" . "C-c i")
      '("j" . "C-c j")
-     '("n" . "C-c n")
      '("p" . "C-x p")
      '("t" . "C-c t")
      '("o" . "C-c o")
@@ -492,7 +567,6 @@
      (cons "w" meow-window-prefix-map))
 
     (meow-normal-define-key
-     '("@" . "C-c @")
      '("0" . meow-digit-argument)
      '("9" . meow-digit-argument)
      '("8" . meow-digit-argument)
@@ -513,29 +587,48 @@
      '("M-3" . meow-expand-3)
      '("M-2" . meow-expand-2)
      '("M-1" . meow-expand-1)
+     ;; '("~")
+     ;; '("!" . ii/meow-shell-command)
+     '("@" . "C-c @")
+     (cons "#" ii/operate-on-number-map)
+     ;; '("$" . ii/meow-pipe-to-shell-command)
+     '("%" . meow-query-replace-regexp)
+     ;; '("^")
+     ;; '("&")
+     ;; '("*")
+     ;; '("\(")
+     ;; '("\)")
      '("-" . negative-argument)
-     '(":" . +meow/command)
+     '("_" . meow-join)
+     '("=" . ii/meow-indent-region-or-buffer)
+     ;; '("+" . )
      '(";" . meow-reverse)
-     '("," . meow-inner-of-thing)
-     '("." . meow-bounds-of-thing)
+     '(":" . ii/meow-command)
+     '("," . ii/meow-inner-of-thing)
+     '("." . ii/meow-bounds-of-thing)
      '("<" . meow-beginning-of-thing)
      '(">" . meow-end-of-thing)
      '("]" . "C-c ]")
      '("[" . "C-c [")
      '("}" . "M-}")
      '("{" . "M-{")
+     '("'" . repeat)
+     '("\"" . "C-x r")
+     '("/" . +search/buffer)
+     '("?" . +lookup/documentation)
      '("a" . meow-append)
      '("A" . meow-open-below)
      '("b" . meow-back-word)
      '("B" . meow-back-symbol)
      '("c" . meow-change)
      '("d" . meow-kill)
-     '("D" . meow-backward-delete)
+     '("D" . meow-kill-append)
      '("e" . meow-next-word)
      '("E" . meow-next-symbol)
      '("f" . meow-find)
+     '("F" . meow-find-expand)
      '("g" . "M-g")
-     '("G" . +meow/grab)
+     '("G" . meow-grab)
      '("h" . meow-left)
      '("H" . meow-left-expand)
      '("i" . meow-insert)
@@ -546,54 +639,50 @@
      '("K" . meow-prev-expand)
      '("l" . meow-right)
      '("L" . meow-right-expand)
-     '("m" . +meow/match)
-     '("M" . meow-join)
+     '("m" . "C-c k")
      '("n" . meow-search)
      '("N" . meow-pop-search)
      '("o" . meow-block)
      '("O" . meow-to-block)
      '("p" . +meow/yank)
      '("P" . meow-yank-pop)
-     '("q" . quoted-insert)
+     '("q" . "C-x C-k")
      '("Q" . meow-goto-line)
      '("r" . meow-replace)
      '("R" . meow-swap-grab)
-     (cons "s" ii/meow-surround-char-map)
-     '("S" . ii/meow-surround-with-string)
+     (cons "s" surround-keymap)
      '("t" . meow-till)
-     '("u" . meow-undo)
+     '("T" . meow-till-expand)
+     '("u" . undo)
      '("U" . undo-redo)
      '("v" . meow-visit)
+     ;; '("V" . meow-visit)
      '("w" . meow-mark-word)
      '("W" . meow-mark-symbol)
      '("x" . meow-line)
      '("X" . meow-goto-line)
      '("y" . meow-save)
-     '("Y" . meow-sync-grab)
+     '("Y" . meow-save-append)
      '("z" . meow-pop-selection)
-     '("Z" . meow-pop-all-selection)
-     '("'" . repeat)
-     '("/" . +search/buffer)
-     '("?" . +lookup/documentation)
-     (cons "C-w" meow-window-prefix-map)
-     '("C-r" . meow-redo)
-     '("C-j" . windmove-down)
-     '("C-k" . windmove-up)
-     '("C-h" . windmove-left)
-     '("C-l" . windmove-right))
+     '("Z" . meow-pop-all-selection))
+
+    (meow-define-keys 'insert
+      (cons "C-'" meow-normal-state-keymap))
 
     ;; kbd macro overrides
     (setq meow--kbd-kill-region "S-<delete>"
           meow--kbd-kill-ring-save "C-<insertchar>"
-          meow--kbd-keyboard-quit "<escape>"
           meow-use-enhanced-selection-effect t
           meow-keypad-leader-dispatch "C-c"
           meow-keypad-ctrl-meta-prefix nil
           meow-keypad-meta-prefix nil
+          meow-keypad-literal-prefix 32
           meow-keypad-execute-on-beacons t)
 
     (setf (alist-get 'meow-kill meow-selection-command-fallback)
-          'meow-delete)
+          'meow-delete
+          (alist-get 'meow-undo-in-selection meow-selection-command-fallback)
+          'meow-undo)
 
     (setf (alist-get 'bounds meow-thing-selection-directions) 'forward
           (alist-get 'begining meow-thing-selection-directions) 'forward)
@@ -610,18 +699,24 @@
                                            (nov-mode . motion)
                                            (archive-mode . test)
                                            (vterm-mode . vterm)
+                                           (speed-type-mode . insert)
                                            (shell-mode . insert)
                                            (eat-mode . eat)
-                                           (shell-command-mode . motion))))
+                                           (shell-command-mode . motion)
+                                           (comint-mode . insert))))
+
+    (setq meow-char-thing-table '((?\( . round) (?\) . round)
+                                  (?\[ . square) (?\] . square)
+                                  (?\{ . curly) (?\} . curly)
+                                  (103 . string)
+                                  (101 . symbol) (119 . window) (98 . buffer) (112 . paragraph)
+                                  (108 . line) (118 . visual-line) (100 . defun) (46 . sentence)))
 
     (meow-thing-register 'whitespace 'whitespace 'whitespace)
     (add-to-list 'meow-char-thing-table '(32 . whitespace))
 
-    (meow-thing-register 'xml-tag
-                         '(pair-regexp ("<[^/>]+>") ("</[^/>]+>"))
-                         '(pair-regexp ("<[^/>]+>") ("</[^/>]+>")))
-
-    (add-to-list 'meow-char-thing-table '(?x . xml-tag))
+    (meow-thing-register 'word 'word 'word)
+    (add-to-list 'meow-char-thing-table '(?w . word))
 
     (meow-thing-register 'regexp-search
                          'ii/meow--regexp-search-inner
@@ -633,13 +728,10 @@
                          'ii/meow--search-inner
                          'ii/meow--search-bounds)
 
-    (add-to-list 'meow-char-thing-table '(?/ . search))
 
-    (meow-thing-register 'angled
-                         '(pair ("<") (">"))
-                         '(pair ("<") (">")))
+    (add-to-list 'meow-char-thing-table '(?\/ . search))
 
-    (add-to-list 'meow-char-thing-table '(?a . angled)))
+    (add-to-list 'meow-selection-command-fallback '(meow-reverse . negative-argument)))
 
   (defun +load-meow ()
     "Load `meow'."
@@ -647,24 +739,18 @@
     (meow-setup)
     (meow-global-mode 1)
     (setq-default meow-replace-state-name-list '((eat . "<T>")
-                                                 (vterm . "<T>")
                                                  (normal . "<N>")
                                                  (motion . "<M>")
                                                  (keypad . "<K>")
                                                  (insert . "<I>")
-                                                 (beacon . "<B>")))
-    (custom-set-faces `(secondary-selection
-                        ((t (:background ,(doom-lighten (doom-color 'bg) 0.05)))))
-                      `(region
-                        ((t (:background ,(doom-lighten (doom-color 'bg) 0.10)))))))
+                                                 (beacon . "<B>"))))
   :bind*
   (("M-SPC" . meow-keypad)
    ("M-<backspace>" . meow-backward-kill-symbol)
-   ("C-O" . meow-pop-to-global-mark)
    ("C-o" . meow-pop-or-unpop-to-mark)
+   ("C-`" . meow-pop-to-global-mark)
    ("M-g c" . meow-comment)
    ("C-c jf" . find-file-at-point)
-   ("C-c jW" . browse-url-at-point)
    ("C-c twm" . menu-bar-mode)
    ("C-c twt" . tool-bar-mode)
    ("C-c tV" . visual-line-mode)
@@ -672,11 +758,14 @@
    ("C-c ic" . insert-char)
    ("C-c ib" . insert-buffer)
    ("C-c b`" . meow-last-buffer)
+   ("C-c kl" . meow-kmacro-lines)
+   ("C-c km" . meow-kmacro-matches)
    :map emacs-lisp-mode-map
    ("C-c ib" . eval-print-last-sexp)
    :map help-map
    ("l" . load-library))
   :hook
+  (meow-switch-state-hook . ii/meow--line-numbers-toggle)
   (after-init-hook . +load-meow))
 
 (with-eval-after-load 'meow
@@ -725,17 +814,13 @@
  ("C-c s?" . +search/affe-grep-thing-at-point)
  ("C-c f." . +search/affe-find-thing-at-point))
 
-(use-package grep
-  :straight nil
-  :init
-  (setopt find-program (+os/per-system! :win (shell-quote-argument "c:/Program Files/Git/usr/bin/find.exe")
-                                        :linux "find"
-                                        :wsl "find")
-          grep-program (executable-find "grep")
-          grep-find-ignored-directories '("SCCS" "RCS" "CVS" "MCVS" ".src" ".svn" ".git" ".hg" ".bzr" "_MTN" "_darcs" "{arch}" "node_modules" "build" "dist")
-          grep-use-headings t))
-
-(setopt isearch-wrap-pause 'no
+(setopt find-program (+os/per-system! :win (shell-quote-argument "c:/Program Files/Git/usr/bin/find.exe")
+                                      :linux "find"
+                                      :wsl "find")
+        grep-program (executable-find "grep")
+        grep-find-ignored-directories '("SCCS" "RCS" "CVS" "MCVS" ".src" ".svn" ".git" ".hg" ".bzr" "_MTN" "_darcs" "{arch}" "node_modules" "build" "dist")
+        grep-use-headings t
+        isearch-wrap-pause 'no
         isearch-lazy-count t
         lazy-count-prefix-format "(%s/%s) "
         search-default-mode t
@@ -743,18 +828,16 @@
         isearch-motion-changes-direction t
         isearch-regexp-lax-whitespace t
         isearch-repeat-on-direction-change t
-        multi-isearch-pause t)
+        multi-isearch-pause t
+        query-replace-skip-read-only t
+        fringe-mode (cons 5 12)
+        right-margin-width 1)
 
 (use-package replace
   :straight nil
-  :init
-  (setopt query-replace-skip-read-only t)
   :bind*
   (("C-c sr" . query-replace)
    ("C-c sg" . query-replace-regexp)))
-
-(setopt imenu-auto-rescan t
-        imenu-use-popup-menu 'on-mouse)
 
 (use-package rg
   :init
@@ -777,7 +860,11 @@
 (use-package wgrep
   :if (< emacs-major-version 30))
 
-(setopt fringe-mode (cons 6 6))
+
+(use-package buffer-box
+  :straight (buffer-box :type git
+                        :host github
+                        :repo "rougier/buffer-box"))
 
 (use-package solaire-mode
   :hook
@@ -792,14 +879,16 @@
                                                              "straight"
                                                              straight-build-dir
                                                              "doom-gruber-darker-theme/"))
-      (setq doom-themes-enable-bold t
+      (setq doom-themes-enable-bold nil
             doom-themes-enable-italic t
             doom-themes-treemacs-enable-variable-pitch nil
             doom-themes-treemacs-theme "doom-colors")
       (doom-themes-visual-bell-config)
       (load-theme +base/theme t)))
   :config
-  (ii/appearance-setup-doom-themes))
+  (ii/appearance-setup-doom-themes)
+  :hook
+  (server-after-make-frame-hook . ii/appearance-setup-doom-themes))
 
 (use-package rainbow-delimiters
   :hook ((prog-mode-hook emacs-lisp-mode-hook) . rainbow-delimiters-mode))
@@ -818,11 +907,6 @@
     lsp-help-mode-hook
     helpful-mode-hook)
    . colorful-mode))
-
-(setq text-scale-mode-step 1.1)
-
-(bind-keys* ("C-=" . text-scale-increase)
-            ("C--" . text-scale-decrease))
 
 (use-package hl-todo
   :commands
@@ -853,8 +937,11 @@
 
 (use-package doom-gruber-darker-theme
   :straight (doom-gruber-darker-theme :type nil
-                                      :local-repo "/home/b/repos/doom-gruber-darker-theme"))
-(setq pulse-iterations 1)
+                                      :local-repo "/home/b/repos/doom-gruber-darker-theme")
+  :config
+  ;; these faces are modified by meow and need to be overridden here
+  (custom-set-faces `(region ((t (:extend nil))))
+                    `(secondary-selection ((t (:extend nil))))))
 
 ;;;; Window Management
 (use-package implicit-windows
@@ -892,13 +979,13 @@
           ;; vc-diff
           ((or . ("\*vc-diff\*"))
            (display-buffer-use-some-window))
-          ;; flymake
+          ;;flymake
           ((or . ((derived-mode . flymake-project-diagnostics-mode)
                   (derived-mode . flymake-diagnostics-buffer-mode)))
            (display-buffer-in-side-window)
            (side . bottom)
            (window-height . 0.35))
-          ((or . ("\*Warnings\*"))
+          ((or . (("\*Warnings\*")))
            (display-buffer-no-window))
           ;; bottom side window
           ((or . ((derived-mode . rg-mode)
@@ -978,16 +1065,12 @@
            (dedicated . nil))
           ;; bottom side window
           ((or . ((derived-mode . proced-mode)))
-           (display-buffer-at-bottom)
-           (window-height . 15)
-           (dedicated . t))))
+           (display-buffer-same-window))))
   :bind*
-  ;; display buffer prefixes
   (("C-c b[" . previous-buffer)
    ("C-c b]" . next-buffer)
    ("C-c ]b" . next-buffer)
    ("C-c [b" . previous-buffer)
-   ;; other
    ("C-c twd" . window-toggle-dedicated)
    :map meow-window-prefix-map
    ("C-o" . other-window-prefix)
@@ -1010,15 +1093,8 @@
    ("s" . split-window-vertically)
    ("w" . other-window)
    ("q" . delete-window)
-   ;; to exit window action repeat map
    :exit
    ("=" . balance-windows)))
-
-(setq window-divider-default-places 'right-only
-      window-divider-default-right-width 1
-      window-divider-default-bottom-width 1)
-
-(add-hook 'window-setup-hook 'window-divider-mode)
 
 (use-package windmove
   :straight nil
@@ -1026,24 +1102,22 @@
   (setq windmove-wrap-around nil)
   :bind*
   ( :map meow-window-prefix-map
-    ("H" . windmove-swap-states-left)
-    ("J" . windmove-swap-states-down)
-    ("K" . windmove-swap-states-up)
-    ("L" . windmove-swap-states-right)
     ("h" . windmove-left)
     ("j" . windmove-down)
     ("k" . windmove-up)
     ("l" . windmove-right)
-    ;; buffer display prefixes
+    ("H" . windmove-swap-states-left)
+    ("J" . windmove-swap-states-down)
+    ("K" . windmove-swap-states-up)
+    ("L" . windmove-swap-states-right)
     ("C-h" . windmove-display-left)
     ("C-j" . windmove-display-down)
     ("C-k" . windmove-display-up)
     ("C-l" . windmove-display-right)
     ("C-f" . windmove-display-new-frame)
     ("C-t" . windmove-display-new-tab)
-    ;; delete in direction
-    ("C-d h" . windmmove-delete-left)
-    ("C-d j" . windomove-delete-down)
+    ("C-d h" . windmove-delete-left)
+    ("C-d j" . windmove-delete-down)
     ("C-d k" . windmove-delete-up)
     ("C-d l" . windmove-delete-right)
     :repeat-map window-repeat-map
@@ -1056,38 +1130,40 @@
     ("k" . windmove-up)
     ("l" . windmove-right)))
 
-(use-package winner
+(use-package window-x
   :straight nil
-  :hook
-  (after-init-hook . winner-mode)
   :bind*
-  (("C-c ]w" . winner-redo)
-   ("C-c [w" . winner-undo)
-   :repeat-map winner-repeat-map
-   ("W" . winner-redo)
-   ("w" . winner-undo)))
+  ( :map meow-window-prefix-map
+    ("C-r r" . rotate-windows)
+    ("C-r b" . rotate-windows-back)))
+
+(use-package uniquify
+  :straight nil
+  :demand
+  :config
+  (setq uniquify-buffer-name-style 'forward))
 
 ;;;; Modeline
 
-(setq uniquify-buffer-name-style nil
-      mode-line-right-align-edge 'right-margin)
+(setq mode-line-right-align-edge 'right-margin)
 
 (add-hook 'minibuffer-mode-hook 'visual-line-mode)
 
 (defvar ii/project-mode-line-format nil)
 
 (defun ii/mode-line--get-project-name (project)
-  ""
+  "Get name of PROJECT while handling the cases of non-file buffers."
   (let ((bf (buffer-name)))
     (if (string-equal (project-name project) bf)
         ""
-      (concat (project-name project) "/"))))
+      (concat (project-name project) ":"))))
 
 (defun ii/mode-line-update-project (&rest _args)
   "Update mode line project display."
-  (if-let* ((p (project-current nil default-directory)))
-      (setq-local ii/project-mode-line-format (ii/mode-line--get-project-name p))
-    (setq-local ii/project-mode-line-format "")))
+  (setq-local ii/project-mode-line-format
+              (if-let ((p (project-current nil default-directory)))
+                  (propertize (ii/mode-line--get-project-name p) 'face 'success)
+                "")))
 
 (add-hook 'window-buffer-change-functions 'ii/mode-line-update-project)
 (add-hook 'after-set-visited-file-name-hook 'ii/mode-line-update-project)
@@ -1102,9 +1178,13 @@
                 " "
                 mode-line-position
                 mode-line-format-right-align
+                (lsp-mode lsp-modeline--diagnostics-string)
+                (lspce-mode lspce--mode-line-format " ")
+                (eglot--managed-mode (:eval (concat eglot-mode-line-format " ")))
+                mode-line-process
                 (flymake-mode flymake-mode-line-counters)
                 (vc-mode vc-mode)
-                (vc-mode " ")
+                " "
                 mode-name))
 
 (setq read-buffer-completion-ignore-case t
@@ -1124,15 +1204,14 @@
   :straight nil
   :init
   (setq completion-preview-minimum-symbol-length 5)
-  :hook
-  (global-corfu-mode-hook . global-completion-preview-mode)
   :bind*
-  ( :map completion-preview-active-mode-map
-    ("M-n" . completion-preview-next-candidate)
-    ("M-p" . completion-preview-prev-candidate)
-    ("TAB" . completion-at-point)
-    ("<tab>" . completion-at-point)
-    ("M-TAB" . completion-preview-insert)))
+  (("C-c tp" . completion-preview-mode)
+   :map completion-preview-active-mode-map
+   ("M-n" . completion-preview-next-candidate)
+   ("M-p" . completion-preview-prev-candidate)
+   ("TAB" . completion-at-point)
+   ("<tab>" . completion-at-point)
+   ("M-TAB" . completion-preview-insert)))
 
 (use-package minibuffer
   :straight nil
@@ -1147,11 +1226,8 @@
   :hook
   (minibuffer-setup-hook . cursor-intangible-mode))
 
-(use-package dabbrev
-  :straight nil
-  :init
-  (setq dabbrev-upcase-means-case-search t
-        dabbrev-ignored-buffer-modes '(archive-mode image-mode docview-mode pdf-view-mode tags-table-mode csv-mode)))
+(setq dabbrev-upcase-means-case-search t
+      dabbrev-ignored-buffer-modes '(archive-mode image-mode docview-mode pdf-view-mode tags-table-mode csv-mode))
 
 (use-package marginalia
   :custom
@@ -1172,6 +1248,8 @@
                                           (reusable-frames . nil)
                                           (popup-frames . nil)
                                           (inhibit-switch-frame . t)))
+
+
   (defun ii/vertico--buffer-mode-display-buffer (buffer alist)
     "BUFFER_ ALIST."
     (let* ((windows (window-list nil -1 nil))
@@ -1208,13 +1286,16 @@
           vertico-multiform-commands
           '((consult-grep buffer)
             (consult-ripgrep buffer)
+            (consult-find buffer)
             (affe-grep buffer)
             (affe-find buffer)))
   :hook
   (marginalia-mode-hook . vertico-mode)
+  (minibuffer-setup-hook . vertico-repeat-save)
   :bind*
-  (("M-`" . vertico-suspend)
+  (("C-M-`" . vertico-suspend)
    ("C-c ss" . vertico-suspend)
+   ("M-`" . vertico-repeat)
    :map vertico-map
    ("M-RET" . vertico-suspend)
    ("M-<return>" . vertico-suspend)
@@ -1224,6 +1305,7 @@
    ("C-K" . vertico-previous-group)
    ("C-c f" . vertico-flat-mode)
    ("C-c s" . vertico-suspend)
+   ("C-c C-u" . vertico-directory-up)
    ("C-c ." . vertico-repeat)
    ("C-c i" . vertico-insert)))
 
@@ -1271,13 +1353,54 @@
                                            :win (format "%s . -not ( -path */.[A-Za-z]* -prune )"
                                                         find-program))
         consult-narrow-key "C-.")
+
+  ;; setup preview for `find-file' and `project-find-file' commands
+  (with-eval-after-load 'vertico
+    (require 'consult)
+    (setq read-file-name-function #'ii/consult-find-file-with-preview)
+
+    (defun ii/consult-find-file-with-preview (prompt &optional dir default mustmatch initial pred)
+      (interactive)
+      (let ((default-directory (or dir default-directory))
+            (minibuffer-completing-file-name t))
+        (consult--read #'read-file-name-internal
+                       :state (consult--file-preview)
+                       :prompt prompt
+                       :require-match mustmatch
+                       :predicate pred)))
+
+    (setq project-read-file-name-function #'ii/consult-project-find-file-with-preview)
+
+    (defun ii/consult-project-find-file-with-preview (prompt all-files &optional pred hist _mb)
+      (let ((prompt (if (and all-files (file-name-absolute-p (car all-files)))
+                        prompt
+                      (concat prompt
+                              (format " in %s"
+                                      (consult--fast-abbreviate-file-name default-directory)))))
+            (minibuffer-completing-file-name t))
+        (consult--read (mapcar
+                        (lambda (file)
+                          (file-relative-name file))
+                        all-files)
+                       :state (consult--file-preview)
+                       :prompt (concat prompt ": ")
+                       :require-match t
+                       :history hist
+                       :category 'file
+                       :predicate pred))))
   :config
   ;; disable previews for compilation errors
   (consult-customize
    consult-compile-error
-   :preview-key nil)
+   :preview-key nil
+   consult-find
+   :state (consult--file-preview))
+  (add-to-list 'consult-preview-excluded-files "\.gpg")
+  (add-to-list 'consult-preview-excluded-files "authinfo\.gpg")
+  (add-to-list 'consult-preview-allowed-hooks 'window-buffer-change-functions)
   :bind*
   (("C-c f/" . consult-find)
+   ("C-c fr" . consult-recent-file)
    ("C-c ir" . consult-register)
    ("C-c tm" . consult-minor-mode-menu)
    ("C-c bb" . consult-buffer)
@@ -1297,6 +1420,8 @@
    ("C-c sc" . consult-compile-error)
    ("C-c //" . consult-ripgrep)
    ("C-c /f" . consult-find)
+   :map help-map
+   ("i" . consult-info)
    :map project-prefix-map
    ("b" . consult-project-buffer)
    :map vertico-map
@@ -1308,15 +1433,30 @@
   :straight t
   :config
   (require 'orderless)
+
+  (defun ii/affe-file-preview ()
+    (let ((open (consult--temporary-files))
+          (preview (consult--buffer-preview)))
+      (lambda (action cand)
+        (unless (eq action 'preview)
+          (funcall open))
+        (funcall preview action
+                 (and cand
+                      (eq action 'preview)
+                      (funcall open cand))))))
+
   (defun affe-orderless-regexp-compiler (input _type _ignorecase)
     (setq input (cdr (orderless-compile input)))
     (cons input (apply-partially #'orderless--highlight input t)))
 
   (setq affe-regexp-compiler #'affe-orderless-regexp-compiler
         affe-count 1000)
+
   ;; Manual preview key for `affe-grep'
-  (consult-customize affe-grep
-                     affe-find
+  (consult-customize affe-find
+                     :state (ii/affe-file-preview)
+                     :preview-key 'any
+                     affe-grep
                      :preview-key '(:debounce 0.1 any))
 
   :bind*
@@ -1329,58 +1469,98 @@
 
 ;;;; Lookup
 (setq max-mini-window-height 0.1
+      browse-url-browser-function 'browse-url-firefox
       browse-url-firefox-program (+os/per-system! :wsl "/mnt/c/Program Files/Mozilla Firefox/firefox.exe"
                                                   :win "firefox.exe"
                                                   :linux "firefox")
-      dictionary-server "dict.org")
+      dictionary-server "dict.org"
+      webjump-sites '(("DuckDuckGo" . [simple-query "https://duckduckgo.com" "www.duckduckgo.com/?q=" ""])
+                      ("Google" . [simple-query "https://google.com" "www.google.com/search?q=" ""])
+                      ("YouTube" . [simple-query "https://youtube.com/feed/subscriptions" "www.youtube.com/results?search_query=" ""])
+                      ("Google" . [simple-query "https://google.com/search" "https://www.google.com/search?hl=en&q=" ""])
+                      ("Stack Overflow" . [simple-query "https://duckduckgo.com/?q=site%3Astackoverflow.com+" "https://duckduckgo.com/?q=site%3Astackoverflow.com+" ""])
+                      ("MyNixos" . [simple-query "https://mynixos.com" "https://mynixos.com/search?q=" ""])
+                      ("Wikipedia" . [simple-query "https://en.wikipedia.org" "https://en.wikipedia.org/w/index.php?search=" ""])
+                      ("CSS Tricks" . [simple-query "https://css-tricks.com" "https://css-tricks.com/?s=" ""])
+                      ("Python docs" . [simple-query "https://docs.python.org/3" "https://docs.python.org/3/search.html?q=" ""])
+                      ("DevDocs.io" . [simple-query "https://devdocs.io" "https://devdocs.io/#q=" ""])
+                      ("Rust STD Docs" . [simple-query "https://doc.rust-lang.org/stable" "https://doc.rust-lang.org/stable/std/index.html?search=" ""])
+                      ("Hoogle" . [simple-query "https://hoogle.haskell.org" "https://hoogle.haskell.org/?hoogle=" ""])
+                      ("ChatGPT" . [simple-query "https://chatgpt.com" "https://chatgpt.com/?q=" ""])))
 
-(use-package webjump
-  :straight nil
-  :custom
-  (webjump-sites '(("DuckDuckGo" . [simple-query "https://duckduckgo.com" "www.duckduckgo.com/?q=" ""])
-                   ("Google" . [simple-query "https://google.com" "www.google.com/search?q=" ""])
-                   ("YouTube" . [simple-query "https://youtube.com/feed/subscriptions" "www.youtube.com/results?search_query=" ""])
-                   ("Google" . [simple-query "https://google.com/search" "https://www.google.com/search?hl=en&q=" ""])
-                   ("Stack Overflow" . [simple-query "https://duckduckgo.com/?q=site%3Astackoverflow.com+" "https://duckduckgo.com/?q=site%3Astackoverflow.com+" ""])
-                   ("MyNixos" . [simple-query "https://mynixos.com" "https://mynixos.com/search?q=" ""])
-                   ("Wikipedia" . [simple-query "https://en.wikipedia.org" "https://en.wikipedia.org/w/index.php?search=" ""])
-                   ("CSS Tricks" . [simple-query "https://css-tricks.com" "https://css-tricks.com/?s=" ""])
-                   ("Python docs" . [simple-query "https://docs.python.org/3" "https://docs.python.org/3/search.html?q=" ""])
-                   ("DevDocs.io" . [simple-query "https://devdocs.io" "https://devdocs.io/#q=" ""])
-                   ("Rust STD Docs" . [simple-query "https://doc.rust-lang.org/stable" "https://doc.rust-lang.org/stable/std/index.html?search=" ""])
-                   ("Hoogle" . [simple-query "https://hoogle.haskell.org" "https://hoogle.haskell.org/?hoogle=" ""])
-                   ("ChatGPT" . [simple-query "https://chatgpt.com" "https://chatgpt.com/?q=" ""]))))
+(bind-key* "C-c jw" 'webjump)
 
 (setq eldoc-echo-area-prefer-doc-buffer nil
-      eldoc-idle-delay 0.05
+      eldoc-idle-delay 0.1
+      eldoc-print-after-edit nil
       eldoc-documentation-strategy 'eldoc-documentation-compose
       eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
 
 (use-package eldoc-box
   :init
+
+  (defun ii/eldoc-box--position-function (width height)
+    (let* ((pos (eldoc-box--default-at-point-position-function-1 width height))
+           (x (car pos))
+           (y (cdr pos)))
+      (cons x
+            y)))
+
   (setq eldoc-box-clear-with-C-g t
-        eldoc-box-cleanup-interval 0.2
-        eldoc-box-position-function 'eldoc-box--default-at-point-position-function
-        eldoc-box-doc-separator "\n--------------\n"
+        eldoc-box-cleanup-interval 0.1
+        eldoc-box-max-pixel-width (byte-compile-lambda
+                                   '(lambda ()
+                                      (if (display-graphic-p) 800 70)))
+        eldoc-box-max-pixel-height (byte-compile-lambda
+                                    '(lambda ()
+                                       (if (display-graphic-p) 800 30)))
+        eldoc-box-position-function 'ii/eldoc-box--position-function
+        eldoc-box-doc-separator "\n-------------------------------\n"
         eldoc-box-only-multi-line nil
         eldoc-box-fringe-use-same-bg nil)
 
-  (defun ii/eldoc-box-toggle-position-function ()
-    (interactive)
-    (pcase eldoc-box-position-function
-      ('eldoc-box--default-at-point-position-function (setopt eldoc-box-position-function 'eldoc-box--default-upper-corner-position-function))
-      (t (setopt eldoc-box-position-function 'eldoc-box--default-at-point-position-function))))
+  (defun ii/eldoc-box--setup ()
+    (if eldoc-box-mode
+        (setq-local eldoc-idle-delay 0
+                    eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
+      (setq-local eldoc-idle-delay 0
+                  eldoc-documentation-strategy 'eldoc-documentation-compose)))
+  :config
+  (setf (alist-get 'font eldoc-box-frame-parameters) +base/font-spec
+        (alist-get 'outer-border-width eldoc-box-frame-parameters) 1
+        (alist-get 'border-width eldoc-box-frame-parameters) 1)
+
   :bind*
   (("C-c te" . eldoc-box-hover-mode)
-   ("C-c tE" . ii/eldoc-box-toggle-position-function))
+   ("C-c ck" . eldoc-box-help-at-point))
   :hook
-  (eldoc-box-mode-hook . eldoc-box-hover-mode))
+  (eldoc-box-mode-hook . eldoc-box-hover-mode)
+  (eldoc-box-mode-hook . ii/eldoc-box--setup))
 
 (use-package dumb-jump
-  :disabled
   :init
-  (setq xref-show-definitions-function #'xref-show-definitions-completing-read)
+  (setq xref-show-definitions-function #'xref-show-definitions-completing-read
+        dumb-jump-prefer-searcher 'rg)
+  :config
+  ;; nwscript support
+  ;; TODO: move to `nwscript-mode'.
+  (with-eval-after-load 'nwscript-mode
+    (add-to-list 'dumb-jump-find-rules
+                 '( :type "function" :supports ("rg" "git-grep") :language "nwscript"
+                    :regex "\\(struct +[A-Za-z0-9\_]+|int|void|float|object|itemproperty|effect|talent|location|command|action|cassowary|event|json|sqlquery|vector|string\\)[ \t]+\\([A-Za-z]+[A-Za-z_0-9]*\\)\\([ \t]*([^{]*)\\)[ \t\n]*{"
+                    :tests ("void Func() {" "struct ps_effect Fire(struct test Test, int num)")
+                    :not ("void Func();" "struct ps_test {" "struct ps_test\n{" "")))
+    (add-to-list 'dumb-jump-find-rules
+                 '( :type "type" :supports ("rg" "git-grep") :language "nwscript"
+                    :regex "\\(struct +[A-Za-z0-9\_]+\\|int\\|void\\|float\\|object\\|itemproperty\\|effect\\|talent\\|location\\|command\\|action\\|cassowary\\|event\\|json\\|sqlquery\\|vector\\|string\\)[ \t]+\\(\\s+JJJ[ \t]*\\)\\(([A-Za-z0-9_, \n=]*)\\);"
+                    :tests ("struct Parser {" "struct ps_effect {" "struct ps_test \n{" "struct Str \n{")
+                    :not ("struct ps_effect PSTest()" "struct ")))
+    (add-to-list 'dumb-jump-find-rules
+                 '( :type "variable" :supports ("rg" "git-grep") :language "nwscript"
+                    :regexp "\\b\\(const[ \t]+\\(int\\|float\\|string\\)[ \t]+\\)\\([A-Z0-9_]+\\)[ \t]+=.*"
+                    :tests ("const int PS_VAR = 234;" "const string ps_str = \"fsfs\"")
+                    :not ("int a = 213213;" "int PS_CONST_FUN"))))
   :hook
   (xref-backend-functions . dumb-jump-xref-activate))
 
@@ -1403,6 +1583,7 @@
    ("C-," . xref-go-forward)))
 
 (defun ii/help--setup ()
+  "Setup local lookup function."
   (setq-local +lookup-documentation-function 'helpful-at-point))
 
 (add-hook 'help-mode-hook 'ii/help--setup)
@@ -1410,7 +1591,7 @@
 
 (use-package helpful
   :config
-  (setq helpful-max-highlight 20000)
+
   (bind-keys* :map helpful-mode-map
               ("?" . +lookup/documentation))
   :bind*
@@ -1440,7 +1621,7 @@
   :config
   (bind-keys*
    :map help-mode-map
-   ("?" . +lookup/documentation))
+   ("x?" . +lookup/documentation))
   :bind
   ( :map help-map
     ("b" . describe-bindings)
@@ -1456,12 +1637,8 @@
     ("w" . woman)))
 
 ;;;; Formatting
-(use-package editorconfig
-  :straight nil
-  :init
-  (setopt editorconfig-exclude-modes '(lisp-interaction-mode))
-  :hook
-  (after-init-hook . editorconfig-mode))
+(setopt editorconfig-exclude-modes '(lisp-interaction-mode))
+(add-hook 'after-init-hook 'editorconfig-mode)
 
 (use-package apheleia
   :defer 5
@@ -1485,85 +1662,35 @@
    ("C-/" . vundo-backward)
    ("C-?" . vundo-forward)))
 
-(use-package paren
-  :straight nil
+(setq show-paren-style 'parenthesis
+      show-paren-delay 0.01
+      show-paren-context-when-offscreen t
+      show-paren-when-point-inside-paren t
+      show-paren-when-point-in-periphery t)
+
+(add-hook 'prog-mode-hook 'show-paren-local-mode)
+
+(use-package window-stool
+  :straight (window-stool :type git
+                          :host github
+                          :repo "JasZhe/window-stool")
   :init
-  (setopt show-paren-style 'parenthesis
-          show-paren-delay 0.05
-          show-paren-context-when-offscreen 'overlay
-          show-paren-when-point-inside-paren t
-          show-paren-when-point-in-periphery t)
-  :config
-  (defvar +paren--extension-overlay nil)
+  (setopt window-stool-n-from-top 4
+          window-stool-n-from-bottom 0)
 
-  (defvar +paren--prefix-overlay nil)
+  (defmacro ii/window-stool--with-clear-buffer (buffer &rest body)
+    "Evaluate BODY in BUFFER without `window-stool' overlay being present."
+    (declare (indent defun))
+    `(let* ((window (get-buffer-window ,buffer))
+            (ov (alist-get window window-stool-overlays)))
+       (when ov (delete-overlay ov))
+       ,@body
+       (window-stool-single-overlay window (window-start window))))
 
-  (defvar +paren--context-face `( :background ,(face-attribute 'header-line :background)
-                                  :extend t :inherit which-func))
-
-  (defun +paren--add-prefix-overlay (beg len)
-    "BEG END."
-    (+paren--delete-prefix-overlay)
-    (setq +paren--prefix-overlay (make-overlay beg (+ beg len)))
-    (overlay-put +paren--prefix-overlay 'priority
-                 (+ show-paren-priority 10))
-    (overlay-put +paren--prefix-overlay
-                 'face 'header-line)
-    ;; (overlay-put +paren--prefix-overlay 'window t)
-    (add-hook 'post-command-hook '+paren--delete-prefix-overlay
-              nil 'local))
-
-  (defun +paren--delete-prefix-overlay ()
-    (when +paren--prefix-overlay
-      (delete-overlay +paren--prefix-overlay)
-      (setq +paren--prefix-overlay nil)
-      (remove-hook 'post-command-hook '+paren--delete-prefix-overlay 'local)))
-
-  (defun +paren--delete-extension-overlay ()
-    (when +paren--extension-overlay
-      (delete-overlay +paren--extension-overlay)
-      (setq +paren--extension-overlay nil)
-      (remove-hook 'post-command-hook '+paren--delete-extension-overlay 'local)))
-
-  (defun +paren--add-extension-overlay (beg end num)
-    "BEG END."
-    (+paren--delete-extension-overlay)
-    ;; (message "adding extension overlay")
-    (setq +paren--extension-overlay (make-overlay end (+ end 1)))
-    (overlay-put +paren--extension-overlay 'priority (+ show-paren-priority 1000))
-    (overlay-put +paren--extension-overlay 'face '(:extend t :inherit header-line))
-    (overlay-put +paren--extension-overlay 'window (selected-window))
-    (add-hook 'post-command-hook '+paren--delete-extension-overlay nil 'local))
-
-  (defun +paren--overlay-function (text)
-    "Show TEXT in an overlay at the top-left of the current window with nice face spec."
-    (show-paren--delete-context-overlay)
-    (let* ((beg (window-start))
-           (loc-info (save-excursion
-                       (goto-char beg)
-                       (cons (line-end-position)
-                             (line-number-at-pos))))
-           (end (car loc-info))
-           (num (cdr loc-info))
-           (clean-text (replace-regexp-in-string "\n" " " text))
-           (priority (+ show-paren-priority 999))
-           (prefix-gap (string-match "\\w\\|\(" text))
-           (stripped-text (string-trim-left clean-text)))
-      (setq show-paren--context-overlay (make-overlay (+ beg prefix-gap) end))
-      (overlay-put show-paren--context-overlay 'display stripped-text)
-      (overlay-put show-paren--context-overlay 'priority
-                   priority)
-      (overlay-put show-paren--context-overlay
-                   'face +paren--context-face)
-      (overlay-put show-paren--context-overlay 'window (selected-window))
-      (add-hook 'post-command-hook #'show-paren--delete-context-overlay
-                nil 'local)
-      (+paren--add-extension-overlay beg end num)))
-
-  ;; use the custom function instead of the provided one to
-  (advice-add 'show-paren--show-context-in-overlay :override '+paren--overlay-function)
   :hook
-  (prog-mode . show-paren-local-mode))
+  (prog-mode-hook . window-stool-mode)
+  :bind*
+  ("C-c tws" . window-stool-mode))
 
 (use-package drag-stuff
   :bind
@@ -1584,7 +1711,7 @@
   :hook
   ((css-ts-mode-hook html-ts-mode-hook json-ts-mode-hook js-ts-mode-hook typescript-ts-mode-hook tsx-ts-mode-hook python-ts-mode-hook yaml-ts-mode-hook toml-ts-mode-hook go-ts-mode-hook) . combobulate-mode))
 
-(setq treesit-font-lock-level 2
+(setq treesit-font-lock-level 3
       set-mark-command-repeat-pop t
       backward-delete-char-untabify-method 'hungry)
 
@@ -1599,42 +1726,75 @@
     (interactive "P")
     (flyspell-goto-next-error (not next)))
 
+  (defun ii/flyspell-mode-deferred ()
+    (+when-idle! 5.0 (flyspell-mode 1)))
+
+  (defun ii/flyspell-prog-mode-deferred ()
+    (+when-idle! 5.0 (flyspell-prog-mode)))
+
   :bind*
   (("C-c ]," . flyspell-goto-next-error)
    ("C-c [," . +flyspell/goto-prev-error)
    :repeat-map meow-error-repeat-map
-   ("," . flyspell-goto-next-error)
-   ("\<" . +flyspell/goto-prev-error)))
+   ("," . flyspell-goto-next-error)))
 
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
-(add-hook 'org-mode-hook 'flyspell-mode)
-(add-hook 'markdown-mode-hook 'flyspell-mode)
+(add-hook 'prog-mode-hook 'ii/flyspell-prog-mode-deferred)
+(add-hook 'org-mode-hook 'ii/flyspell-mode-deferred)
+(add-hook 'markdown-mode-hook 'ii/flyspell-mode-deferred)
 (add-hook 'prog-mode-hook 'flymake-mode)
+
+(setq markdown-fontify-code-blocks-natively t)
 
 (use-package flymake
   :straight nil
-  :custom-face
-  (flymake-end-of-line-diagnostics-face ((t (:background ,(color-lighten-name (doom-color 'bg) 2)))))
   :init
   (setq flymake-repeat-map (make-sparse-keymap))
-  (setopt flymake-show-diagnostics-at-end-of-line 'short
-          flymake-start-on-flymake-mode nil
-          flymake-suppress-zero-counters nil
-          flymake-fringe-indicator-position 'right-fringe
-          flymake-margin-indicator-position 'right-margin
-          flymake-margin-indicators-string '((error "!" compilation-error)
-                                             (warning "$" compilation-warning)
-                                             (note "i" compilation-info))
-          flymake-mode-line-counter-format '("("
-                                             flymake-mode-line-error-counter
-                                             flymake-mode-line-warning-counter
-                                             flymake-mode-line-note-counter
-                                             ")"))
+  (setq flymake-show-diagnostics-at-end-of-line nil
+        flymake-start-on-flymake-mode nil
+        flymake-suppress-zero-counters nil
+        flymake-indicator-type 'margins
+        flymake-fringe-indicator-position nil
+        flymake-margin-indicator-position 'right-margin
+        flymake-margin-indicators-string '((error "●" compilation-error)
+                                           (warning "●" compilation-warning)
+                                           (note "●" compilation-info))
+        flymake-mode-line-counter-format '("("
+                                           flymake-mode-line-error-counter
+                                           flymake-mode-line-warning-counter
+                                           flymake-mode-line-note-counter
+                                           ")"))
+
+  (defvar ii/flymake--eol-hidden nil
+    "TODO")
+
+  (defun ii/flymake--get-overlays ()
+    (cl-remove-if-not (lambda (ov)
+                        (and (overlay-get ov 'flymake-overlay)
+                             (not (overlay-get ov 'flymake--eol-overlay))))
+                      (overlays-in (point-min) (point-max))))
+
+  (defun ii/flymake--hide-eol-overlays ()
+    (dolist (o (ii/flymake--get-overlays))
+      (when (overlay-get o 'flymake--eol-overlay)
+        (if-let* ((src-ovs (overlay-get o 'flymake-eol-source-overlays)))
+            (overlay-put o 'display nil)))))
+
+  (defun ii/flymake--show-eol-overlays ()
+    (dolist (o (ii/flymake--get-overlays))
+      (when (overlay-get o 'flymake--eol-overlay)
+        (if-let* ((src-ovs (overlay-get o 'flymake-eol-source-overlays))
+                  flymake-show-diagnostics-at-end-of-line)
+            (overlay-put o 'display (flymake--eol-overlay-summary src-ovs))
+          (delete-overlay o)))))
+
   (defun ii/flymake-toggle-eol ()
     (interactive)
+    (+toggle-local-var! flymake-show-diagnostics-at-end-of-line 'normal nil)
     (when (bound-and-true-p flymake-mode)
-      (+toggle-local-var! flymake-show-diagnostics-at-end-of-line 'short nil)
-      (flymake-mode 1)))
+      (flymake-start)
+      (flymake--update-eol-overlays)
+      (flymake--update-diagnostics-listings (current-buffer))))
+
   :config
   (bind-keys* :map flymake-prefix-map
               ("t" . ii/flymake-toggle-eol))
@@ -1646,6 +1806,7 @@
     ("M-g [" . flymake-goto-prev-error)
     ("C-c ]d" . flymake-goto-next-error)
     ("C-c [d" . flymake-goto-prev-error)
+    ("C-c t!" . ii/flymake-toggle-eol)
     :map flymake-prefix-map
     ("]" . flymake-goto-next-error)
     ("[" . flymake-goto-prev-error)
@@ -1653,13 +1814,10 @@
     ("p" . flymake-show-project-diagnostics)
     ("l" . flymake-switch-to-log-buffer)
     :repeat-map meow-error-repeat-map
-    ("d" . flymake-goto-next-error)
-    ("D" . flymake-goto-prev-error)))
+    ("d" . flymake-goto-next-error)))
 
 (use-package flymake-jsts
-  :straight '(flymake-jsts :type git :host github :repo "orzechowskid/flymake-jsts" :branch "main")
-  :hook
-  (flymake-mode-hook . flymake-jsts-eslint-enable))
+  :straight '(flymake-jsts :type git :host github :repo "orzechowskid/flymake-jsts" :branch "main"))
 
 ;;;; Snippets
 (+when-idle! 3.0 (require 'yasnippet))
@@ -1700,6 +1858,76 @@
           next-error-highlight t
           next-error-highlight-no-select t
           next-line-add-newlines nil)
+
+  (defvar ii/undo--last-changes nil
+    "Tadasdasd")
+
+  (defvar ii/undo--current-change nil
+    "Current change")
+
+  (defun ii/undo--make-marker (pos buffer data)
+    (let ((marker (make-marker)))
+      (set-marker marker pos buffer)
+      (list :marker marker :line (line-number-at-pos pos) :time (current-time :data data))))
+
+  (defun ii/undo--advice (&rest args)
+    (when (and (not (minibufferp))
+               (not (bound-and-true-p dired-mode))
+               (not buffer-read-only))
+      (let ((change (nth 2 buffer-undo-list)))
+        (when (not (equal change (car ii/undo--last-changes)))
+          ;;(message "last change is %S" change);;
+          (if change
+              (cond ((and (listp change)
+                          (length> change 2)
+                          (markerp (car change)))
+                     (add-to-list 'ii/undo--last-changes (ii/undo--make-marker (car change) (current-buffer))))
+                    ((and
+                      (listp change)
+                      (stringp (car change)))
+                     (add-to-list 'ii/undo--last-changes (ii/undo--make-marker (abs (cdr change)) (current-buffer))))
+                    ((and (consp change)
+                          (numberp (car change)))
+                     (add-to-list 'ii/undo--last-changes (ii/undo--make-marker (abs (car change)) (current-buffer))))
+                    (t nil)))))))
+
+  ;; (defun ii/undo--setup ()
+  ;;   (advice-add 'undo-auto--undoable-change :after 'ii/undo--advice))
+
+  (defun ii/undo--consult ())
+
+  (defun ii/undo-goto-last-change ())
+
+  (defun ii/undo-goto-next-change ())
+
+  (defun ii/undo--format-change-cand (change))
+
+  (defun ii/undo-goto-change ()
+    (interactive)
+    (let ((change (consult--read (mapcar
+                                  (lambda (marker-pair)
+                                    (let ((marker (car marker-pair)))
+                                      (list (format "%s:%d at %d" (buffer-name (marker-buffer marker))
+                                                    (cdr marker-pair)
+                                                    (marker-position marker))
+                                            :marker marker
+                                            :data
+                                            :line (cdr marker-pair))))
+                                  ii/undo--last-changes)
+                                 :lookup (lambda (cand all-cands input narrow)
+                                           (if-let* ((info (alist-get cand all-cands nil nil #'string-equal))
+                                                     (marker (plist-get info :marker))
+                                                     (line (plist-get info :line))
+                                                     (buffer (marker-buffer marker)))
+                                               (when t
+                                                 (message "buffer name is %S" buffer)
+                                                 (atomic-change-group
+                                                   (pop-to-buffer buffer)
+                                                   (with-current-buffer buffer
+                                                     (goto-line marker))))
+                                             (user-error "Cant find marker"))))))
+      change))
+  ;; (add-hook 'meow-global-mode-hook 'ii/undo--setup)
   :bind*
   ( ("C-x k" . kill-current-buffer)
     ("C-c bK" . kill-current-buffer)
@@ -1715,9 +1943,11 @@
     ("C-c etp" . transpose-paragraphs)
     ("C-c et." . transpose-sentences)
     ("C-c etr" . transpose-regions)
+    ("C-c t C-w w" . toggle-word-wrap)
+    ("M-g ;" . ii/undo-goto-change)
     :repeat-map meow-error-repeat-map
     ("e" . next-error)
-    ("E" . previous-error)))
+    (";" . negative-argument)))
 
 (use-package comint
   :straight nil
@@ -1725,7 +1955,7 @@
   (setopt comint-eol-on-send t
           comint-prompt-read-only t)
   :bind*
-  (("C-x C-!" . comint)))
+  (("C-x C-!" . comint-run)))
 
 (use-package compile
   :straight nil
@@ -1736,39 +1966,40 @@
           compilation-search-all-directories t
           compilation-context-lines t
           compilation-skip-threshold 0)
-  :hook
-  (compilation-filter-hook . ansi-color-compilation-filter)
+
   :bind*
-  (("C-x c" . compile)))
+  ("C-x c" . compile)
+  :hook
+  (compilation-filter-hook . ansi-color-compilation-filter))
 
 (use-package fancy-compilation
   :commands (fancy-compilation-mode)
-  :init
-  (with-eval-after-load 'compile
-    (fancy-compilation-mode)))
+  :config
+  (fancy-compilation-mode 1))
+
+(use-package shx)
+
+(use-package dwim-shell-command
+  :straight ( :type git
+              :host github
+              :repo "xenodium/dwim-shell-command")
+  :config
+  (require 'dwim-shell-commands))
 
 (use-package dape
   :init
   (setq dape-key-prefix (kbd "C-c D")
         dape-buffer-window-arrangement 'right))
 
-(use-package implicit-capf
-  :straight `(implicit-capf :type nil
-                            :local-repo ,(expand-file-name "capf" +init-module-path))
-  :autoload
-  (+completion--in-region)
-  :init
-  (setq completion-in-region-function '+completion--in-region)
-  :bind*
-  (("C-c ta" . +corfu-toggle-auto))
+(use-package cape
   :hook
-  (global-corfu-mode-hook . +global-corfu-mode--setup))
+  (completion-at-point-functions . cape-file))
 
 (use-package corfu
   :init
   (setq corfu-cycle t
         corfu-echo-delay nil
-        corfu-auto-delay 0.2
+        corfu-auto-delay 0.1
         corfu-echo-mode nil
         corfu-preselect 'prompt
         corfu-preview-current 'insert
@@ -1778,12 +2009,21 @@
         corfu-right-margin-width 0
         corfu-bar-width 0
         corfu-count 17
-        corfu-max-width 50
-        corfu-min-width 40
+        corfu-max-width 70
+        corfu-min-width 60
         corfu-quit-no-match t
         corfu-on-exact-match 'insert
-        global-corfu-minibuffer nil)
+        global-corfu-test-minibuffer nil)
+
   :config
+
+  (defun ii/corfu-toggle-auto ()
+    (interactive)
+    (when (bound-and-true-p corfu-mode)
+      (+toggle-var! corfu-auto)
+      (+toggle-var! corfu-preview-current t 'insert)
+      (corfu-mode 1)))
+
   (setopt corfu--frame-parameters  '((no-accept-focus . t)
                                      (no-focus-on-map . t)
                                      (min-width . t)
@@ -1791,7 +2031,7 @@
                                      (border-width . 1)
                                      (outer-border-width . 0)
                                      (internal-border-width . 0)
-                                     (child-frame-border-width . 1)
+                                     (child-frame-border-width . 0)
                                      (vertical-scroll-bars . nil)
                                      (horizontal-scroll-bars . nil)
                                      (menu-bar-lines . 0)
@@ -1805,34 +2045,7 @@
                                      (no-special-glyphs . t)
                                      (desktop-dont-save . t)
                                      (inhibit-double-buffering . t)))
-  :hook
-  (after-init-hook . global-corfu-mode)
-  (global-corfu-mode-hook . corfu-popupinfo-mode)
-  :bind*
-  (("C-TAB" . corfu-complete)
-   :map corfu-map
-   ("M-h" . corfu-popupinfo-documentation)
-   ("M-g" . corfu-info-location)
-   ("M-e" . corfu-expand)
-   ("C-SPC" . corfu-insert-separator)
-   ("C-<space>" . corfu-insert-separator)
-   ([tab] . corfu-next)
-   ("<tab>" . corfu-next)
-   ("TAB" . corfu-next)
-   ([backtab] . corfu-previous)
-   ("<backtab>" . corfu-previous)
-   ("S-TAB" . corfu-previous)))
 
-(use-package corfu-terminal
-  :straight (corfu-terminal :type git
-                            :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
-  :if (< emacs-major-version 31)
-  :init
-  (setq corfu-terminal-disable-on-gui t)
-  :hook
-  (global-corfu-mode-hook . corfu-terminal-mode))
-
-(with-eval-after-load 'corfu
   (defvar ii/corfu-formatter-id-mapping
     '((array :str "[ ] " :face font-lock-type-face)
       (boolean :str "0|1 " :face font-lock-builtin-face)
@@ -1869,25 +2082,50 @@
       (unit :str "unit" :face font-lock-constant-face)
       (value :str "val " :face font-lock-builtin-face)
       (variable :str "var " :face font-lock-variable-name-face)
-      (t :str "----"  :face font-lock-warning-face)))
-
-  (defun ii/corfu-margin--get-by-kind (kind)
-    "Get margin display by kind KIND."
-    (when-let* ((entry (or (alist-get (or kind t) ii/corfu-formatter-id-mapping)
-                           (alist-get t ii/corfu-formatter-id-mapping)))
-                (face (plist-get entry :face))
-                (str (plist-get entry :str)))
-      (propertize str 'face face)))
+      (t :str "    "  :face font-lock-warning-face)))
 
   (defun ii/corfu-margin-formatter (_)
     "Margin formatter for corfu."
     (and-let* ((kindfunc (plist-get completion-extra-properties :company-kind)))
       (lambda (cand)
         (let* ((kind (funcall kindfunc cand))
-               (short (ii/corfu-margin--get-by-kind kind)))
+               (short (when-let* ((entry (or (alist-get (or kind t) ii/corfu-formatter-id-mapping)
+                                             (alist-get t ii/corfu-formatter-id-mapping)))
+                                  (face (plist-get entry :face))
+                                  (str (plist-get entry :str)))
+                        (propertize str 'face face))))
           (concat short "| ")))))
 
-  (add-to-list 'corfu-margin-formatters 'ii/corfu-margin-formatter))
+  (add-to-list 'corfu-margin-formatters 'ii/corfu-margin-formatter)
+  :hook
+  (after-init-hook . global-corfu-mode)
+  (global-corfu-mode-hook . corfu-popupinfo-mode)
+  (global-corfu-mode-hook . corfu-echo-mode)
+  (global-corfu-mode-hook . corfu-history-mode)
+  :bind*
+  (("C-TAB" . corfu-complete)
+   ("C-c ta" . ii/corfu-toggle-auto)
+   :map corfu-map
+   ("M-h" . corfu-popupinfo-documentation)
+   ("M-g" . corfu-info-location)
+   ("M-e" . corfu-expand)
+   ("C-SPC" . corfu-insert-separator)
+   ("C-<space>" . corfu-insert-separator)
+   ([tab] . corfu-next)
+   ("<tab>" . corfu-next)
+   ("TAB" . corfu-next)
+   ([backtab] . corfu-previous)
+   ("<backtab>" . corfu-previous)
+   ("S-TAB" . corfu-previous)))
+
+(use-package corfu-terminal
+  :straight (corfu-terminal :type git
+                            :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
+  :if (< emacs-major-version 31)
+  :init
+  (setq corfu-terminal-disable-on-gui t)
+  :hook
+  (global-corfu-mode-hook . corfu-terminal-mode))
 
 (use-package lspce
   :straight `(lspce :type git
@@ -1905,6 +2143,7 @@
         lspce-server-programs '(("rust" "rust-analyzer" "")
                                 ("python" "jedi-language-server" "")
                                 ("python" "pylsp" "")
+                                ("python" "basedpyright-langserver" "--stdio")
                                 ("haskell" "haskell-language-server-wrapper" "lsp")
                                 ("C" "ccls" "")
                                 ("sh" "bash-language-server" "start")
@@ -1919,6 +2158,7 @@
         lspce-enable-flymake t
         lspce-log-level 3
         lspce-completion-no-annotation nil
+        lspce-send-changes-idle-time 0.8
         lspce-enable-imenu-index-function t
         lspce-modes-enable-single-file-root '(python-ts-mode typescript-ts-mode c-ts-mode)
         lspce-xref-append-implementations-to-definitions t
@@ -1934,14 +2174,15 @@
   :init
   (defun ii/eglot--setup (&rest _args)
     (when eglot-inlay-hints-mode
-      (eglot-inlay-hints-mode -1)))
+      (eglot-inlay-hints-mode -1))
+    (setq-local eldoc-documentation-strategy 'eldoc-documentation-default))
 
   (setopt eglot-autoshutdown t
           eglot-extend-to-xref t
+          eglot-sync-connect 1
           eglot-ignored-server-capabilities
           `(:documentHighlightProvider
             :inlayHintProvider
-            :codeLensProvider
             :colorProvider))
   :config
   (setopt eglot-code-action-indications '(eldoc-hint))
@@ -1956,21 +2197,55 @@
     ("C-c cc" . eglot-show-call-hierarchy)
     ("C-c ct" . eglot-show-type-hierarchy)
     ("C-c cf" . eglot-format)
-    ("C-c ca" . eglot-code-actions)
-    ("C-c c" . eglot-))
+    ("C-c ca" . eglot-code-actions))
   :hook
   (eglot-inlay-hints-mode-hook . ii/eglot--setup))
+
+(use-package lsp-mode
+  :init
+  (setq lsp-keymap-prefix "C-c c"
+        lsp-auto-configure nil
+        lsp-enable-symbol-highlighting nil
+        lsp-enable-imenu t
+        lsp-enable-completion t
+        lsp-enable-file-watchers t
+        lsp-enable-folding nil
+        lsp-eldoc-render-all t
+        lsp-enable-on-type-formatting nil
+        lsp-enable-flymake t
+        lsp-headerline-breadcrumb-enable nil
+        lsp-completion-provider :none
+        lsp-diagnostics-provider :flymake))
+
+(use-package lsp-ui
+  :init
+  (setq lsp-ui-doc-enable t
+        lsp-ui-peek-enable t
+        lsp-ui-imenu-enable t
+        lsp-ui-sideline-enable nil)
+  :config
+  (setf  (alist-get 'font lsp-ui-doc-frame-parameters) +base/font-spec)
+  (setopt lsp-ui-sideline-show-diagnostics nil
+          lsp-ui-sideline-ignore-duplicate nil))
+
+(use-package lsp-pyright
+  :custom (lsp-pyright-langserver-command "basedpyright")
+  :init
+  (setq lsp-pyright-basedpyright-inlay-hints-generic-types t))
+
+(use-package lsp-haskell
+  :after lsp-mode)
 
 ;;; Indent indicators
 (use-package whitespace
   :straight nil
   :init
-  (setq whitespace-global-modes '(not image-mode markdown-mode gfm-mode org-mode latex-mode dired-mode csv-mode nxml-mode ess-mode diff-mode wdired-mode magit-mode magit-diff-mode)
+  (setq whitespace-global-modes '(not image-mode nov-mode pdf-view-mode markdown-mode gfm-mode org-mode latex-mode dired-mode csv-mode nxml-mode ess-mode diff-mode wdired-mode magit-mode magit-diff-mode)
         whitespace-display-mappings '((space-mark 32 [183] [46])
                                       (space-mark 160 [164] [95])
                                       (newline-mark 10 [36 10])
                                       (tab-mark 9 [187 9] [92 9]))
-        whitespace-style '(face tab-mark spaces lines-char page-delimiters trailing space-after-tab newline indentation))
+        whitespace-style '(face tab-mark spaces page-delimiters trailing space-after-tab newline indentation))
   :bind*
   ("C-c tS" . whitespace-toggle-options)
   :hook
@@ -1992,9 +2267,10 @@
     "Set ellipsis used to denote hidden entries to ELLIPSIS."
     (let* ((dtable (or buffer-display-table (make-display-table)))
            (face-offset (* (face-id 'shadow) (ash 1 22)))
-           (value (vconcat (mapcar (lambda (c)
-                                     (+ face-offset c))
-                                   (string-trim-right ellipsis)))))
+           (value
+            (vconcat (mapcar (lambda (c)
+                               (+ face-offset c))
+                             (string-trim-right ellipsis)))))
       (set-display-table-slot dtable 'selective-display value)
       (setq buffer-display-table dtable)))
 
@@ -2020,79 +2296,48 @@
   :commands
   indent-bars-mode
   :init
-  (setopt indent-bars-color '(highlight :face-bg t :blend 0.15)
-          indent-bars-starting-column nil
-          indent-bars-pattern "."
-          indent-bars-width-frac 0.3
-          indent-bars-pad-frac 0.0
-          indent-bars-zigzag nil
-          indent-bars-no-descend-lists t
-          indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1)
-          indent-bars-highlight-current-depth '(:blend 0.6)
-          indent-bars-display-on-blank-lines t
-          indent-bars-spacing 1
-          indent-bars-color '(region :face-bg t :blend 0.2)
-          indent-bars-no-descend-string t
-          indent-bars-prefer-character nil)
+  (setq indent-bars-color '(highlight :face-bg t :blend 0.5)
+        indent-bars-starting-column 0
+        indent-bars-display-on-blank-lines t
+        indent-bars-pattern "."
+        indent-bars-no-descend-lists t
+        indent-bars-display-on-blank-lines t
+        indent-bars-no-descend-string t
+        indent-bars-prefer-character t)
+
   (defun ii/indent-bars--maybe-turn-on ()
-    (when (not (memq major-mode '(emacs-lisp-mode
-                                  lisp-interaction-mode
-                                  clojure-mode
-                                  lisp-mode
-                                  common-lisp-mode)))
+    (when (not (memq major-mode '(emacs-lisp-mode lisp-interaction-mode clojure-mode lisp-mode common-lisp-mode)))
       (indent-bars-mode)))
   (add-hook 'prog-mode-hook 'ii/indent-bars--maybe-turn-on))
-
-
-(use-package sideline-blame)
-
-(use-package sideline
-  :init
-  (setq sideline-backends-right `((sideline-lsp . up))
-        sideline-backend-delays '((sideline-lsp . 1))
-        sideline-backends-right-skip-current-line nil
-        sideline-truncate t
-        sideline-force-display-if-exceeds nil
-        sideline-order-right 'up
-        sideline-format-right "%s"
-        sideline-display-backend-name nil
-        sideline-display-backend-format ""
-        sideline-display-backend-type nil)
-  :bind
-  (("C-c ts" . sideline-mode))
-  :hook
-  (lsp-mode-hook . sideline-mode))
-
-
-;; Project Management
-(use-package implicit-project
-  :straight `(implicit-project :type nil
-                               :local-repo ,(expand-file-name "project" +init-module-path))
-  :autoload
-  (+project-magit-status)
-  :commands
-  (+project-list-buffers-consult
-   +project-vterm)
-  :bind*
-  ( :map project-prefix-map
-    ("V" . +project-vterm))
-  :hook
-  (project-find-functions . +project--root-finder))
 
 (use-package project
   :straight (project :type built-in)
   :config
-  (setopt project-buffers-viewer '+project-list-buffers-consult
-          project-mode-line t
-          project-mode-line-format '(:eval (concat (project-mode-line-format) "/"))
+  (defun ii/project--root-finder (dir)
+    "Integrate .git project roots."
+    (let ((dotgit (and (setq dir (locate-dominating-file dir ".git"))
+                       (expand-file-name dir))))
+      (and dotgit
+           (cons 'transient (file-name-directory dotgit)))))
+
+  (defun ii/project-magit-status ()
+    (interactive)
+    (magit-status (project-root (project-current))))
+
+  (defun ii/project-list-buffers-consult (_project _files-only)
+    (interactive)
+    (consult-project-buffer))
+
+  (add-hook 'project-find-functions 'ii/project--root-finder)
+
+  (setopt project-buffers-viewer 'ii/project-list-buffers-consult
           project-compilation-buffer-name-function 'project-prefixed-buffer-name
           project-vc-extra-root-markers '("package.json" "cargo.toml" ".+\.cabal"))
 
   (add-to-list 'project-switch-commands '(project-dired "Open root dir"))
-  (add-to-list 'project-switch-commands '(+project-magit-status "Magit status" ?m))
+  (add-to-list 'project-switch-commands '(ii/project-magit-status "Magit status" ?m))
   (add-to-list 'project-switch-commands '(affe-find "Fuzzy Find file" ?F))
   (add-to-list 'project-switch-commands '(eat-project "Eat" ?E))
-  (add-to-list 'project-switch-commands '(+project-vterm "Vterm" ?V))
   (add-to-list 'project-switch-commands '(affe-grep "Fuzzy find rx" ?/)))
 
 (use-package direnv
@@ -2103,12 +2348,29 @@
   :hook
   (after-init-hook . direnv-mode))
 
+(use-package envrc
+  :disabled
+  :if (executable-find "direnv")
+  :bind-keymap*
+  ("" . envrc-command-map)
+  :hook
+  (after-init-hook . envrc-global-mode))
+
+(use-package docker
+  :if (executable-find "docker"))
+
+(use-package kele
+  :if (executable-find "kubectl")
+  :config
+  (kele-mode 1))
+
 ;; Version Control
 (setopt vc-make-backup-files nil
         vc-display-status t
-        diff-font-lock-syntax 'hunk-only
-        diff-refine 'font-lock
-        diff-refine-nonmodified t
+        diff-font-lock-syntax nil
+        diff-refine 'navigation
+        diff-refine-nonmodified nil
+        diff-font-lock-prettify nil
         ediff-shell (+os/per-system! :linux "sh"
                                      :wsl "sh")
         ediff-ignore-case t
@@ -2119,6 +2381,16 @@
                                                   vc-directory-exclusion-list)
                                                 '())
                                             '("straight" "node_modules" "build")))
+
+(use-package git-modes)
+
+(use-package git-timemachine
+  :bind*
+  (("C-c g C-t t" . git-timemachine-toggle)
+   :map git-timemachine-mode-map
+   ("C-c g C-t b" . git-timemachine-blame)
+   ("C-c g C-t n" . git-timemachine-show-next-revision)
+   ("C-c g C-t p" . git-timemachine-show-previous-revision)))
 
 (use-package magit
   :preface
@@ -2138,14 +2410,19 @@
   (magit-process-find-password-functions . magit-process-password-auth-source)
   :bind*
   (("C-c gg" . magit-status)
-   ("C-c gB" . magit-blame)
-   ("C-c gD" . magit-diff)
-   ("C-c gX" . magit-dispatch)))
+   ("C-c gb" . magit-blame)
+   ("C-c gd" . magit-diff)
+   ("C-c gx" . magit-dispatch)
+   ("C-c g C-i" . magit-gitignore-in-topdir)))
+
+(use-package magit-todos
+  :after magit
+  :config (magit-todos-mode 1))
 
 (use-package diff-hl
   :init
   (setq diff-hl-show-hunk-function 'diff-hl-show-hunk-inline-popup
-        diff-hl-showhunk-inline-popup-hide-hunk t
+        diff-hl-show-hunk-inline-popup-hide-hunk t
         diff-hl-show-hunk-inline-popup-smart-lines nil
         diff-hl-draw-borders nil
         diff-hl-update-async t
@@ -2160,22 +2437,20 @@
   (global-diff-hl-mode-hook . diff-hl-margin-mode)
   (after-init-hook . global-diff-hl-mode))
 
-;;;; Terminal Emulation
+;; Terminal Emulation
 
-(use-package vterm
-  :if (executable-find "gcc")
-  :init
-  (setopt vterm-shell (getenv "SHELL")
-          vterm-max-scrollback 2500)
-  :bind*
-  (("C-c ov" . vterm))
-  :hook
-  (vterm-mode-hook . hl-line-mode))
+(setq eshell-banner-message "")
 
 (use-package eat
+  :init
   :config
-  (setopt eat-shell (+os/per-system! :linux "bash"
-                                     :win "bash"))
+  (setopt eat-shell (+os/per-system! :linux "zsh"
+                                     :win "bash")
+          eat-enable-blinking-text nil
+          eat-enable-shell-prompt-annotation nil
+          eat-minimum-latency 0.009)
+  ;;; eat sets the terminfo directory to the straight build path, which contains only source and emacs Info files. This points it to the actual repo.
+  (setq eat-term-terminfo-directory (expand-file-name "straight/repos/eat/terminfo" user-emacs-directory))
   :bind*
   (("C-c oe" . eat)
    :map project-prefix-map
@@ -2189,20 +2464,21 @@
 ;;;; Buffer Management
 (use-package autorevert
   :straight nil
-  :init
+  :config
   (defun ii/auto-revert--toggle-mode-in-buffer (window)
     "Setup `autorevert' in current buffer."
-    (with-current-buffer (current-buffer)
-      (let* ((frame (selected-frame)))
-        (if (frame-visible-p frame)
-            (progn (auto-revert-mode 1)
-                   (auto-revert-buffer (current-buffer)))
-          (auto-revert-mode -1)))
-      (message "running in buffer %S, auto-revert-mode is %S" (current-buffer) auto-revert-mode)))
+    (if-let* ((buffer-window (get-buffer-window (current-buffer)))
+              (buffer-frame (window-frame buffer-window))
+              (visible (frame-visible-p buffer-frame)))
+        (progn (auto-revert-mode 1)
+               (auto-revert-buffer (current-buffer)))
+      (auto-revert-mode -1))
+    (message "running in buffer %S, auto-revert-mode is %S" (current-buffer) auto-revert-mode))
 
   (defun ii/auto-revert--setup-buffer ()
-    (add-hook 'window-buffer-change-functions 'ii/auto-revert--toggle-mode-in-buffer 1 t)
+    (add-hook 'window-buffer-change-functions 'ii/auto-revert--toggle-mode-in-buffer 90 t)
     (setq-local auto-revert-check-vc-info t))
+
   :hook
   ((pdf-view-mode-hook nov-mode-hook dired-mode-hook) . ii/auto-revert--setup-buffer))
 
@@ -2210,6 +2486,7 @@
   :straight nil
   :init
   (setq ibuffer-show-empty-filter-groups nil
+        ibuffer-filtering-alist nil
         ibuffer-saved-filter-groups
         '(("default"
            ("org" (or
@@ -2322,20 +2599,23 @@
    ("/p" . ibuffer-filter-by-project)
    ("/^" . ibuffer-pop-filter)))
 
-(use-package recentf
-  :straight nil
-  :config
+
+(with-eval-after-load 'recentf
   (add-to-list 'recentf-exclude ".*[0-9a-z]+\.\\(png\\|jpg\\|jpeg\\|webp\\|svg\\|gif\\)")
-  (add-to-list 'recentf-exclude ".*\.priv/.*")
-  :hook
-  (after-init-hook . recentf-mode)
-  :bind*
-  (("C-c fr" . recentf)))
+  (add-to-list 'recentf-exclude ".*\.priv/.*"))
+
+(recentf-mode 1)
 
 (use-package files
   :straight nil
   :bind*
   ("C-c br" . revert-buffer))
+
+(use-package files-x
+  :straight nil
+  :bind*
+  (("C-c ilp" . modify-file-local-variable-prop-line)
+   ("C-c flv" . modify-file-local-variable)))
 
 (use-package dired
   :straight nil
@@ -2347,14 +2627,25 @@
         dired-kill-when-opening-new-dired-buffer nil
         dired-auto-revert-buffer t
         dired-create-destination-dirs 'ask
-        wdired-allow-to-change-permissions t
-        wdired-use-dired-vertical-movement 'sometimes)
+        dired-auto-revert-buffer 'dired-buffer-stale-p
+        dired-omit-verbose nil
+        dired-vc-rename-file t
+        dired-clean-confirm-killing-deleted-buffers nil)
   :bind*
   (("M-g M-d" . dired-at-point)
    :map dired-mode-map
-   ("C-e" . wdired-change-to-wdired-mode)
-   ("i" . wdired-change-to-wdired-mode)
+   ("e" . wdired-change-to-wdired-mode)
    ("-" . dired-up-directory)))
+
+(use-package wdired
+  :straight nil
+  :init
+  (setq wdired-allow-to-change-permissions t
+        wdired-use-dired-vertical-movement 'sometimes)
+  :bind*
+  (:map wdired-mode-map
+        ("C-c C-t" . wdired-toggle-bit)
+        ("C-c C-s" . wdired-set-bit)))
 
 (use-package diredfl
   :hook
@@ -2369,20 +2660,19 @@
           ("images"
            (extension "svg" "svgz" "gif" "jpg" "jpeg" "png" "tiff" "xbm" "xpm" "picon" "icon" "pict" "icon" "rgba" "xcf"))-
           ("markup"
-           (extension "typ" "tex" "md" "org")))))
-;; :hook
-;; (dired-mode-hook . dired-filter-mode))
+           (extension "typ" "tex" "md" "org")))
+        dired-filter-verbose nil)
+  :bind*
+  ( :map dired-mode-map
+    ("TAB" . dired-subtree-toggle))
+  :hook
+  (dired-mode-hook . dired-filter-mode)
+  (dired-mode-hook . dired-collapse-mode))
 
 ;;;; remote
-(use-package auth-source
-  :straight nil
-  :demand
-  :init
-  (setq auth-sources '("~/.authinfo" "~/.authinfo.gpg" "~/.netrc")))
+(setq auth-sources '("~/.authinfo" "~/.authinfo.gpg" "~/.netrc"))
 
-(use-package tramp
-  :straight nil
-  :config
+(with-eval-after-load 'tramp
   ;; change sudo timeout
   (add-to-list 'tramp-connection-properties '(nil
                                               "session-timeout"
@@ -2538,10 +2828,14 @@
                    (org-agenda-files org-agenda-files)))))))
   :config
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
+  :bind*
+  (("C-c oa" . org-agenda))
   :hook
   (org-mode-hook . visual-line-mode)
   (org-mode-hook . org-indent-mode)
   (org-ode-hook . org-latex-preview-mode))
+
+(use-package org-contrib)
 
 (use-package org-appear
   :hook (org-mode-hook . org-appear-mode))
@@ -2557,6 +2851,9 @@
   (o-docs-libraries
    '("~/org-special-block-extras/documentation.org")
    "The places where I keep my ‘#+documentation’"))
+
+(use-package org-transclusion
+  :after org)
 
 (use-package org-roam
   :custom
@@ -2665,24 +2962,15 @@
   :bind*
   ( :map pdf-view-mode-map
     ("C-c nn" . org-noter)
+    :map nov-mode-map
+    ("C-c nn" . org-noter)
+    :map djvu-mode-
     :map org-noter-doc-mode-map
     ("i" . org-noter-insert-note)
     ("i" . org-noter-insert-precise-note)
     ("C-c nq" . org-noter-kill-session)
     :map org-noter-notes-mode-map
     ("C-c nq" . org-noter-kill-session)))
-
-(use-package reader
-  :disabled
-  :straight
-  (cond ((and (not (file-directory-p "/etc/nixos"))
-              (+os/is-linux-p))
-         '(reader :type git
-                  :host codeberg
-                  :repo "divyaranjan/emacs-reader"
-                  :files ("*.el" "render-core.so")
-                  :pre-build ("make" "all")))
-        (t t)))
 
 (use-package pdf-tools
   :custom
@@ -2695,31 +2983,98 @@
 
 (use-package nov
   :mode ("\\.epub\\'" . nov-mode)
+  :init
+  (defun ii/nov-setup-local-faces ()
+    "Setup local faces in nov.el mode."
+    (when (not variable-pitch-mode)
+      (variable-pitch-mode 1)))
   :hook
   (nov-mode-hook . variable-pitch-mode))
 
+(use-package citar
+  :custom
+  (citar-bibliography '("~/bib/references.bib")))
+
 ;;;; LLM integration
+
+(defun ii/api-key-from-auth-source (host key-var &optional user)
+  "Return api key for USER at HOST that might be stored in environment variable KEY-VAR."
+  (or (getenv key-var)
+      (plist-get
+       (car (auth-source-search :host host
+                                :user (or user "apikey")
+                                :require '(:secret)))
+       :secret)
+      (user-error "No api key found either in %s or in authinfo.gpg" key-var)))
+
+(defmacro ii/api-key-from-auth-source! (host key-var &optional user)
+  "Return a function that returns an API key for USER at HOST that could be stored in KEY-VAR."
+  `(lambda ()
+     (or (getenv ,key-var)
+         (plist-get
+          (car (auth-source-search :host ,host
+                                   :user ,(or user "apikey")
+                                   :require '(:secret)))
+          :secret)
+         (user-error "No api key found either in %s or in authinfo.gpg" ,key-var))))
+
+(defmacro ii/preload-api-keys! (&rest key-assocs)
+  "Setup api keys from KEY-ASSOCS."
+  `(progn ,@(mapcar (lambda (assoc)
+                      (let ((host (car assoc))
+                            (env-var (cadr assoc))
+                            (user (cddr assoc)))
+                        `(or (getenv ,env-var)
+                             (when-let* ((secret (plist-get (car (auth-source-search
+                                                                  :host ,host
+                                                                  :user (or ,user "apikey")
+                                                                  :require '(:secret)))
+                                                            :secret))
+                                         (key (if (functionp secret)
+                                                  (encode-coding-string (funcall secret) 'utf-8)
+                                                secret)))
+                               (setenv ,env-var key))
+                             (user-error "No api key found either in %s or in authinfo.gpg" ,env-var))))
+                    key-assocs)))
+
 
 (use-package minuet
   :straight t
   :config
   ;; You can use M-x minuet-configure-provider to interactively configure provider and model
-  (setq minuet-provider 'openai-fim-compatible)
+  (setopt minuet-provider 'openai-compatible
+          minuet-request-timeout 0.5
+          minuet-add-single-line-entry t
+          minuet-n-completions 2
+          minuet-auto-suggestion-throttle-delay 0.3
+          minuet-auto-suggestion-debounce-delay 0.5)
 
-  (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 64))
-;; :bind
-;; (("M-y" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
-;;  ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
-;;  ("C-c m" . #'minuet-configure-provider)
-;;  :map minuet-active-mode-map
-;;  ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
-;;  ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
-;;  ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
-;;  ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
-;;  ;; Accept the first line of completion, or N lines with a numeric-prefix:
-;;  ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
-;;  ("M-a" . #'minuet-accept-suggestion-line)
-;;  ("M-e" . #'minuet-dismiss-suggestion)))
+  (plist-put minuet-openai-compatible-options :end-point "https://openrouter.ai/api/v1/chat/completions")
+  (plist-put minuet-openai-compatible-options :api-key (ii/api-key-from-auth-source "openrouter.ai" "OPENROUTER_API_KEY"))
+  (plist-put minuet-openai-compatible-options :model "kwaipilot/kat-coder-pro:free")
+
+  ;; Prioritize throughput for faster completion
+  (minuet-set-optional-options minuet-openai-compatible-options :provider '(:sort "throughput"))
+  (minuet-set-optional-options minuet-openai-compatible-options :max_tokens 200)
+  (minuet-set-optional-options minuet-openai-compatible-options :top_p 0.9)
+  (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 64)
+
+  (defun ii/minuet-auto-block-suggestions ()
+    (and (not buffer-read-only)
+         meow-insert-mode
+         (not (bolp))
+         (looking-at-p "\s*$")))
+  :bind*
+  (("C-c at" . minuet-auto-suggestion-mode)
+   ("C-c a TAB" . minuet-show-suggestion)
+   :map minuet-active-mode-map
+   ("M-n" . minuet-next-suggestion)
+   ("M-p" . minuet-previous-suggestion)
+   ("C-g" . minuet-dismiss-suggestion)
+   ("C-TAB" . minuet-accept-suggestion-line)
+   ("TAB" . minuet-accept-suggestion))
+  :hook
+  (minuet-auto-suggestion-block-functions . ii/minuet-auto-block-suggestions))
 
 (use-package mcp
   :straight (mcp :host github
@@ -2732,68 +3087,101 @@
                        :branch "main"
                        :repo "MatthewZMD/aidermacs")
   :init
-  (setq +llm-aidermacs-models (list :default ""))
-  (setq aidermacs-default-model "openrouter/"
-        aidermacs-editor-model "openrouter/"
-        aidermacs-weak-model "" )
+  (setopt aidermacs-default-model "openrouter/mistralai/mistral-7b-instruct:free"
+          aidermacs-editor-model "openrouter/mistralai/mistral-7b-instruct:free"
+          aidermacs-weak-model "openrouter/mistralai/mistral-7b-instruct:free"
+          aidermacs-vterm-use-theme-colors t
+          aidermacs-backend 'comint
+          aidermacs-default-chat-mode 'architect)
   :config
+  (ii/preload-api-keys!
+   ("openrouter.ai" "OPENROUTER_API_KEY"))
+
+  (add-to-list 'display-buffer-alist '((derived-mode . aidermacs-comint-mode)
+                                       (display-buffer-use-some-window)))
   (aidermacs-setup-minor-mode)
   :custom
   (aidermacs-use-architect-mode t)
-  (aidermacs-default-model "sonnet")
   :bind*
   (("C-c aa" . aidermacs-transient-menu)))
 
 (use-package gptel
   :config
-  (setq gptel-model 'DeepSeek-R1
-        +gptel-openrouter (gptel-make-openai "OpenRouter"
-                            :host "openrouter.ai"
-                            :endpoint "/api/v1/chat/completions"
-                            :stream t
-                            :key #'gptel-api-key
-                            :models '(moonshotai/kimi-dev-72b:free
-                                      deepseek/deepseek-r1-0528-qwen3-8b:free))
-        gptel-backend +gptel-openrouter)
+  (setq gptel-model 'kwaipilot/kat-coder-pro:free
+        gptel-include-reasoning nil
+        ii/gptel-openrouter (gptel-make-openai "OpenRouter"
+                              :host "openrouter.ai"
+                              :endpoint "/api/v1/chat/completions"
+                              :stream t
+                              :key #'gptel-api-key
+                              :models '(moonshotai/kimi-dev-72b:free
+                                        kwaipilot/kat-coder-pro:free
+                                        deepseek/deepseek-r1-0528-qwen3-8b:free))
+        gptel-backend ii/gptel-openrouter)
   :hook
   (gptel-mode-hook . visual-line-mode)
   :bind*
   (("C-c ag" . gptel-menu)
+   ("C-c a C-g" . gptel)
    ("C-c ar" . gptel-rewrite)
    :map embark-region-map
+   :package embark
    ("R" . gptel-rewrite)))
 
-;;Media
-(use-package image
-  :straight nil
+(use-package agent-shell
   :init
-  (setopt max-image-size 15.0
-          image-use-external-converter t
-          image-auto-resize 'fit-window)
+  (setq agent-shell-header-style 'text
+        agent-shell-file-completion-enabled t
+        agent-shell-show-welcome-message nil
+        agent-shell-highlight-blocks t)
   :config
+  (add-to-list 'whitespace-global-modes 'agent-shell-mode t))
+
+(use-package claude-code-ide
+  :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")
+  :init
+  (setq claude-code-ide-diagnostics-backend 'flymake
+        claude-code-ide-eat-preserve-position t
+        claude-code-ide-terminal-backend 'eat)
+  :config
+  (claude-code-ide-emacs-tools-setup)
+  :bind* ("C-c ac" . claude-code-ide-menu))
+
+(use-package eca)
+
+;;Media
+(setq max-image-size 15.0
+      image-use-external-converter t
+      image-auto-resize 'fit-window)
+
+(with-eval-after-load 'image
   (bind-keys* :map image-map
               ("r" . +utils/open-random-file-in-dir)))
 
-(use-package emms
-  :if (executable-find "mpd")
-  :init
-  (setq emms-player-list '(emms-player-mpd)
-        emms-source-file-default-directory (getenv "XDG_MUSIC_DIR"))
-  :config
-  (require 'emms-setup)
-  (require 'emms-player-mpd)
-  (add-to-list 'emms-player-list 'emms-player-mpd)
-  (setq emms-player-mpd-server-name "localhost"
-        emms-player-mpd-server-port "6600"
-        emms-player-mpd-music-directory (substitute-in-file-name "$XDG_MUSIC_DIR"))
-  (emms-player-mpd-connect)
-  :hook
-  (emms-info-functions . emms-info-mpd)
-  :bind*
-  (("C-c mm" . emms)
-   ("C-c mr" . emms-toggle-repeat-playlist)
-   ("C-c mR" . emms-toggle-repeat-track)))
 
+;; mpd support
+(when (executable-find "mpd")
+  (require 'mpc)
+
+  (defun ii/mpc-current-song ()
+    (interactive)
+    (if (not (null mpc-current-song))
+        (let ((minibuffer-message-clear-timeout 2))
+          (message mpc-current-song))))
+
+  (setq mpc-browser-tags '(Album|Playlist)
+        mpc-status-buffer-format '("%-5{Time} / %{Duration} %2{Disc--}%4{Track}" "%{Title}" "%{Album}"
+                                   "%{Artist}" "%128{Cover}"))
+
+  (bind-keys* ("C-c mm" . mpc)
+              ("C-c mn" . mpc-next)
+              ("C-c mp" . mpc-prev)
+              ("C-c mt" . mpc-toggle-play)
+              ("C-c mr" . mpc-toggle-repeat)
+              ("C-c ms" . mpc-toggle-shuffle)
+              ("C-c m." . ii/mpc-current-song)))
+
+(use-package leetcode)
 
 ;;;; Language modes
 
@@ -2801,7 +3189,9 @@
       go-ts-mode-indent-offset 4
       c-ts-mode-indent-offset 4
       java-ts-mode-indent-offset 4
-      rust-ts-mode-indent-offset 4)
+      rust-ts-mode-indent-offset 4
+      elixir-basic-offset 4
+      mhtml-ts-mode-css-fontify-colors nil)
 
 (add-to-list 'auto-mode-alist '("\\.cjs\\'" . json-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.jsonc*\\'" . json-ts-mode))
@@ -2840,8 +3230,9 @@
   :custom
   (haskell-ts-font-lock-level 3)
   (haskell-ts-use-indent t)
-  (haskell-ts-ghci "ghci")
   :mode "\\.hs\\|.lhs\\'"
+  :init
+  (setopt haskell-ts-ghci (executable-find "ghci"))
   :config
   (add-to-list 'treesit-language-source-alist
                '(haskell . ("https://github.com/tree-sitter/tree-sitter-haskell" "v0.23.1")))
@@ -2853,6 +3244,7 @@
   :init
   (add-to-list 'auto-mode-alist '("\\.el\.gz\\'" . emacs-lisp-mode))
   :config
+
   (defun ii/emacs-lisp--setup ()
     (setq-local compile-command "emacs --load-file "
                 +lookup-documentation-function 'helpful-at-point))
@@ -2871,11 +3263,6 @@
   :mode "\\.gleam\\'"
   :init
   (setq gleam-ts-indent-offset 4))
-
-(use-package elixir-ts-mode
-  :straight nil
-  :init
-  (setq elixir-basic-offset 4))
 
 (use-package mix
   :hook (elixir-ts-mode-hook . mix-minor-mode))
@@ -2948,7 +3335,14 @@
   :straight (nwscript-mode :type nil
                            :local-repo "/home/b/projects/nwscript-mode.el")
   :autoload (nwscript-mode)
-  :mode "\\.nss\\'")
+  :mode "\\.nss\\'"
+  :config
+  ;; add base game includes
+  (let ((file (substitute-in-file-name "$HOME/nwn2mods/game-includes")))
+    (if (file-directory-p file)
+        (add-to-list 'nwscript-include-dirs file))))
+
+
 ;; :straight (nwscript-mode :type git
 ;;                          :host github
 ;;                          :branch "master"
@@ -2978,9 +3372,23 @@
   :init
   (setq crystal-indent-level 4))
 
-;; no config required
-(ii/packages! f dash ov embark-consult verb devdocs vlf yasnippet-capf realgud cape lsp-metals ob-sql-mode djvu forge org-contrib htmlize ox-rss org-roam-ui ement mastodon elfeed poly-markdown poly-R poly-org fsharp-mode zig-mode erlang markdown-mode cuda-mode powershell nushell-mode xenops auctex ocaml-ts-mode dune reason-mode solidity-mode lean-mode d-mode gdscript-mode nim-mode gpr-mode idris-mode nasm-mode masm-mode fasm-mode riscv-mode mips-mode fstar-mode sharper shader-mode sln-mode csproj-mode robe otp edts ess purescript-mode dart-mode common-lisp-snippets geiser racket-mode clj-refactor clojure-snippets cider clojure-mode groovy-mode sbt-mode pyvenv)
+(use-package speed-type
+  :init
+  (setq speed-type-save-statistic-option 'always)
+  :bind*
+  (("C-c ott" . speed-type-text)
+   ("C-c otb" . speed-type-buffer)
+   ("C-c otr" . speed-type-region)
+   :map speed-type-mode-map
+   ("C-c C-p" . speed-type-pause)))
 
+(use-package elfeed
+  :init
+  (setq elfeed-db-directory (expand-file-name ".elfeed" user-emacs-directory)
+        elfeed-enclosure-default-dir user-emacs-directory))
+
+;; no config required
+(ii/packages! f dash ov embark-consult verb devdocs vlf yasnippet-capf realgud lsp-metals ob-sql-mode djvu forge org-contrib htmlize ox-rss org-roam-ui ement mastodon elfeed poly-markdown poly-R poly-org fsharp-mode zig-mode erlang cuda-mode powershell nushell-mode xenops auctex ocaml-ts-mode dune reason-mode solidity-mode lean-mode d-mode gdscript-mode nim-mode gpr-mode idris-mode vhdl-ts-mode vhdl-ext nasm-mode masm-mode fasm-mode riscv-mode mips-mode fstar-mode sharper shader-mode sln-mode csproj-mode robe otp edts ess purescript-mode dart-mode common-lisp-snippets geiser racket-mode clj-refactor clojure-snippets cider clojure-mode groovy-mode sbt-mode pyvenv)
 
 ;; load os-specific stuff
 (+os/per-system!
@@ -2995,6 +3403,6 @@
  (prefer-coding-system 'utf-8)
  :wsl
  (add-to-list 'exec-path "/mnt/c/Program Files/Mozilla Firefox/"))
-
+;; aliases
 
 ;;; init.el ends here;;

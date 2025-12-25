@@ -155,6 +155,7 @@ starting at the third one. The `autoload' docstring can be omitted."
               (message path)
               (add-to-list 'exec-path path))
             (string-split paths ":")))))
+
 ;;;###autoload
 (defun +set-env-vars-from-shell (&rest vars)
   "Set all environment variables in VARS."
@@ -213,10 +214,10 @@ starting at the third one. The `autoload' docstring can be omitted."
 
 (defmacro ii/packages! (&rest pkgs)
   "Expands to sequential `use-package' declarations with PKGS as arguments,."
-  `(progn ,@(mapcar (lambda(pkg-sym)
+  `(progn ,@(mapcar (lambda (pkg-sym)
                       (if (symbolp pkg-sym)
                           `(straight-use-package ',pkg-sym)
-                        (when (listp pkgs-sym)
+                        (when (listp pkg-sym)
                           `(use-package ,@pkg-sym))))
                     pkgs)))
 

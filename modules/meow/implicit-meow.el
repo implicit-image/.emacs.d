@@ -1,11 +1,18 @@
 ;;; -*- lexical-binding: t -*-
 
-
 ;;; Code:
 (require 'meow)
-(require 'implicit-meow-match)
-(require 'implicit-meow-command)
+(require 'implicit-meow-surround)
+(require 'surround)
+;; (require 'implicit-meow-beacon)
 
+;;;; Variables
+
+(defvar-local ii/meow--beacon-face-cookie nil)
+
+(defvar ii/meow--toggled-case nil)
+
+(defvar ii/meow--toggle-case-original-text nil)
 
 ;;;; Utility functions
 
@@ -50,7 +57,6 @@
          (beg (save-mark-and-excursion
                 (isearch-beginning-of-buffer)
                 (line-beginning-position))))
-    (isearch-done)
     (cons beg end)))
 
 (defun ii/meow--search-inner (regex-p)
@@ -80,23 +86,6 @@
 (defun ii/meow--string-search-bounds ()
   (ii/meow--search-bounds nil))
 
-(defun ii/meow-next-defun (arg)
-  (beginning-of-defun arg)
-  (point))
-
-(defun ii/meow-next-line (arg)
-  (beginning-of-line arg)
-  (point))
-
-(defun ii/meow-next-paragraph (arg)
-  (forward-paragraph arg)
-  (point))
-
-(defun ii/meow-next-sentence (arg)
-  (forward-sentence arg)
-  (point))
-
-
 ;;;; Commands
 
 (defun backward-line (&optional n)
@@ -106,9 +95,6 @@
 (defun backward-symbol (&optional n)
   (interactive "p")
   (forward-symbol (- (or n 1))))
-
-(defun +meow--beacon-advice ()
-  (setq meow--beacon-defining-kbd-macro 'record))
 
 (defun +meow/yank (&optional save)
   (interactive "P")
@@ -120,58 +106,49 @@
         (delete-region beg end))))
   (meow-yank))
 
-(defun +meow/insert-exit ()
-  "Switch to NORMAL state."
-  (interactive)
-  (cond
-   ((meow-keypad-mode-p)
-    (meow--exit-keypad-state))
-   ((and (meow-insert-mode-p)
-         (or (eq meow--beacon-defining-kbd-macro 'quick)
-             (eq meow--beacon-defining-kbd-macro 'record)))
-    (setq meow--beacon-defining-kbd-macro nil)
-    (meow-beacon-insert-exit))
-   ((meow-insert-mode-p)
-    (meow--switch-state 'normal))))
+;; surround commands
+(defun ii/meow-surround-with-char (char n)
+  "Surround current selection with CHAR N times."
+  (interactive (list
+                (read-char "Surround with: ")
+                (or prefix-arg nil)))
+  (ii/meow--surround-with-char n (ii/meow--surround-get-matching-pair char)))
 
-(defun +meow/grab ()
-  (interactive)
-  (save-mark-and-excursion
-    (when (not (or (region-active-p)
-                   meow-beacon-mode))
-      (meow-bounds-of-thing (meow-thing-prompt "Grab: ")))
-    (meow-grab)))
+(defun ii/meow-delete-surrounding-char (char n)
+  "Delete surrounding Nth character pair associated with CHAR ."
+  (interactive (list
+                (read-char "Delete surrounding: ")
+                (or prefix-arg 1)))
+  (ii/meow--delete-surrounding-chars n (ii/meow--surround-get-matching-pair char)))
 
-(defun +meow/beacon-on-symbol ()
-  (interactive)
-  (save-mark-and-excursion
-    (when (not (region-active-p))
-      (meow-bounds-of-thing (meow-thing-prompt "Surround: "))
-      (meow-grab)))
-  (meow-mark-symbol 1))
+(defun ii/meow-change-surrounding-char (char n)
+  "Change surrounding Nth character pair associated with CHAR."
+  (interactive (list
+                (read-char "Change surrounding: ")
+                (or prefix-arg 1)))
+  (ii/meow--change-surrounding-chars n (ii/meow--surround-get-matching-pair char)))
 
-(defun ii/meow-surround-with-char ())
+(defun ii/meow-beacon-surround-with-char (char n)
+  "Surround current selection with CHAR N times."
+  (interactive (list
+                (read-char "Surround with: ")
+                (or prefix-arg nil)))
+  (ii/meow--beacon-surround-with-char n (ii/meow--surround-get-matching-pair char)))
 
-(defun ii/meow-surround-with-string ())
+(defun ii/meow-beacon-delete-surrounding-char (char n)
+  "Delete surrounding Nth character pair associated with CHAR ."
+  (interactive (list
+                (read-char "Delete surrounding: ")
+                (or prefix-arg 1)))
+  (ii/meow--beacon-delete-surrounding-chars n (ii/meow--surround-get-matching-pair char)))
 
-(defun ii/meow-delete-surrounding-char ())
+(defun ii/meow-beacon-change-surrounding-char (char n)
+  "Change surrounding Nth character pair associated with CHAR."
+  (interactive (list
+                (read-char "Change surrounding: ")
+                (or prefix-arg 1)))
+  (ii/meow--beacon-change-surrounding-chars n (ii/meow--surround-get-matching-pair char)))
 
-(defun ii/meow-delete-surrounding-string ())
-
-(defun +meow/match (where &optional arg)
-  ""
-  (interactive (list (read-char-from-minibuffer
-                      (ii/meow--match-prompt)
-                      (mapcar (lambda (cell)
-                                (car cell))
-                              ii/meow--match-functions))
-                     current-prefix-arg))
-  (if-let ((fn (cdr (alist-get where ii/meow--match-functions))))
-      (funcall fn arg)
-    (message "Operation %c not recognized" where)))
-
-(defvar ii/meow--toggled-case nil)
-(defvar ii/meow--toggle-case-original-text nil)
 
 (defun ii/meow-switch-char-case (&optional offset)
   "Toggle case of char at point."
@@ -244,14 +221,12 @@
 (defun ii/meow-upcase-dwim (arg)
   (interactive "P")
   (let ((deactivate-mark nil))
-    (upcase-dwim arg)))
+    (upcase-dwim (or arg 1))))
 
 (defun ii/meow-downcase-dwim (arg)
   (interactive "P")
   (let ((deactivate-mark nil))
-    (downcase-dwim arg)))
-
-(defvar-local ii/meow--beacon-face-cookie nil)
+    (downcase-dwim (or arg 1))))
 
 (defun ii/meow--beacon-mode-setup ()
   "Setup display settings for `meow-beacon-mode'."
@@ -293,27 +268,89 @@
         (push new-rg regexp-search-ring)
       (message "New regexp is blank"))))
 
-;; (defvar ii/meow-next-thing-function-alist nil
-;;   "Alist of `meow' THING and functions to find next occurrence of THING.")
+(defun ii/meow-bounds-of-thing (thing)
+  (interactive (list (meow-thing-prompt "Bounds of:")))
+  (if (alist-get thing meow-char-thing-table)
+      (meow-bounds-of-thing thing)
+    (surround-mark-inner (char-to-string thing))))
+
+(defun ii/meow-inner-of-thing (thing)
+  (interactive (list (meow-thing-prompt "Inner of:")))
+  (if (alist-get thing meow-char-thing-table)
+      (meow-bounds-of-thing thing)
+    (surround-mark-outer (char-to-string thing))))
+
+
+;; (defun ii/meow-end-of-thing (thing arg)
+;;   "Select up to end of THING. If ARG is positive, select additional ARG THINGs forward; if its negative select ARG THINGs backward."
+;;   (interactive (list (meow-thing-prompt "End of:")
+;;                      (or prefix-arg 0)))
+;;   (cond ((not (meow-beacon-mode-p))
+;;          (meow-end-of-thing thing)
+;;          (ii/meow--adjust-direction arg)
+;;          (ii/meow-expand-thing! thing arg))
+;;         (t nil)))
 ;;
-;; (defun ii/meow-next-thing (thing &optional arg)
-;;   "THING."
-;;   (interactive (list (meow-thing-prompt "next")
-;;                      prefix-arg))
-;;   (when-let* ((fn (alist-get thing ii/meow-next-thing-function-alist)))
-;;     (meow-cancel-selection)
-;;     (funcall-interactively fn arg)))
+;; (defun ii/meow-beginning-of-thing (thing arg)
+;;   (interactive (list (meow-thing-prompt "Beginning of:")
+;;                      (or (numberp prefix-arg) 1)))
+;;   (cond ((not (meow-beacon-mode-p))
+;;          (meow-beginning-of-thing thing)
+;;          (ii/meow--adjust-direction arg)
+;;          (ii/meow-expand-thing! thing arg))
+;;         (t nil)))
 ;;
-;; (defvar-local ii/meow--last-selected-thing nil
-;;   "Stores last thing selected from `meow-thing-prompt'.")
+;; (defun ii/meow-mark-word (n)
+;;   "Select current word at point and following N - 1 words."
+;;   (interactive (list (or prefix-arg 0)))
+;;   (ii/meow--adjust-direction n)
+;;   (meow-mark-word n)
+;;   (ii/meow-expand-thing! 'word n))
 ;;
-;; (defun ii/meow--thing-prompt-advice (thing)
-;;   (setq-local ii/meow--last-selected-place this-command
-;;               ii/meow--last-selected-thing thing))
+;; (defun ii/meow-prefix-arg-mode--turn-on ()
+;;   "Turn on `meow-prefix-arg-mode'."
+;;   (advice-add 'meow-bounds-of-thing :override 'ii/meow-bounds-of-thing)
+;;   (advice-add 'meow-inner-of-thing :override 'ii/meow-inner-of-thing)
+;;   (advice-add 'meow-beginning-of-thing :override 'ii/meow-beginning-of-thing)
+;;   (advice-add 'meow-end-of-thing :override 'ii/meow-end-of-thing)
+;;   (advice-add 'meow-mark-word :override 'ii/meow-mark-word)
+;;   (advice-add 'meow--beacon-update-overlays :override 'ii/meow--beacon-update-overlays))
 ;;
-;; (advice-add 'meow-thing-prompt :filter-return 'ii/meow--thing-prompt-advice)
+;; (defun ii/meow-prefix-arg-mode--turn-off ()
+;;   "turn off `meow-prefix-arg-mode'."
+;;   (advice-remove 'meow-bounds-of-thing 'ii/meow-bounds-of-thing)
+;;   (advice-remove 'meow-inner-of-thing 'ii/meow-inner-of-thing)
+;;   (advice-remove 'meow-beginning-of-thing 'ii/meow-beginning-of-thing)
+;;   (advice-remove 'meow-end-of-thing 'ii/meow-end-of-thing)
+;;   (advice-remove 'meow-mark-word 'ii/meow-mark-word)
+;;   (advice-remove 'meow--beacon-update-overlays 'ii/meow--beacon-update-overlays))
+;;
+;; (define-minor-mode ii/meow-prefix-arg-mode
+;;   "Minor mode for enabling using prefix arguments with `meow' selection commands."
+;;   (if (bound-and-true-p ii/meow-prefix-arg-mode)
+;;       (ii/meow-prefix-arg-mode--turn-on)
+;;     (ii/meow-prefix-arg-mode--turn-off)))
+
+(defun ii/meow-indent-region-or-buffer (&optional arg)
+  (interactive)
+  (ii/window-stool--with-clear-buffer (current-buffer)
+    (save-restriction
+      (widen)
+      (if (region-active-p)
+          (indent-region (region-beginning) (region-end))
+        (indent-region (point-min) (point-max))))))
+
+(defun ii/meow-shell-command ()
+  (interactive))
+
+(defun ii/meow-pipe-to-shell-command ()
+  (interactive))
+
+(defun ii/meow-insert-shell-output ()
+  (interactive))
+
+(defun ii/meow-command (&optional arg)
+  (interactive))
 
 (provide 'implicit-meow)
-
-
 

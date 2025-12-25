@@ -39,7 +39,7 @@
              (when (bound-and-true-p sym) t))
            symbols))
 
-(defmacro +any-bound-and-true-p! (symbols)
+(defmacro +any-bound-and-true-p! (&rest symbols)
   `(or ,@(mapcar (lambda (sym) `(bound-and-true-p ,sym)) symbols)))
 
 (defun +default-directory ()
@@ -96,7 +96,7 @@
   (interactive)
   (if (and (bound-and-true-p mode))
       (funcall-interactively mode -1)
-    (funcall-interactively mode -1)))
+    (funcall-interactively mode 1)))
 
 (defun +utils/delete-visited-file ()
   "Delete the file visited by current buffer."
@@ -143,9 +143,7 @@
 
 (defun +utils/forward-defun (arg)
   (interactive "P")
-  (beginning-of-defun (if arg
-                          (- arg)
-                        -1)))
+  (beginning-of-defun (if arg (- arg) -1)))
 
 (defun +utils/backward-defun (arg)
   (interactive "P")
@@ -185,7 +183,7 @@
   "Open user init module file."
   (interactive)
   (let ((default-directory (cdr (project-current nil user-emacs-directory))))
-    (project-find-file nil)))
+    (affe-find +init-module-path)))
 
 (defun +utils/open-random-file-in-dir (dir)
   (interactive (list default-directory))
@@ -196,17 +194,22 @@
       (find-alternate-file (seq-random-elt files))
     (error "There are no ther files in %s" dir)))
 
-(defun +utiles/ripgrep-modules ()
+(defun +utils/ripgrep-modules ()
   (interactive)
   (consult-ripgrep +init-module-path))
 
 (defun +utils/ripgrep-user-directory ()
   (interactive)
-  (consult-ripgrep user-emacs-directory))
+  (affe-grep user-emacs-directory))
 
 (defun ii/negate-repeat-prefix-arg ()
   "Negate "
   (interactive)
   (setq-local last-prefix-arg (- last-prefix-arg)))
+
+(defun ii/process-to-string (command &rest args)
+  (with-temp-buffer
+    (call-process command nil t )
+    (buffer-substring-no-properties (point-min) (point-max))))
 
 (provide 'implicit-utils)

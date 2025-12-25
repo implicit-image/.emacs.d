@@ -1,32 +1,48 @@
 ;;; -*- lexical-binding: t -*-
 (require 'meow)
 
-(defvar meow-command-history nil
+(defvar ii/meow-command-history nil
   "History for `+meow/command'.")
 
-(defvar ii/meow-command-prompt (propertize ":" 'cursor-intangible t))
+(defvar ii/meow-command-prompt (propertize ":" 'read-only t 'cursor-intangible t 'intangible t 'insert-behind-hooks '(ii/meow-command--insert-update)))
 
 (defvar ii/meow-command--short-form-alist nil)
 
 (defvar ii/meow-command--long-form-alist nil)
 
+(defvar ii/meow-command-alist nil)
+
+
+;;;; Macros
+
 (defmacro ii/meow-define-command (name &rest body)
   "Define a meow command with NAME and BODY."
   (declare (indent defun))
-  (let ((fname (intern (concat "ii/meow--command-" (symbol-name name))))
-        (short-form (eval `(concat ,@(map (lambda (str)
-                                            (string-to-char str))
-                                          (string-split (symbol-name name)
-                                                        "-" t t)) ))))
-    (add-to-list 'ii/meow-command--short-form-alist `(,short-form . ,fname))
-    (add-to-list 'ii/meow-command--long-form-alist `(,name . ,fname))
-    `(defun  ,fname (&optional prefix-arg)
-       (interactive "P")
-       ,@body)))
+  (if-let* ((short-name (plist-get body :short))
+            (args (plist-get body :args))
+            (fn (plist-get body :function)))
+      `(progn (add-to-list 'ii/meow-command-alist (list ,name ,fn))
+              (add-to-list 'ii/meow-command--short-form-alist (list ,short-name ,fn)))))
+
+(defmacro ii/meow-define-command-prefix (name char)
+  "Define `meow' command prefix NAME as CHAR."
+  `(progn ))
+
+
+
+(defun ii/meow-command--parse (command-expr)
+  "Parse `meow' commands in COMMAND-EXPR."
+  (if-let* ((command (car (string-split command-expr " ")))
+            (fn (assq (intern ))))
+      ()
+    (progn (message "Command not found")
+           nil)))
 
 (defun ii/meow-command--capf ()
-  "Capf function for meow commands.")
+  "`completion-at-point' function for meow commands.")
 
+(defun ii/meow-command--insert-update (beg end)
+  "")
 
 (defun +meow-command--get-command (expr)
   (cond ((or (eq expr "w")
@@ -39,20 +55,23 @@
           'quit)
          (t nil))))
 
+(defun ii/meow-command--minibuffer-setup ()
+  (set-syntax-table emacs-lisp-mode-syntax-table)
+  (cursor-intangible-mode 1)
+  (add-hook 'completion-at-point-functions
+            #'cape-elisp-symbol nil t)
+  (add-hook ')
+  (setq-local trusted-content :all))
+
 (defun +meow/command (&optional arg)
   "Prompt for a command to execute."
   (interactive "p")
-  (minibuffer-with-setup-hook
-      (lambda ()
-        (set-syntax-table emacs-lisp-mode-syntax-table)
-        (add-hook 'completion-at-point-functions
-                  #'cape-elisp-symbol nil t)
-        (setq-local trusted-content :all))
+  (minibuffer-with-setup-hook 'ii/meow-command--minibuffer-setup
     (let* ((command (read-from-minibuffer ii/meow-command-prompt
                                           nil
                                           read--expression-map
                                           nil
-                                          'meow-command-history)))
+                                          'ii/meow-command-history)))
       (pcase command
         ((guard (or (string-equal (string-clean-whitespace command)
                                   "0")
@@ -75,5 +94,13 @@
         (_ (+meow--error "[meow] command error"))))))
 
 
+;;;; commands
+
+(ii/meow-define-command write
+  :short "w"
+  :args (())
+  :function
+  (lambda (path)
+    (write-file )))
 
 (provide 'implicit-meow-command)

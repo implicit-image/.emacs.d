@@ -1,0 +1,150 @@
+;;; -*- lexical-binding: t -*-
+;; implementation for match and surround functionality
+;; in style of helix
+(require 'implicit-utils)
+(require 'implicit-meow-utils)
+
+(defvar ii/meow-surround-pair-alist nil
+  "")
+
+(defmacro ii/meow-define-pair! (pair &rest args)
+  ""
+  (declare (indent defun))
+  (let ((pair (if (symbolp pair)
+                  (symbol-value pair)
+                pair)))
+    `(add-to-list 'ii/meow-surround-pair-alist ',(list (or (plist-get args :mode) t) pair))))
+
+(defmacro ii/meow--with-surround-context! (beg-sym end-sym &rest body)
+  "Evaluate BODY with current buffer narrowed to surround context."
+  (declare (indent defun))
+  `(when-let* ((,beg-sym (region-beginning))
+               (,end-sym (region-end)))
+     (if (not (region-active-p)) (meow--select-range nil (cons ,beg-sym ,end-sym)))
+     (save-mark-and-excursion
+       (narrow-to-region ,beg-sym ,end-sym)
+       ,@body
+       (widen))))
+
+(defun ii/meow--setup-local-pairs ()
+  (make-local-variable 'insert-pair-alist)
+  (dolist (a ii/meow-surround-pair-alist)
+    (let ((mode (car a)))
+      (if (or (eq mode t)
+              (eq mode major-mode)
+              (if (listp mode )
+                  (memq major-mode mode)
+                (derived-mode-p mode)))
+          (add-to-list 'insert-pair-alist (cadr a))))))
+
+(defun ii/meow--match-prompt ()
+  "Return a prompt for `+meow/match'."
+  (ii/make-key-prompt "Match: " ii/meow--match-functions))
+
+(defun ii/meow--surround-get-matching-pair (char)
+  "Get matching pair for CHAR."
+  (cl-reduce (lambda (_ac _el)
+               (if (memq char _el) _el _ac))
+             insert-pair-alist
+             :initial-value (list char char)))
+
+(defun ii/meow--find-surrounding-chars (open close &optional nth)
+  (if-let* ((nth (or nth 1))
+            (prev (save-mark-and-excursion
+                    (search-backward open nil nil nth)))
+            (next (save-mark-and-excursion
+                    (search-forward close nil nil nth))))
+      (cons prev next)
+    (progn (user-error "Failed determining surrounding characters")
+           nil)))
+
+(defun ii/meow--insert-n-times (arg &optional n)
+  "Insert ARG N times, at least 1."
+  (let ((n (if (or (null n)
+                   (<= n 0 ))
+               1
+             n)))
+    (dotimes (i n)
+      (insert arg))))
+
+(defun ii/meow--surround-with-char (with-newline pair)
+  (let ((parens-require-spaces nil)
+        (open (car pair))
+        (close (cadr pair)))
+    (ii/meow--with-surround-context! beg end
+      (beginning-of-buffer)
+      (set-mark (point))
+      (insert open)
+      (when with-newline (insert ?\n))
+      (end-of-buffer)
+      ;; make place for the last char
+      (when with-newline (insert ?\n))
+      (insert close))))
+
+(defun ii/meow--change-surrounding-chars (nth pair)
+  ""
+  (let ((parens-require-spaces nil)
+        (open (car pair))
+        (close (cadr pair)))
+    (ii/meow--with-surround-context! beg end
+      (beginning-of-buffer)
+      (set-mark (point))
+      (delete-char 1)
+      (insert open)
+      (end-of-buffer)
+      (backward-char 1)
+      (delete-char 1)
+      (insert close)
+      (indent-region beg end))))
+
+(defun ii/meow--delete-surrounding-chars (arg pair)
+  "ARG OPEN CLOSE."
+  (let ((parens-require-spaces nil)
+        (open (car pair))
+        (close (cadr pair)))
+    (ii/meow--with-surround-context! beg end
+      (beginning-of-buffer)
+      (delete-char 1)
+      (end-of-buffer)
+      (backward-char 1)
+      (delete-char 1))))
+
+(defun ii/meow--beacon-surround-with-char (with-newline pair)
+  (meow--with-selection-fallback
+   (ii/meow--apply-to-beacon-overlays! start end
+     (ii/meow--surround-with-char with-newline pair))))
+
+(defun ii/meow--beacon-delete-surrounding-chars (arg pair)
+  (meow--with-selection-fallback
+   (ii/meow--apply-to-beacon-overlays! (ii/meow--delete-surrounding-chars arg pair))))
+
+(defun ii/meow--beacon-change-surrounding-chars (arg pair)
+  (meow--with-selection-fallback
+   (ii/meow--apply-to-beacon-overlays! (ii/meow--change-surrounding-chars arg pair))))
+
+;; define common pairs
+(ii/meow-define-pair! (?\" ?\"))
+(ii/meow-define-pair! (?\' ?\'))
+(ii/meow-define-pair! (?\{ ?\}))
+(ii/meow-define-pair! (?\[ ?\]))
+(ii/meow-define-pair! (?\( ?\)))
+(ii/meow-define-pair! (?* ?*))
+(ii/meow-define-pair! (?- ?-))
+
+;; mode specific pairs
+(ii/meow-define-pair! (?\` ?\')
+  :mode (emacs-lisp-mode lisp-interaction-mode))
+
+(ii/meow-define-pair! (?_ ?_)
+  :mode (org-mode))
+
+(ii/meow-define-pair! (?~ ?~)
+  :mode (org-mode))
+
+(ii/meow-define-pair! (?= ?=)
+  :mode (org-mode))
+
+(ii/meow-define-pair! (?- ?-)
+  :mode (org-mode))
+
+(provide 'implicit-meow-surround)

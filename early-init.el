@@ -20,7 +20,6 @@
       process-adaptive-read-buffering nil
       ;; a bit of performance optimization on startup
       frame-inhibit-implied-resize t
-      inhibit-x-resources nil
       initial-buffer-choice nil
       inhibit-startup-buffer-menu nil
       inhibit-startup-screen t
@@ -33,9 +32,11 @@
       use-file-dialog nil
       use-dialog-box nil
       scroll-bar-mode nil
-      use-system-tooltips nil
+      use-system-tooltips t
       menu-bar-mode nil
       tool-bar-mode nil)
+
+(setq-default inhibit-x-resources t)
 
 (defun +init-reset-inhibit-redisplay ()
   (setq inhibit-redisplay nil))
@@ -46,9 +47,9 @@
 (setq mode-line-format nil)
 (setq backup-directory-alist `(("." . ,(expand-file-name "backups" user-emacs-directory))))
 ;; to increase lsp-mode performance
-(setenv "LSP_USE_PLISTS" "true")
+;; (setenv "LSP_USE_PLISTS" "true")
 (setq +base/font-family (pcase system-type
-                          ('gnu/linux "Comic Code Ligatures")
+                          ('gnu/linux "Comic Code")
                           ('windows-nt "Cas"))
       +base/font-weight 'light
       +base/font-size (pcase system-type
@@ -90,6 +91,9 @@
 
 ;; run garbage collection on idle
 (run-with-idle-timer 0.8 t 'garbage-collect)
+
+;; garbage collect on focus-out
+(advice-add 'after-focus-change-function :after 'garbage-collect)
 
 (defun +font--setup ()
   (set-frame-font (font-spec :family +base/font-family
