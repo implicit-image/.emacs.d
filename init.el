@@ -698,7 +698,6 @@
                                            (emms-playlist-mode . motion)
                                            (nov-mode . motion)
                                            (archive-mode . test)
-                                           (vterm-mode . vterm)
                                            (speed-type-mode . insert)
                                            (shell-mode . insert)
                                            (eat-mode . eat)
@@ -2445,14 +2444,15 @@
 
 (use-package eat
   :init
-  :config
   (setopt eat-shell (+os/per-system! :linux "zsh"
                                      :win "bash")
           eat-enable-blinking-text nil
-          eat-enable-shell-prompt-annotation nil
+          ;; eat-enable-shell-prompt-annotation nil
           eat-minimum-latency 0.009)
   ;;; eat sets the terminfo directory to the straight build path, which contains only source and emacs Info files. This points it to the actual repo.
-  (setq eat-term-terminfo-directory (expand-file-name "straight/repos/eat/terminfo" user-emacs-directory))
+  ;; (setq eat-term-terminfo-directory (expand-file-name "straight/repos/eat/terminfo" user-emacs-directory)
+  ;;       eat--terminfo-path (expand-file-name "straight/repos/eat/terminfo" user-emacs-directory)
+  ;;       eat--shell-integration-path (expand-file-name "straight/repos/eat/integration" user-emacs-directory))
   :bind*
   (("C-c oe" . eat)
    :map project-prefix-map
@@ -3334,10 +3334,13 @@
   :mode "\\.nix\\'")
 
 (use-package nwscript-mode
-  :straight (nwscript-mode :type nil
-                           :local-repo "/home/b/projects/nwscript-mode.el")
+  :straight (nwscript-mode :type git
+                           :host github
+                           :repo "implicit-image/nwscript-mode.el")
   :autoload (nwscript-mode)
   :mode "\\.nss\\'"
+  :init
+  (setopt nwscript-compiler-executable (substitute-in-file-name "$HOME/.local/bin/nwnsc.exe"))
   :config
   ;; add base game includes
   (let ((file (substitute-in-file-name "$HOME/nwn2mods/game-includes")))
