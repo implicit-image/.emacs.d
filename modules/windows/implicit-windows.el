@@ -159,6 +159,10 @@ If BODY is non-nil, it is executed before returning window."
    (side . left)
    (slot . 1)))
 
+(+define-display-buffer-prefix! ii/no-window-prefix
+  display-buffer-no-window
+  "")
+
 (defun +windows/toggle-modeline (buffer)
   "Toggle modeline visibility in BUFFER."
   (interactive (list (current-buffer)))
@@ -166,11 +170,6 @@ If BODY is non-nil, it is executed before returning window."
     (if mode-line-format
         (+windows--hide-modeline)
       (+windows--show-modeline))))
-
-(defun +windows/delete-in-direction (this-window dir)
-  "Delete the window in direction DIR from window THIS-WINDOW."
-  (interactive) (list (selected-window)
-                      ()))
 
 (defun +windows/toggle-maximize-window (this-window frame)
   "Maximize window THIS-WINDOW if it is not maximized, else restore window configuration before last\
@@ -186,9 +185,19 @@ maximization."
     (setq +windows--maximize-saved-config (current-window-configuration frame))
     (delete-other-windows this-window)))
 
-(defun +windows/rotate (backwards)
-  "Rotate window configuration on current frame forward. If BACKWARDS is \
-non-nil, rotate backwards instead."
-  (interactive))
+(defun ii/windows-toggle-minibuffer-focus ()
+  (interactive)
+  (if (and (minibufferp (current-buffer))
+           (window-live-p (minibuffer-selected-window)))
+      (select-window (minibuffer-selected-window))
+    (switch-to-minibuffer)))
+
+(defun ii/windows-quit-current-minibuffer (&optional arg)
+  (interactive "p")
+  (when (not (minibufferp (current-buffer)))
+    (switch-to-minibuffer))
+  (when arg
+    (remove-hook 'minibuffer-exit-hook 'ii/vertico--restore-window-config))
+  (vertico-exit))
 
 (provide 'implicit-windows)

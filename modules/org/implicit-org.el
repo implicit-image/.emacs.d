@@ -61,8 +61,7 @@
                       filename)))
 
 ;;;###autoload
-(defun +org-mode--jupyter-setup ()
-  (org-babel-jupyter-override-src-block "haskell"))
+(defun +org-mode--jupyter-setup ())
 
 
 (provide 'implicit-org)

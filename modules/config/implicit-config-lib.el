@@ -97,7 +97,7 @@ starting at the third one. The `autoload' docstring can be omitted."
     `(progn ,@exprs)))
 
 ;;;###autoload
-(defmacro +when-idle! (min-time &rest body)
+(defmacro ii/when-idle! (min-time &rest body)
   "Run BODY with next idle timer after MIN-TIME of idle time."
   (declare (indent defun))
   `(run-with-idle-timer ,min-time nil (lambda () ,@body)))
@@ -128,6 +128,27 @@ starting at the third one. The `autoload' docstring can be omitted."
   `(progn ,@(mapcar (lambda (path)
                       `(add-to-list 'exec-path ,path))
                     dirs)))
+
+;; taken from https://github.com/doomemacs/doomemacs/blob/38d94da67dc84897a4318714dcc48494c016d8c4/lisp/doom-lib.el
+(defmacro ii/cmd! (&rest body)
+  "Returns (lambda () (interactive) ,@body)
+A factory for quickly producing interaction commands, particularly for keybinds
+or aliases."
+  (declare (doc-string 1))
+  `(lambda (&rest _) (interactive) ,@body))
+
+(defmacro ii/cmd!! (command &optional prefix-arg &rest args)
+  "Returns a closure that interactively calls COMMAND with ARGS and PREFIX-ARG.
+Like `cmd!', but allows you to change `current-prefix-arg' or pass arguments to
+COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
+`define-key' or `map!')."
+  (declare (doc-string 1) (pure t) (side-effect-free t))
+  `(lambda (arg &rest _) (interactive "P")
+     (let ((current-prefix-arg (or ,prefix-arg arg)))
+       (,(if args
+             #'funcall-interactively
+           #'call-interactively)
+        ,command ,@args))))
 
 (defun +from-shell--getenv-linux (varname)
   "Get environment variable VARNAME in SHELL. If shell is nil, use `'."
@@ -165,10 +186,18 @@ starting at the third one. The `autoload' docstring can be omitted."
                           (symbol (car binding))
                           (val (cadr binding)))
                      (cons symbol val)))
-                 (string-split (shell-command-to-string "env") "\n"))))
+                 (string-split (shell-command-to-string "env") "\n")))
+        (inhibit-message t))
     (dolist (assoc assocs)
-      (when (memq (car assoc) vars)
-        (setenv (car assoc) (cadr assoc))))))
+      (let ((var (car assoc)))
+        (if (string-equal var "PATH")
+            (mapc (lambda (path)
+                    (when init-file-debug
+                      (message path))
+                    (add-to-list 'exec-path path))
+                  (string-split (cdr assoc) ":"))
+          (when (memq var vars)
+            (setenv var (cadr assoc))))))))
 
 (defun +char-whitespace? (char)
   "Check if CHAR is whitespace."
@@ -225,5 +254,21 @@ starting at the third one. The `autoload' docstring can be omitted."
   ""
   (let ((system-sym (intern (concat ":" (system-name)))))
     `(progn ,@(plist-get args system-sym))))
+
+(defun ii/deps (&rest args)
+  (eval
+   `(and ,@(mapcar (lambda (exe)
+                     `(let ((path (executable-find ,exe))
+                            (inhibit-message t))
+                        (message "DEPS: %s%s found%s"
+                                 ,exe
+                                 (if path "" " not")
+                                 (if path (concat " " "at " path) "!"))
+                        path))
+                   args))))
+
+(defmacro ii/with-no-message! (&rest body)
+  `(let ((inhibit-message t))
+     ,@body))
 
 (provide 'implicit-config-lib)

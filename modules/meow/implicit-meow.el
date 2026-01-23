@@ -47,7 +47,6 @@
 
 (defun ii/meow--search-bounds (regex-p)
   "Return bounds for last regexp search."
-  (isearch-forward regex-p)
   (let* ((rg (car (if regex-p
                       regexp-search-ring
                     search-ring)))

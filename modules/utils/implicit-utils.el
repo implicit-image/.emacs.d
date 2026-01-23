@@ -182,8 +182,8 @@
 (defun +utils/browse-modules ()
   "Open user init module file."
   (interactive)
-  (let ((default-directory (cdr (project-current nil user-emacs-directory))))
-    (affe-find +init-module-path)))
+  (let ((default-directory user-emacs-directory))
+    (command-execute 'consult-fd)))
 
 (defun +utils/open-random-file-in-dir (dir)
   (interactive (list default-directory))
@@ -211,5 +211,12 @@
   (with-temp-buffer
     (call-process command nil t )
     (buffer-substring-no-properties (point-min) (point-max))))
+
+(defun ii/sudo-edit (&optional filename)
+  (interactive (list (read-file-name "Open: ")))
+  (if (eq system-type 'gnu/linux)
+      (let ((default-directory "/home/root"))
+        (find-file (concat "/sudo:root@localhost:" filename)))
+    (user-error "Implemented only on gnu/linux")))
 
 (provide 'implicit-utils)
