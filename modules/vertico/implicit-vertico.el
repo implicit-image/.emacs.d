@@ -3,7 +3,7 @@
 ;; Author: Błażej Niewiadomski
 ;; Maintainer: Błażej Niewiadomski
 ;; Version: version
-;; Package-Requires: (dependencies)
+;; Package-Requires: ()
 ;; Homepage: homepage
 ;; Keywords: keywords
 
@@ -48,11 +48,17 @@
 (defun ii/vertico--buffer-get-display-alist-props (wider command)
   (if (null wider)
       '(:width 1.0 :height 0.3 :side bottom)
-    `( :width ,(cond ((memq command (car (alist-get 0.5 ii/vertico--buffer-width-alist nil nil 'eql))) 0.5)
-                     ((memq command (car (alist-get 0.35 ii/vertico--buffer-width-alist nil nil 'eql))) 0.25)
-                     (t 0.5))
-       :height 1.0
-       :side left)))
+    (let* ((width (cond ((memq command (car (alist-get 0.5 ii/vertico--buffer-width-alist nil nil 'eql))) 0.5)
+                        ((memq command (car (alist-get 0.35 ii/vertico--buffer-width-alist nil nil 'eql))) 0.25)
+                        (t 0.5)))
+           (side (if (or (>= (window-left-column (selected-window)) (/ (1- (frame-width)) 2))
+                         (equal width 0.25))
+                     'left
+                   'right)))
+      (message "width %S side %S si-minibufer %S" width side (minibufferp))
+      `( :width ,width
+         :height 1.0
+         :side ,side))))
 
 (defun ii/vertico--get-buffer-alist (command)
   (let ((props (ii/vertico--buffer-get-display-alist-props (>= (frame-pixel-width) (frame-pixel-height))

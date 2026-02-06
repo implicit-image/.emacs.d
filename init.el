@@ -124,7 +124,7 @@
         blink-cursor-mode nil)
 
 (setq-default backup-inhibited t
-              line-spacing 0.1
+              line-spacing 0.0
               create-lockfiles nil
               truncate-lines t
               make-backup-files nil
@@ -147,6 +147,7 @@
                                (or (lambda (b) (buffer-local-value 'cursor-face-highlight-mode b))
                                    (lambda (b) (string-match-p "\\` " (buffer-name b))) minibufferp
                                    (major-mode . eat-mode)
+                                   (major-mode . vterm-mode)
                                    (major-mode . dired-sidebar-mode)))
       x-stretch-cursor nil
       backup-by-copying t
@@ -189,6 +190,7 @@
       speedbar-prefer-window t
       speedbar-window-default-width 40
       explicit-shell-file-name (executable-find "bash")
+      savehist-autosave-interval nil
       savehist-additional-variables
       '(kill-ring
         register-alist
@@ -235,7 +237,11 @@
 
 (use-package emacs
   :init
-  (setq ii/goto-repeat-map (make-sparse-keymap))
+  (setq ii/goto-repeat-map (make-sparse-keymap)
+        paragraph-repeat-map (make-sparse-keymap)
+        sentence-repeat-map (make-sparse-keymap)
+        sexp-repeat-map (make-sparse-keymap)
+        list-repeat-map (make-sparse-keymap))
 
   (defun ii/backward-down-list (arg interactive)
     (interactive "^p\nd")
@@ -245,17 +251,8 @@
   (require 'server)
   (if (not (server-running-p))
       (server-start))
-  :bind*
-  (;; dont use arrows
-   ("<left>" . (lambda () (interactive) (message "No arrows!")))
-   ("<right>" . (lambda () (interactive) (message "No arrows!")))
-   ("<up>" . (lambda () (interactive) (message "No arrows!")))
-   ("<down>" . (lambda () (interactive) (message "No arrows!")))
-   ("M-RET" . recenter)
-   ("M-<return>" . recenter)
-   ("M-]" . forward-paragraph)
-   ("M-[" . backward-paragraph)
-   ("C-c to" . toggle-option)
+  :bind
+  (("C-c to" . toggle-option)
    ("C-c tde" . toggle-debug-on-error)
    ("C-c tdq" . toggle-debug-on-quit)
    ("C-c tl" . scroll-lock-mode)
@@ -265,7 +262,30 @@
    ("C-c q C-r" . restart-emacs)
    ("C-c b C-k" . kill-buffer)
    ("C-c b C-n" . narrow-to-region)
-   ("C-c b C-w" . widen)
+   ("C-c b C-w" . widen))
+  :bind*
+  (;; dont use arrows
+   ("<left>" . (lambda () (interactive) (message "No arrows!")))
+   ("<right>" . (lambda () (interactive) (message "No arrows!")))
+   ("<up>" . (lambda () (interactive) (message "No arrows!")))
+   ("<down>" . (lambda () (interactive) (message "No arrows!")))
+   ("<menu>" . context-menu-open)
+   ("M-RET" . recenter)
+   ("M-<return>" . recenter)
+   ("M-]" . forward-paragraph)
+   ("M-[" . backward-paragraph)
+   :repeat-map paragraph-repeat-map
+   ("p" . forward-paragraph)
+   ("P" . backward-paragraph)
+   :repeat-map sentence-repeat-map
+   ("." . forward-sentence)
+   (">" . backward-sentence)
+   :repeat-map sexp-repeat-map
+   ("s" . forward-sexp)
+   ("S" . backward-sexp)
+   :repeat-map list-repeat-map
+   ("\]" . forward-list)
+   ("\[" . backward-list)
    :map goto-map
    ("]p" . forward-paragraph)
    ("[p" . backward-paragraph)
@@ -299,9 +319,6 @@
   :hook
   ((window-setup-hook server-after-make-frame-hook) . +font--setup)
   ((help-mode-hook helpful-mode-hook lsp-ui-doc-hook) . visual-line-mode)
-  ;; display line numbers in text-editing modes
-  ;; (prog-mode-hook . visual-line-mode)
-  ;; (visual-line-mode-hook . visual-wrap-prefix-mode)
   (gfm-mode-hook . display-line-numbers-mode)
   (prog-mode-hook . display-line-numbers-mode)
   (after-init-hook . (lambda () (message (emacs-init-time)))))
@@ -339,56 +356,140 @@
 (when (featurep 'tty-child-frames)
   (when (fboundp 'tty-tooltip-mode)
     (tty-tooltip-mode 1))
-  (set-display-table-slot standard-display-table
-                          'box-vertical (make-glyph-code #x2502))
-  (set-display-table-slot standard-display-table
-                          'box-horizontal (make-glyph-code #x2500))
-  (set-display-table-slot standard-display-table
-                          'box-down-right (make-glyph-code #x250c))
-  (set-display-table-slot standard-display-table
-                          'box-down-left (make-glyph-code #x2510))
-  (set-display-table-slot standard-display-table
-                          'box-up-right (make-glyph-code #x2514))
-  (set-display-table-slot standard-display-table
-                          'box-up-left (make-glyph-code #x2518))
-  (set-display-table-slot standard-display-table
-                          'box-double-vertical (make-glyph-code #x2551))
-  (set-display-table-slot standard-display-table
-                          'box-double-horizontal (make-glyph-code #x2550))
-  (set-display-table-slot standard-display-table
-                          'box-double-down-right (make-glyph-code #x2554))
-  (set-display-table-slot standard-display-table
-                          'box-double-down-left (make-glyph-code #x2557))
-  (set-display-table-slot standard-display-table
-                          'box-double-up-right (make-glyph-code #x255a))
-  (set-display-table-slot standard-display-table
-                          'box-double-up-left (make-glyph-code #x255d)))
+  (set-display-table-slot standard-display-table 'box-vertical (make-glyph-code #x2502))
+  (set-display-table-slot standard-display-table 'box-horizontal (make-glyph-code #x2500))
+  (set-display-table-slot standard-display-table 'box-down-right (make-glyph-code #x250c))
+  (set-display-table-slot standard-display-table 'box-down-left (make-glyph-code #x2510))
+  (set-display-table-slot standard-display-table 'box-up-right (make-glyph-code #x2514))
+  (set-display-table-slot standard-display-table 'box-up-left (make-glyph-code #x2518))
+  (set-display-table-slot standard-display-table 'box-double-vertical (make-glyph-code #x2551))
+  (set-display-table-slot standard-display-table 'box-double-horizontal (make-glyph-code #x2550))
+  (set-display-table-slot standard-display-table 'box-double-down-right (make-glyph-code #x2554))
+  (set-display-table-slot standard-display-table 'box-double-down-left (make-glyph-code #x2557))
+  (set-display-table-slot standard-display-table 'box-double-up-right (make-glyph-code #x255a))
+  (set-display-table-slot standard-display-table 'box-double-up-left (make-glyph-code #x255d)))
 
-(setq which-key-popup-type 'side-window
+(setq which-key-popup-type 'frame
       which-key-preserve-window-configuration nil
+      which-key-max-description-length 40
       which-key-side-window-max-width 0.2
-      which-key-idle-delay 0.6
+      which-key-idle-delay 0.4
       which-key-side-window-max-height 0.2
       which-key-idle-secondary-delay 0.05
       which-key-separator " "
       which-key-sort-order 'which-key-key-order-alpha
       which-key-side-window-slot 2
-      which-key-max-display-columns 5
-      which-key-prefix-prefix "[M] "
-      which-key-add-column-padding 2
-      which-key-show-remaining-keys nil
+      which-key-max-display-columns 1
+      which-key-prefix-prefix "+"
+      which-key-compute-remaps t
+      which-key-add-column-padding 1
+      which-key-show-remaining-keys t
       which-key-frame-max-width 2
       which-key-frame-max-height 10
-      which-key-min-column-description-width 30)
+      which-key-min-column-description-width 40)
 
 (add-hook 'meow-global-mode-hook
           (defun ii/which-key--setup ()
             (require 'which-key)
             (which-key-mode)
-            (which-key-setup-side-window-bottom)))
+            (which-key-posframe-mode 1)))
 
-;; (with-eval-after-load 'which-key
-;;   (which-key-add-key-based-replacements))
+(with-eval-after-load 'which-key
+  (which-key-add-key-based-replacements
+    ;; keypad
+    "<space> x k" "Kmacro"
+    "SPC x k" "Kmacro"
+    ;; kmacro map
+    "C-x C-k" "Kmacro"
+    "C-x C-k C-q" "Cond macro counter"
+    "C-x C-k C-r" "Counter to register"
+    "C-x C-k C-r a" "Cond counter to register"
+    ;; M-g
+    "M-g b" "Buffer"
+    "M-g \[" "Goto Prev"
+    "M-g ]" "Goto Next"
+    ;; C-x map
+    "C-x RET" "Input System"
+    "C-x p" "Project"
+    "C-x r" "Register"
+    "C-x n" "Narrow"
+    "C-x t" "Tab bar"
+    "C-x t^" "Detach bar"
+    "C-x a" "Abbrev"
+    "C-x ai" "Add Abbrev"
+    "C-x w" "Window"
+    "C-x w^" "Detach"
+    "C-x wf" "Flip"
+    "C-x wo" "Rotate"
+    "C-x wr" "Rotate Layout"
+    "C-x v" "VC"
+    "C-x vB" "Since merge base"
+    "C-x vb" "Branch"
+    "C-x vM" "Merge"
+    "C-x vw" "Working tree"
+    "C-x 8" "Insert Char"
+    "C-x x" "Buffer Content"
+    "C-x X" "Edebug"
+    "C-x C-a" "Edebug"
+    ;; C-c map
+    "C-c a" "LLM"
+    "C-c b" "Buffer"
+    "C-c c" "Code"
+    "C-c d" "Directory"
+    "C-c e" "Edit"
+    "C-c et" "Transpose"
+    "C-c f" "Files"
+    "C-c g" "Git"
+    "C-c h" "Help"
+    "C-c i" "Insert"
+    "C-c j" "Jump"
+    "C-c k" "Kmacro"
+    "C-c l" "L"
+    "C-c m" "Mark"
+    "C-c n" "Notes"
+    "C-c o" "Open"
+    "C-c p" "Project"
+    "C-c q" "Quit"
+    "C-c r" "Run"
+    "C-c s" "Search"
+    "C-c t" "Toggle"
+    "C-c td" "Debug"
+    "C-c tw" "Window"
+    "C-c u" "U"
+    "C-c v" "V"
+    "C-c w" "Window"
+    "C-c x" "X"
+    "C-c y" "Y"
+    "C-c z" "Z"))
+
+(use-package which-key-posframe
+  :if (> emacs-major-version 30)
+  :config
+  (defun ii/which-key-posframe-poshandler (info)
+    "Display the which-key posframe correctly on tty."
+    (if (and (not (display-graphic-p)) (featurep 'tty-child-frames))
+        (let ((h (plist-get info :mode-line-height))
+              (m (plist-get info :minibuffer-height))
+              (fw (plist-get info :parent-frame-width))
+              (fh (plist-get info :parent-frame-height))
+              (pw (plist-get info :posframe-width))
+              (ph (plist-get info :posframe-height)))
+          (message "mode-line-height %S mini-height %S fw %S pw %S" h m fw pw)
+          (cons (- fw pw 1)
+                (if (>= ph fh)
+                    0
+                  (- fh ph m h))))
+      (posframe-poshandler-frame-bottom-right-corner info)))
+
+  (setq which-key-posframe-parameters '((border-width . 2)
+                                        (internal-border-width . 2)
+                                        (vertical-border . 2)
+                                        (user-size . nil)
+                                        (width . 0.6)
+                                        (height . 0.4)
+                                        (inhibit-double-buffering . nil))
+        which-key-posframe-border-width 2
+        which-key-posframe-poshandler 'ii/which-key-posframe-poshandler))
 
 (use-package kkp
   :hook
@@ -432,6 +533,7 @@
   :bind*
   (("C-c ei" . ii/meow-increment-number-at-point)
    ("C-c ed" . ii/meow-decrement-number-at-point)
+   ("C-c ee" . ii/meow-iedit-mode)
    :map goto-map
    ("C-c" . ii/meow-switch-case)
    ("~" . ii/meow-toggle-case-region)
@@ -450,6 +552,7 @@
 (use-package treesit
   :straight nil
   :init
+  (setq treesit-enabled-modes t)
   ;; treat treesitter nodes as s-expressions
   (setq-default treesit-sexp-thing 'sexp))
 
@@ -566,9 +669,10 @@
                            (format #("%d/%d" 0 5 (face font-lock-regexp-face))
                                    iedit-occurrence-index (iedit-counter)))))
   :bind*
-  (("C-c ee" . iedit-mode)
-   :map isearch-mode-map
-   ("M-d" . iedit-mode-from-isearch)))
+  ( :map iedit-mode-keymap
+    ()
+    :map isearch-mode-map
+    ("M-d" . iedit-mode-from-isearch)))
 
 (use-package multiple-cursors
   :init
@@ -576,6 +680,9 @@
         mc/mode-line '(" mc:"
                        (:eval
                         (format #("%d" 0 2 (face font-lock-regexp-face)) (mc/num-cursors)))))
+  :bind
+  ( :map mc/keymap
+    ("<return>" . nil))
   :bind*
   (("C->" . mc/mark-next-like-this)
    ("C-<" . mc/mark-previous-like-this)
@@ -640,25 +747,46 @@
       '("<escape>" . eat-self-input)
       '("M-SPC" . meow-keypad)
       '("C-g" . eat-self-input)
-      (cons "C-w" meow-window-prefix-map)
       (cons "C-t" meow-eat-toggle-map))
 
-    (defvar-keymap meow-view-state-map
+    (meow-define-state vterm
+      "Meow state for `vterm'."
+      :keymap meow-vterm-state-map)
+
+    (setq meow-cursor-type-vterm 'bar)
+
+    (meow-define-keys 'vterm
+      '("<escape>" . vterm-send-escape)
+      '("M-SPC" . meow-keypad)
+      '("C-g" . meow-self-input)
+      '("C-c tc" . vterm-copy-mode))
+
+    (defvar-keymap meow-view-state-keymap
       :doc "Map for `meow-view-mode'."
+      :parent meow-motion-state-keymap
       "<remap> <self-insert-command>" #'meow-noop
       "j" #'meow-next
       "k" #'meow-prev
+      "z" #'recenter
+      "c" #'recenter
+      "C-p" #'backward-page
+      "C-n" #'forward-page
+      "V" #'meow-normal-mode
       "SPC" #'meow-keypad)
 
     ;;;; view state
     (meow-define-state view
       "meow state for viewing buffers."
-      :keymap meow-view-state-map)
+      :keymap meow-view-state-keymap)
 
-    (meow-define-keys 'view
-      '("\]" . "M-g ]")
-      '("\[" . "M-g [")
-      '("V" . meow-normal-mode))
+    ;; (meow-define-keys 'view
+    ;;   '("\]" . "M-g ]")
+    ;;   '("\[" . "M-g [")
+    ;;   '("z" . recenter)
+    ;;   '("c" . recenter)
+    ;;   '("C-n" . forward-page)
+    ;;   '("C-p" . backward-page)
+    ;;   '("V" . meow-normal-mode))
 
     (setq meow-cursor-type-view 'hollow)
 
@@ -733,8 +861,8 @@
     (meow-motion-define-key
      '("j" . meow-next)
      '("k" . meow-prev)
-     '("C-s" . +search/buffer)
-     (cons "C-w" meow-window-prefix-map))
+     '("C-s" . +search/buffer))
+
 
     (bind-key* "C-x C-k C-s" 'meow-beacon-macro-mode)
     (add-hook 'meow-normal-mode-hook (lambda ()
@@ -756,20 +884,11 @@
      '("/" . "C-c /")
      '("]" . "M-g ]")
      '("[" . "M-g [")
+     (cons "'" meow-normal-state-keymap)
      '("?" . +lookup/documentation)
-     '("a" . "C-c a")
-     '("b" . "C-c b")
-     '("f" . "C-c f")
-     '("g" . "C-c g")
-     (cons "h" help-map)
-     '("i" . "C-c i")
-     '("j" . "C-c j")
      '("p" . "C-x p")
-     '("t" . "C-c t")
-     '("o" . "C-c o")
-     '("q" . "C-c q")
-     '("s" . "C-c s")
-     (cons "w" meow-window-prefix-map))
+     (cons "h" help-map)
+     '("w" . "C-w"))
 
     (meow-normal-define-key
      '("0" . meow-digit-argument)
@@ -852,7 +971,7 @@
      '("M" . meow-macro)
      '("n" . meow-search)
      '("N" . meow-pop-search)
-     '("o" . meow-block)
+     '("o" . meow-tree-sitter-node)
      '("O" . meow-to-block)
      '("p" . +meow/yank)
      '("P" . meow-yank-pop)
@@ -1079,12 +1198,14 @@
   (defun ii/rg--setup ()
     (setq-local outline-regexp "File.*$"
                 outline-heading-end-regexp "\n"))
+  :config
+  (rg-enable-default-bindings)
   :bind*
   (("C-c /'" . rg-dwim)
    ("C-c /p" . rg-project)
    ("C-c /s" . rg-isearch-project)
    ("C-c /S" . rg-isearch-current-dir)
-   :map search-map
+   :map isearch-mode-map
    ("/" . rg-isearch-project)
    :map rg-mode-map
    ("i" . wgrep-change-to-wgrep-mode))
@@ -1092,7 +1213,9 @@
   (rg-mode-hook . ii/rg--setup))
 
 ;; emacs >= 31 includes `grep-edit-mode'
-(use-package wgrep)
+(use-package wgrep
+  :init
+  (setq wgrep-auto-save-buffer t))
 
 (use-package ast-grep
   :after (consult)
@@ -1220,7 +1343,6 @@ The function FOOTER is called to insert a footer."
    :map search-map
    ("t" . hl-todo-occur)))
 
-
 (use-package doom-gruber-darker-theme
   :straight (doom-gruber-darker-theme :type git
                                       :host github
@@ -1229,39 +1351,34 @@ The function FOOTER is called to insert a footer."
   ;; these faces are modified by meow and need to be overridden here
   (custom-set-faces `(region ((t (:extend nil))))
                     `(iedit-occurrence ((t (:background ,(doom-color 'base3) :foreground ,(doom-color 'fg-alt) :weight bold :inverse nil))))
+                    `(eldoc-posframe-background-face ((t (:background ,(doom-color 'bg-alt)))))
                     `(secondary-selection ((t (:background ,(doom-color 'bg):extend nil))))
-                    `(diff-hl-margin-insert ((t (:width semi-condensed :background ,(doom-color 'success)))))
-                    `(diff-hl-margin-delete ((t (:width semi-condensed))))
-                    `(diff-hl-margin-change ((t (:width semi-condensed))))
                     `(vertico-group-separator ((t (:background ,(doom-color 'bg-alt) :foreground ,(doom-color 'fg-alt) :strike-through t))))
                     `(vertico-group-title ((t (:background ,(doom-color 'bg-alt) :foreground ,(doom-color 'fg-alt)))))
                     `(minibuffer-nonselected ((t (:background ,(doom-color 'bg-alt) :foreground ,(doom-color 'fg-alt) :extend nil))))
                     `(embark-selected ((t (:background ,(doom-color 'selection) :foreground unspecified))))
-                    `(rg-file-tag-face ((t (:background :foreground ,(doom-color 'bg-alt) :extend t))))
-                    `(eldoc-box-border ((t (:background ,(doom-color 'fg-alt)))))
-                    `(vertical-border ((t (:foreground ,(doom-color 'fg-alt) :background ,(doom-color 'bg)))))))
+                    `(rg-file-tag-face ((t (:background :foreground ,(doom-color 'bg-alt) :extend t))))))
 
 ;;;; Window Management
 (use-package implicit-windows
   :straight `(implicit-windows :type nil
                                :local-repo ,(expand-file-name "windows" +init-module-path))
   :bind*
-  ( :map meow-window-prefix-map
-    ("C-`" . ii/windows-toggle-minibuffer-focus)
-    ("`" . ii/windows-quit-current-minibuffer)
-    ("\m" . +windows/toggle-maximize-window)
-    ("C-n" . ii/no-window-prefix)
-    ("C-v" . +windows/below-selected-prefix)
-    ("C-b" . +windows/bottom-window-prefix)
-    ("C-M-h" . +windows/left-vsplit-prefix)
-    ("C-M-j" . +windows/below-hsplit-prefix)
-    ("C-M-k" . +windows/above-hsplit-prefix)
-    ("C-M-l" . +windows/right-vsplit-prefix)
-    ("M-h" . +windows/left-side-window-prefix)
-    ("M-j" . +windows/bottom-side-windows-prefix)
-    ("M-k" . +windows/top-side-window-prefix)
-    ("M-l" . +windows/right-side-window-prefix)
-    ("C-c tM" . +windows/toggle-modeline)))
+  (("C-w C-`" . ii/windows-toggle-minibuffer-focus)
+   ("C-w `" . ii/windows-quit-current-minibuffer)
+   ("C-w \m" . +windows/toggle-maximize-window)
+   ("C-w C-n" . ii/no-window-prefix)
+   ("C-w C-v" . +windows/below-selected-prefix)
+   ("C-w C-b" . +windows/bottom-window-prefix)
+   ("C-w C-M-h" . +windows/left-vsplit-prefix)
+   ("C-w C-M-j" . +windows/below-hsplit-prefix)
+   ("C-w C-M-k" . +windows/above-hsplit-prefix)
+   ("C-w C-M-l" . +windows/right-vsplit-prefix)
+   ("C-w M-h" . +windows/left-side-window-prefix)
+   ("C-w M-j" . +windows/bottom-side-windows-prefix)
+   ("C-w M-k" . +windows/top-side-window-prefix)
+   ("C-w M-l" . +windows/right-side-window-prefix)
+   ("C-w C-c tM" . +windows/toggle-modeline)))
 
 (use-package window
   :straight nil
@@ -1423,26 +1540,27 @@ The function FOOTER is called to insert a footer."
            (display-buffer-same-window))))
   :bind*
   (("C-c twd" . window-toggle-dedicated)
+   ("C-c bp" . previous-buffer)
+   ("C-c bn" . next-buffer)
+   ("C-w C-o" . other-window-prefix)
+   ("C-w C-s" . same-window-prefix)
+   ("C-w q" . delete-window)
+   ("C-w Q" . kill-buffer-and-window)
+   ("C-w v" . split-window-horizontally)
+   ("C-w s" . split-window-vertically)
+   ("C-w =" . balance-windows)
+   ("C-w o" . delete-other-windows)
+   ("C-w -" . shrink-window)
+   ("C-w +" . enlarge-window)
+   ("C-w M-\-" . shrink-window-horizontally)
+   ("C-w M-\+" . enlarge-window-horizontally)
+   ("C-w w" . other-window)
+   ("C-w C-w" . other-window)
    :map goto-map
    ("b[" . previous-buffer)
    ("b]" . next-buffer)
    ("]b" . next-buffer)
    ("[b" . previous-buffer)
-   :map meow-window-prefix-map
-   ("C-o" . other-window-prefix)
-   ("C-s" . same-window-prefix)
-   ("q" . delete-window)
-   ("Q" . kill-buffer-and-window)
-   ("v" . split-window-horizontally)
-   ("s" . split-window-vertically)
-   ("=" . balance-windows)
-   ("o" . delete-other-windows)
-   ("-" . shrink-window)
-   ("+" . enlarge-window)
-   ("M-\-" . shrink-window-horizontally)
-   ("M-\+" . enlarge-window-horizontally)
-   ("w" . other-window)
-   ("C-w" . other-window)
    :repeat-map window-repeat-map
    ("v" . split-window-horizontally)
    ("s" . split-window-vertically)
@@ -1456,41 +1574,39 @@ The function FOOTER is called to insert a footer."
   :init
   (setq windmove-wrap-around nil)
   :bind*
-  ( :map meow-window-prefix-map
-    ("C-h" . windmove-left)
-    ("C-j" . windmove-down)
-    ("C-k" . windmove-up)
-    ("C-l" . windmove-right)
-    ("H" . windmove-swap-states-left)
-    ("J" . windmove-swap-states-down)
-    ("K" . windmove-swap-states-up)
-    ("L" . windmove-swap-states-right)
-    ("h" . windmove-display-left)
-    ("j" . windmove-display-down)
-    ("k" . windmove-display-up)
-    ("l" . windmove-display-right)
-    ("C-f" . windmove-display-new-frame)
-    ("C-t" . windmove-display-new-tab)
-    ("C-d h" . windmove-delete-left)
-    ("C-d j" . windmove-delete-down)
-    ("C-d k" . windmove-delete-up)
-    ("C-d l" . windmove-delete-right)
-    :repeat-map window-repeat-map
-    ("H" . windmove-swap-states-left)
-    ("J" . windmove-swap-states-down)
-    ("K" . windmove-swap-states-up)
-    ("L" . windmove-swap-states-right)
-    ("C-h" . windmove-left)
-    ("C-j" . windmove-down)
-    ("C-k" . windmove-up)
-    ("C-l" . windmove-right)))
+  (("C-w C-h" . windmove-left)
+   ("C-w C-j" . windmove-down)
+   ("C-w C-k" . windmove-up)
+   ("C-w C-l" . windmove-right)
+   ("C-w H" . windmove-swap-states-left)
+   ("C-w J" . windmove-swap-states-down)
+   ("C-w K" . windmove-swap-states-up)
+   ("C-w L" . windmove-swap-states-right)
+   ("C-w h" . windmove-display-left)
+   ("C-w j" . windmove-display-down)
+   ("C-w k" . windmove-display-up)
+   ("C-w l" . windmove-display-right)
+   ("C-w C-f" . windmove-display-new-frame)
+   ("C-w C-t" . windmove-display-new-tab)
+   ("C-w C-d h" . windmove-delete-left)
+   ("C-w C-d j" . windmove-delete-down)
+   ("C-w C-d k" . windmove-delete-up)
+   ("C-w C-d l" . windmove-delete-right)
+   :repeat-map window-repeat-map
+   ("H" . windmove-swap-states-left)
+   ("J" . windmove-swap-states-down)
+   ("K" . windmove-swap-states-up)
+   ("L" . windmove-swap-states-right)
+   ("C-h" . windmove-left)
+   ("C-j" . windmove-down)
+   ("C-k" . windmove-up)
+   ("C-l" . windmove-right)))
 
 (use-package window-x
   :straight nil
   :bind*
-  ( :map meow-window-prefix-map
-    ("C-r r" . rotate-windows)
-    ("C-r b" . rotate-windows-back)))
+  (("C-w C-r r" . rotate-windows)
+   ("C-w C-r b" . rotate-windows-back)))
 
 (use-package uniquify
   :straight nil
@@ -1555,7 +1671,9 @@ The function FOOTER is called to insert a footer."
 
 (setq-default header-line-format nil
               mode-line-format
-              '((:eval meow--indicator)
+              '((:eval (propertize " ●"
+                                   'face
+                                   (alist-get meow--current-state meow-indicator-face-alist)))
                 (multiple-cursors-mode mc/mode-line)
                 (iedit-mode iedit-mode-line)
                 "%n "
@@ -1564,7 +1682,7 @@ The function FOOTER is called to insert a footer."
                 mode-line-buffer-identification
                 "%] "
                 mode-line-position
-                "%I"
+                " %I"
                 mode-line-format-right-align
                 (lsp-mode lsp-modeline--diagnostics-string)
                 (lspce-mode (:eval (concat lspce--mode-line-format " ")))
@@ -1629,6 +1747,16 @@ The function FOOTER is called to insert a footer."
   :straight `(implicit-vertico :type nil
                                :local-repo ,(expand-file-name "vertico" +init-module-path)))
 
+(use-package vertico-posframe
+  :init
+  (setq vertico-posframe-width 100
+        vertico-posframe-min-width 100)
+  :config
+  (defun ii/vertico-posframe-setup ()
+    (setq vertico-resize vertico-posframe-mode))
+
+  (add-hook 'vertico-posframe-mode-hook 'ii/vertico-posframe-setup))
+
 (use-package vertico
   :init
   (setopt vertico-count 12
@@ -1646,7 +1774,6 @@ The function FOOTER is called to insert a footer."
                                                    (message "garbage collecting..."))))
 
   :config
-  (vertico-multiform-mode)
   (setopt vertico-multiform-categories
           '((embark-keybinding grid)
             (consult-xref buffer)
@@ -1663,7 +1790,20 @@ The function FOOTER is called to insert a footer."
             (consult-buffer buffer)
             (project-find-file buffer)
             (affe-grep buffer)
-            (affe-find buffer)))
+            (affe-find buffer)
+            (eglot-code-actions posframe
+                                (vertico-posframe-poshandler . posframe-poshandler-point-frame-center)
+                                (vertico-posframe-border-width . 2))
+            (lsp-execute-code-action posframe
+                                     (vertico-posframe-poshandler . posframe-poshandler-point-frame-center)
+                                     (vertico-posframe-border-width . 2))
+            (lspce-code-actions posframe
+                                (vertico-posframe-poshandler . posframe-poshandler-point-frame-center)
+                                (vertico-posframe-border-width . 2))
+            ("insert" posframe
+             (vertico-posframe-poshandler . posframe-poshandler-point-bottom-left-corner)
+             (vertico-posframe-border-width . 2))))
+  (vertico-multiform-mode)
   :hook
   (marginalia-mode-hook . vertico-mode)
   (minibuffer-setup-hook . vertico-repeat-save)
@@ -1763,13 +1903,13 @@ targets."
    ("C-c C-c" . embark-collect)))
 
 (use-package consult-lsp
-  :bind*
+  :bind
   ( :map lsp-mode-map
     ("C-c cs" . consult-lsp-symbols)
     ("C-c cd" . consult-lsp-diagnostics)))
 
 (use-package consult-eglot
-  :bind*
+  :bind
   ( :map eglot-mode-map
     ("C-c cs" . consult-eglot-symbols)))
 
@@ -1785,10 +1925,10 @@ targets."
                                                           find-program)
                                            :win (format "%s . -not ( -path */.[A-Za-z]* -prune )"
                                                         find-program))
-        consult-narrow-key "C-."
+        consult-narrow-key "C-c C-n"
         consult-async-min-input 1
         consult-async-refresh-delay 0.1
-        consult-async-input-debounce 0.1
+        consult-async-input-debounce 0.2
         consult-async-input-throttle 0.2
         consult-register-prefix "")
 
@@ -1882,6 +2022,12 @@ targets."
    :map vertico-map
    ("C-c C-h" . consult-history)))
 
+(use-package consult-omni
+  :straight ( :type git
+              :host github
+              :repo "armindarvish/consult-omni")
+  :after (consult))
+
 (use-package websocket)
 
 (use-package affe
@@ -1895,7 +2041,7 @@ targets."
     (cons input (apply-partially #'orderless--highlight input t)))
 
   (setq affe-regexp-compiler #'affe-orderless-regexp-compiler
-        affe-count 2000)
+        affe-count 3000)
 
   ;; Manual preview key for `affe-grep'
   (consult-customize affe-grep
@@ -1981,13 +2127,16 @@ targets."
                     eldoc-documentation-strategy 'eldoc-documentation-compose)))
   :config
   (setf (alist-get 'font eldoc-box-frame-parameters) +base/font-spec
-        (alist-get 'outer-border-width eldoc-box-frame-parameters) 1
-        (alist-get 'border-width eldoc-box-frame-parameters) 1)
+        (alist-get 'outer-border-width eldoc-box-frame-parameters) 2
+        (alist-get 'internal-border-width eldoc-box-frame-parameters) 2
+        (alist-get 'vertical-border eldoc-box-frame-parameters) 2
+        (alist-get 'border-width eldoc-box-frame-parameters) 2)
 
   :bind*
   (("C-c te" . eldoc-box-hover-mode)
    ("C-c ck" . eldoc-box-help-at-point))
   :hook
+  (prog-mode-hook . eldoc-box-hover-mode)
   (eldoc-box-mode-hook . eldoc-box-hover-mode)
   (eldoc-box-mode-hook . ii/eldoc-box--setup))
 
@@ -2295,11 +2444,11 @@ targets."
   :straight '(flymake-jsts :type git :host github :repo "orzechowskid/flymake-jsts" :branch "main"))
 
 ;;;; Snippets
-(ii/when-idle! 3.0 (require 'yasnippet))
-(ii/when-idle! 2.0 (require 'yasnippet-snippets))
-
 (use-package yasnippet
   :init
+  ;; lazuly load yasnippets on idle
+  (ii/when-idle! 3.0 (require 'yasnippet))
+
   (setq doom-snippets-enable-short-helpers t
         yas-snippet-dirs (list (file-name-concat user-emacs-directory "straight" straight-build-dir "doom-snippets")
                                (file-name-concat user-emacs-directory "snippets")
@@ -2364,7 +2513,7 @@ targets."
     ("C-c etp" . transpose-paragraphs)
     ("C-c et." . transpose-sentences)
     ("C-c etr" . transpose-regions)
-    ("C-c t C-w w" . toggle-word-wrap)
+    ("C-c tW" . toggle-word-wrap)
     :map goto-map
     ("[e" . previous-error)
     ("]e" . next-error)
@@ -2447,8 +2596,8 @@ targets."
         corfu-auto-delay 0.1
         corfu-echo-mode nil
         corfu-preselect 'prompt
-        corfu-preview-current 'insert
-        corfu-auto nil
+        corfu-preview-current nil
+        corfu-auto t
         corfu-popupinfo-delay '(0.25 . 0.25)
         corfu-left-margin-width 6
         corfu-right-margin-width 0
@@ -2456,7 +2605,7 @@ targets."
         corfu-auto-prefix 2
         corfu-count 17
         corfu-max-width 120
-        corfu-min-width 70
+        corfu-min-width 60
         corfu-quit-no-match t
         corfu-on-exact-match 'insert
         global-corfu-test-minibuffer nil)
@@ -2470,27 +2619,27 @@ targets."
       (+toggle-var! corfu-preview-current t 'insert)
       (corfu-mode 1)))
 
-  (setopt corfu--frame-parameters  '((no-accept-focus . t)
-                                     (no-focus-on-map . t)
-                                     (min-width . t)
-                                     (min-height . t)
-                                     (border-width . 2)
-                                     (outer-border-width . 2)
-                                     (internal-border-width . 2)
-                                     (child-frame-border-width . 2)
-                                     (vertical-scroll-bars . nil)
-                                     (horizontal-scroll-bars . nil)
-                                     (menu-bar-lines . 0)
-                                     (tool-bar-lines . 0)
-                                     (tab-bar-lines . 0)
-                                     (tab-bar-lines-keep-state . t)
-                                     (no-other-frame . t)
-                                     (unsplittable . t)
-                                     (undecorated . t)
-                                     (cursor-type . nil)
-                                     (no-special-glyphs . t)
-                                     (desktop-dont-save . t)
-                                     (inhibit-double-buffering . t)))
+  (setopt corfu--frame-parameters '((no-accept-focus . t)
+                                    (no-focus-on-map . t)
+                                    (min-width . t)
+                                    (min-height . t)
+                                    (border-width . 0)
+                                    (outer-border-width . 0)
+                                    (internal-border-width . 0)
+                                    (child-frame-border-width . 0)
+                                    (vertical-scroll-bars . nil)
+                                    (horizontal-scroll-bars . nil)
+                                    (menu-bar-lines . 0)
+                                    (tool-bar-lines . 0)
+                                    (tab-bar-lines . 0)
+                                    (tab-bar-lines-keep-state . t)
+                                    (no-other-frame . t)
+                                    (unsplittable . t)
+                                    (undecorated . t)
+                                    (cursor-type . nil)
+                                    (no-special-glyphs . t)
+                                    (desktop-dont-save . t)
+                                    (inhibit-double-buffering . t)))
 
   (defvar ii/corfu-formatter-id-mapping
     '((array :str "[ ]  " :face  font-lock-type-face)
@@ -2530,7 +2679,6 @@ targets."
       (variable :str "var  " :face font-lock-variable-name-face)
       (t :str "-----"  :face  font-lock-warning-face)))
 
-
   (defun ii/corfu-margin-formatter (_)
     "Margin formatter for corfu."
     (and-let* ((kindfunc (plist-get completion-extra-properties :company-kind)))
@@ -2547,8 +2695,10 @@ targets."
   :hook
   (after-init-hook . global-corfu-mode)
   (global-corfu-mode-hook . corfu-popupinfo-mode)
-  (global-corfu-mode-hook . corfu-echo-mode)
-  (global-corfu-mode-hook . corfu-history-mode)
+  :bind
+  ( :map corfu-map
+    ("SPC" . corfu-insert-separator)
+    ("<space>" . corfu-insert-separator))
   :bind*
   (("C-TAB" . corfu-complete)
    ("C-c ta" . ii/corfu-toggle-auto)
@@ -2556,8 +2706,6 @@ targets."
    ("M-h" . corfu-popupinfo-documentation)
    ("M-g" . corfu-info-location)
    ("M-e" . corfu-expand)
-   ("C-SPC" . corfu-insert-separator)
-   ("C-<space>" . corfu-insert-separator)
    ([tab] . corfu-next)
    ("<tab>" . corfu-next)
    ("TAB" . corfu-next)
@@ -2711,6 +2859,7 @@ targets."
             :diagnosticProvider))
   :config
   (setopt eglot-code-action-indications '(eldoc-hint))
+
   (defun ii/eglot-rename (&rest args)
     (interactive)
     (let ((case-fold-search nil))
@@ -2892,9 +3041,9 @@ targets."
 
 (use-package docker
   :bind*
-  (("C-c od" . docker)
-   ("C-c ol" . docker-images)
-   ("C-c ov" . docker-volumes)))
+  (("C-c odd" . docker)
+   ("C-c odi" . docker-images)
+   ("C-c odv" . docker-volumes)))
 
 (use-package kele
   :config
@@ -2976,12 +3125,23 @@ targets."
 
 (setq eshell-banner-message "")
 
-(use-package eat
-  :after (eshell)
-  :config
+(use-package vterm
+  :if (eq system-type 'gnu/linux)
+  :init
+  (defun ii/project-vterm (arg)
+    (interactive "p")
+    (let ((default-directory (or (project-root (project-current))
+                                 default-directory)))
+      (vterm arg)))
 
-  (setopt eat-shell (+os/per-system! :linux "zsh"
-                                     :win "bash")
+  :bind
+  (("C-c ov" . vterm)
+   :map project-prefix-map
+   ("V" . ii/project-vterm)))
+
+(use-package eat
+  :config
+  (setopt eat-shell (+os/per-system! :linux "zsh" :win "bash")
           eat-enable-blinking-text nil
           eat-term-scrollback-size (* 1000 1000)
           eat-enable-shell-prompt-annotation nil
@@ -3002,24 +3162,26 @@ targets."
 ;;;; Buffer Management
 (use-package autorevert
   :straight nil
+  :init
+  (setq auto-revert-verbose t
+        auto-revert-use-notify nil
+        auto-revert-stop-on-user-input nil
+        revert-without-query (list "."))
   :config
-  (defun ii/auto-revert--toggle-mode-in-buffer (window)
-    "Setup `autorevert' in current buffer."
-    (if-let* ((buffer-window (get-buffer-window (current-buffer)))
-              (buffer-frame (window-frame buffer-window))
-              (visible (frame-visible-p buffer-frame)))
-        (progn (auto-revert-mode 1)
-               (auto-revert-buffer (current-buffer)))
-      (auto-revert-mode -1))
-    (let ((inhibit-message t))
-      (message "running in buffer %S, auto-revert-mode is %S" (current-buffer) auto-revert-mode)))
-
-  (defun ii/auto-revert--setup-buffer ()
-    (add-hook 'window-buffer-change-functions 'ii/auto-revert--toggle-mode-in-buffer 90 t)
-    (setq-local auto-revert-check-vc-info t))
+  ;; taken from doom emacs
+  ;; https://github.com/doomemacs/doomemacs/blob/57818a6da90fbef39ff80d62fab2cd319496c3b9/lisp/doom-editor.el#L243
+  (defun ii/auto-revert-buffer (&optional _)
+    "Auto revert current buffer if necessary."
+    (unless (or auto-revert-mode
+                (active-minibuffer-window)
+                (and buffer-file-name
+                     auto-revert-remote-files
+                     (file-remote-p buffer-file-name nil t)))
+      (let ((auto-revert-mode t))
+        (auto-revert-handler))))
 
   :hook
-  ((pdf-view-mode-hook nov-mode-hook dired-mode-hook) . ii/auto-revert--setup-buffer))
+  ((window-selection-change-functions window-buffer-change-functions) . ii/auto-revert-buffer))
 
 (use-package ibuffer
   :straight nil
@@ -3131,7 +3293,6 @@ targets."
    :map ibuffer-mode-map
    ("/^" . ibuffer-pop-filter)))
 
-
 (with-eval-after-load 'recentf
   (add-to-list 'recentf-exclude ".*[0-9a-z]+\.\\(png\\|jpg\\|jpeg\\|webp\\|svg\\|gif\\)")
   (add-to-list 'recentf-exclude ".*\.priv/.*"))
@@ -3191,12 +3352,8 @@ targets."
     (let ((inhibit-read-only t))
       (newline)))
 
-  (defun ii/wdired-new-directory ())
+  (defun ii/wdired-new-directory ()))
 
-  :bind*
-  ( :map wdired-mode-map
-    ("C-c C-t" . wdired-toggle-bit)
-    ("C-c C-s" . wdired-set-bit)))
 
 (use-package diredfl
   :hook
@@ -3727,6 +3884,7 @@ targets."
 
 (with-eval-after-load 'image
   (bind-keys* :map image-map
+              ("<mouse-1>" . +utils/open-random-file-in-dir)
               ("r" . +utils/open-random-file-in-dir)))
 
 
@@ -3745,6 +3903,7 @@ targets."
 (add-to-list 'auto-mode-alist '("\\.cjs\\'" . json-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.jsonc*\\'" . json-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.php\\'" . php-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
 (add-to-list 'auto-mode-alist '("\\/git-rebase-todo\\'" . conf-mode))
 
 (use-package tide

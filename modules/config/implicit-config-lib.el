@@ -271,4 +271,16 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
   `(let ((inhibit-message t))
      ,@body))
 
+(defmacro ii/with-default-directory! (dir &rest body)
+  (declare (indent defun))
+  `(let ((default-directory ,dir))
+     ,@body))
+
+(defmacro ii/with-project-root! (&rest body)
+  (declare (indent defun))
+  `(let ((default-directory (or (project-root (project-current))
+                                default-directory)))
+     ,@body))
+
+
 (provide 'implicit-config-lib)
