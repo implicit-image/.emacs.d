@@ -4,6 +4,7 @@
 !/init.el
 !/modules/
 !/modules/**
+!/elisp/**
 !/local/**/*.el
 !/local/**/*.md
 !/local/*.el
