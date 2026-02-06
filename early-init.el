@@ -51,7 +51,7 @@
 (setq +base/font-family (pcase system-type
                           ('gnu/linux "Comic Code")
                           ('windows-nt "Cas"))
-      +base/font-weight 'light
+      +base/font-weight 'normal
       +base/font-size (pcase system-type
                         ('windows-nt 10)
                         (_ 15))
@@ -90,12 +90,13 @@
 (add-hook 'minibuffer-setup-hook 'my-minibuffer-setup-hook)
 
 ;; run garbage collection on idle
-(run-with-idle-timer 0.8 t 'garbage-collect)
+(run-with-idle-timer 2.0 t 'garbage-collect)
 
 ;; garbage collect on focus-out
 (advice-add 'after-focus-change-function :after 'garbage-collect)
 
 (defun +font--setup ()
+  (interactive)
   (set-frame-font (font-spec :family +base/font-family
                              :weight +base/font-weight
                              :size +base/font-size)

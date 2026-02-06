@@ -2,9 +2,25 @@
 
 ;;; Code:
 (require 'meow)
-(require 'implicit-meow-surround)
 (require 'surround)
+(require 'implicit-meow-surround)
+;; (require 'implicit-meow-thing)
 ;; (require 'implicit-meow-beacon)
+
+
+;; multilpe-cursors functions
+(declare-function mc/remove-fake-cursors "multiple-cursors")
+(declare-function mc/create-fake-cursor-at-point "multiple-cursors")
+(declare-function mc/num-cursors "multiple-cursors")
+(declare-function mc/disable-multiple-cursors-mode "multiple-cursors")
+(declare-function mc/pop-state-from-overlay "multiple-cursors")
+
+;; iedit functions
+(declare-function iedit-mode "iedit-mode")
+(declare-function iedit-start "iedit-mode")
+(declare-function iedit-counter "iedit-mode")
+(declare-function iedit-goto-first-occurrence "iedit-mode")
+(declare-function iedit-restrict-region "iedit-mode")
 
 ;;;; Variables
 
@@ -47,7 +63,6 @@
 
 (defun ii/meow--search-bounds (regex-p)
   "Return bounds for last regexp search."
-  (isearch-forward regex-p)
   (let* ((rg (car (if regex-p
                       regexp-search-ring
                     search-ring)))
@@ -280,57 +295,6 @@
       (meow-bounds-of-thing thing)
     (surround-mark-outer (char-to-string thing))))
 
-
-;; (defun ii/meow-end-of-thing (thing arg)
-;;   "Select up to end of THING. If ARG is positive, select additional ARG THINGs forward; if its negative select ARG THINGs backward."
-;;   (interactive (list (meow-thing-prompt "End of:")
-;;                      (or prefix-arg 0)))
-;;   (cond ((not (meow-beacon-mode-p))
-;;          (meow-end-of-thing thing)
-;;          (ii/meow--adjust-direction arg)
-;;          (ii/meow-expand-thing! thing arg))
-;;         (t nil)))
-;;
-;; (defun ii/meow-beginning-of-thing (thing arg)
-;;   (interactive (list (meow-thing-prompt "Beginning of:")
-;;                      (or (numberp prefix-arg) 1)))
-;;   (cond ((not (meow-beacon-mode-p))
-;;          (meow-beginning-of-thing thing)
-;;          (ii/meow--adjust-direction arg)
-;;          (ii/meow-expand-thing! thing arg))
-;;         (t nil)))
-;;
-;; (defun ii/meow-mark-word (n)
-;;   "Select current word at point and following N - 1 words."
-;;   (interactive (list (or prefix-arg 0)))
-;;   (ii/meow--adjust-direction n)
-;;   (meow-mark-word n)
-;;   (ii/meow-expand-thing! 'word n))
-;;
-;; (defun ii/meow-prefix-arg-mode--turn-on ()
-;;   "Turn on `meow-prefix-arg-mode'."
-;;   (advice-add 'meow-bounds-of-thing :override 'ii/meow-bounds-of-thing)
-;;   (advice-add 'meow-inner-of-thing :override 'ii/meow-inner-of-thing)
-;;   (advice-add 'meow-beginning-of-thing :override 'ii/meow-beginning-of-thing)
-;;   (advice-add 'meow-end-of-thing :override 'ii/meow-end-of-thing)
-;;   (advice-add 'meow-mark-word :override 'ii/meow-mark-word)
-;;   (advice-add 'meow--beacon-update-overlays :override 'ii/meow--beacon-update-overlays))
-;;
-;; (defun ii/meow-prefix-arg-mode--turn-off ()
-;;   "turn off `meow-prefix-arg-mode'."
-;;   (advice-remove 'meow-bounds-of-thing 'ii/meow-bounds-of-thing)
-;;   (advice-remove 'meow-inner-of-thing 'ii/meow-inner-of-thing)
-;;   (advice-remove 'meow-beginning-of-thing 'ii/meow-beginning-of-thing)
-;;   (advice-remove 'meow-end-of-thing 'ii/meow-end-of-thing)
-;;   (advice-remove 'meow-mark-word 'ii/meow-mark-word)
-;;   (advice-remove 'meow--beacon-update-overlays 'ii/meow--beacon-update-overlays))
-;;
-;; (define-minor-mode ii/meow-prefix-arg-mode
-;;   "Minor mode for enabling using prefix arguments with `meow' selection commands."
-;;   (if (bound-and-true-p ii/meow-prefix-arg-mode)
-;;       (ii/meow-prefix-arg-mode--turn-on)
-;;     (ii/meow-prefix-arg-mode--turn-off)))
-
 (defun ii/meow-indent-region-or-buffer (&optional arg)
   (interactive)
   (ii/window-stool--with-clear-buffer (current-buffer)
@@ -352,5 +316,74 @@
 (defun ii/meow-command (&optional arg)
   (interactive))
 
-(provide 'implicit-meow)
+;;;###autoload
+(defun ii/meow-mc-mark-all (beg end)
+  (interactive (if (region-active-p)
+                   (list (region-beginning) (region-end))
+                 (list (point-min) (point-max))))
+  (let ((search (car regexp-search-ring))
+        (case-fold-search nil))
+    (if (string= search "")
+        (message "Mark aborted")
+      (progn
+        (mc/remove-fake-cursors)
+        (goto-char beg)
+        (let ((lastmatch))
+          (while (and (< (point) end) ; can happen because of (forward-char)
+                      (search-forward-regexp search end t))
+            (push-mark (match-beginning 0))
+            (mc/create-fake-cursor-at-point)
+            (setq lastmatch (point))
+            (when (= (point) (match-beginning 0))
+              (forward-char)))
+          (unless lastmatch
+            (error "Search failed for %S" search)))
+        (goto-char (match-end 0))
+        (if (< (mc/num-cursors) 3)
+            (mc/disable-multiple-cursors-mode)
+          (mc/pop-state-from-overlay (mc/furthest-cursor-before-point))
+          (multiple-cursors-mode 1))))))
 
+;;;###autoload
+(defun ii/meow-mc-restrict-to-thing (thing arg)
+  "Delete all fake cursors except for ones in bounds of THING. If ARG is a number, use bounds of ARG THINGS. If ARG is negative, use bounds of ARG previous things."
+  (interactive (list (meow-thing-prompt "Restrict mc to: ") current-prefix-arg))
+  (if-let* ((bounds (meow--parse-bounds-of-thing-char thing))
+            (beg (car bounds))
+            (end (cdr bounds)))
+      (save-mark-and-excursion
+        (mc/for-each-fake-cursor
+         (when (or (< (overlay-start cursor) beg)
+                   (> (overlay-end cursor) end))
+           (mc/remove-fake-cursor cursor))))))
+
+;; iedit-mode integration
+;;;###autoload
+(defun ii/meow-iedit-mode (beg end)
+  "Enter `iedit-mode' using the head of `regexp-search-ring' as search regex. BEG and END are bounds of active region or beginning and end of accessible portion of the buffer."
+  (interactive (progn
+                 ;; if the region is meow word/symbol selection, deactivate it
+                 (when (and (region-active-p) meow--search-indicator-overlay)
+                   (deactivate-mark))
+                 (if (and (region-active-p))
+                     (list (region-beginning) (region-end))
+                   (list (point-min) (point-max)))))
+  (when (region-active-p)
+    (deactivate-mark))
+  (iedit-start (car regexp-search-ring) beg end)
+  (if (> (iedit-counter) 0)
+      (iedit-goto-first-occurrence)
+    (iedit-mode -1)))
+
+;;;###autoload
+(defun ii/meow-iedit-restrict-to-thing (thing arg)
+  "Restrict iedit to bounds of THING. If ARG is positive, "
+  (interactive (list (meow-thing-prompt "Restrict iedit to: ") current-prefix-arg))
+  (when-let* ((bounds (meow--parse-bounds-of-thing-char thing)))
+    (iedit-restrict-region (car bounds) (cdr bounds))))
+
+(defun ii/meow-noop ()
+  "Does nothing."
+  (interactive))
+
+(provide 'implicit-meow)

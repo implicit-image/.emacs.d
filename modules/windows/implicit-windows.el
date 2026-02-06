@@ -92,72 +92,76 @@ If BODY is non-nil, it is executed before returning window."
                                                 (assoc 'window-width 0.2))))
 
 (+define-display-buffer-prefix! +windows/left-vsplit-prefix
-  +windows/display-buffer-in-left-vsplit
-  "[vsplit-left]")
+                                +windows/display-buffer-in-left-vsplit
+                                "[vsplit-left]")
 
 (+define-display-buffer-prefix! +windows/right-vsplit-prefix
-  +windows/display-buffer-in-right-vsplit
-  "[vsplit-right]")
+                                +windows/display-buffer-in-right-vsplit
+                                "[vsplit-right]")
 
 (+define-display-buffer-prefix! +windows/above-hsplit-prefix
-  +windows/display-buffer-in-top-hsplit
-  "[hsplit-top]")
+                                +windows/display-buffer-in-top-hsplit
+                                "[hsplit-top]")
 
 (+define-display-buffer-prefix! +windows/below-hsplit-prefix
-  +windows/display-buffer-in-bot-hsplit
-  "[hsplit-bot]")
+                                +windows/display-buffer-in-bot-hsplit
+                                "[hsplit-bot]")
 
 (+define-display-buffer-prefix! +windows/below-selected-prefix
-  display-buffer-below-selected
-  "[below-selected]"
-  ((window-height . 0.5)))
+                                display-buffer-below-selected
+                                "[below-selected]"
+                                ((window-height . 0.5)))
 
 (+define-display-buffer-prefix! +windows/bottom-window-prefix
-  display-buffer-at-bottom
-  "[at-bottom-window]"
-  ((window-height . 0.3)))
+                                display-buffer-at-bottom
+                                "[at-bottom-window]"
+                                ((window-height . 0.3)))
 
 (+define-display-buffer-prefix! +windows/right-side-window-prefix
-  display-buffer-in-side-window
-  "[in-right-side-window]"
-  ((window-width . 0.5)
-   (side . right)
-   (slot . 1)))
+                                display-buffer-in-side-window
+                                "[in-right-side-window]"
+                                ((window-width . 0.5)
+                                 (side . right)
+                                 (slot . 1)))
 
 (+define-display-buffer-prefix! +windows/left-side-window-prefix
-  display-buffer-in-side-window
-  "[in-left-side-window]"
-  ((window-width . 0.5)
-   (side . left)
-   (slot . 1)))
+                                display-buffer-in-side-window
+                                "[in-left-side-window]"
+                                ((window-width . 0.5)
+                                 (side . left)
+                                 (slot . 1)))
 
 (+define-display-buffer-prefix! +windows/top-side-window-prefix
-  display-buffer-in-side-window
-  "[in-top-side-window]"
-  ((window-height . 0.5)
-   (side . top)
-   (slot . 1)))
+                                display-buffer-in-side-window
+                                "[in-top-side-window]"
+                                ((window-height . 0.5)
+                                 (side . top)
+                                 (slot . 1)))
 
 (+define-display-buffer-prefix! +windows/bottom-side-window-prefix
-  display-buffer-in-side-window
-  "[in-botoom-side-window]"
-  ((window-height . 0.5)
-   (side . bottom)
-   (slot . 1)))
+                                display-buffer-in-side-window
+                                "[in-botoom-side-window]"
+                                ((window-height . 0.5)
+                                 (side . bottom)
+                                 (slot . 1)))
 
 (+define-display-buffer-prefix! ii/right-sidebar-window-prefix
-  display-buffer-in-side-window
-  "[right-sidebar]"
-  ((window-width . 0.2)
-   (side . right)
-   (slot . 1)))
+                                display-buffer-in-side-window
+                                "[right-sidebar]"
+                                ((window-width . 0.2)
+                                 (side . right)
+                                 (slot . 1)))
 
 (+define-display-buffer-prefix! ii/left-sidebar-window-prefix
-  display-buffer-in-side-window
-  "[left-sidebar]"
-  ((window-width . 0.2)
-   (side . left)
-   (slot . 1)))
+                                display-buffer-in-side-window
+                                "[left-sidebar]"
+                                ((window-width . 0.2)
+                                 (side . left)
+                                 (slot . 1)))
+
+(+define-display-buffer-prefix! ii/no-window-prefix
+                                display-buffer-no-window
+                                "")
 
 (defun +windows/toggle-modeline (buffer)
   "Toggle modeline visibility in BUFFER."
@@ -166,11 +170,6 @@ If BODY is non-nil, it is executed before returning window."
     (if mode-line-format
         (+windows--hide-modeline)
       (+windows--show-modeline))))
-
-(defun +windows/delete-in-direction (this-window dir)
-  "Delete the window in direction DIR from window THIS-WINDOW."
-  (interactive) (list (selected-window)
-                      ()))
 
 (defun +windows/toggle-maximize-window (this-window frame)
   "Maximize window THIS-WINDOW if it is not maximized, else restore window configuration before last\
@@ -186,9 +185,19 @@ maximization."
     (setq +windows--maximize-saved-config (current-window-configuration frame))
     (delete-other-windows this-window)))
 
-(defun +windows/rotate (backwards)
-  "Rotate window configuration on current frame forward. If BACKWARDS is \
-non-nil, rotate backwards instead."
-  (interactive))
+(defun ii/windows-toggle-minibuffer-focus ()
+  (interactive)
+  (if (and (minibufferp (current-buffer))
+           (window-live-p (minibuffer-selected-window)))
+      (select-window (minibuffer-selected-window))
+    (switch-to-minibuffer)))
+
+(defun ii/windows-quit-current-minibuffer (&optional arg)
+  (interactive "p")
+  (when (not (minibufferp (current-buffer)))
+    (switch-to-minibuffer))
+  (when arg
+    (remove-hook 'minibuffer-exit-hook 'ii/vertico--restore-window-config))
+  (vertico-exit))
 
 (provide 'implicit-windows)
