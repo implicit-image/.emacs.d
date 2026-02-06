@@ -4,6 +4,7 @@
 !/init.el
 !/modules/
 !/modules/**
+!/elisp/
 !/elisp/**
 !/local/**/*.el
 !/local/**/*.md
@@ -11,5 +12,5 @@
 !/local/*.md
 !/local/**
 !/local/
-/modules/**/#*#
-/modules/#*#
+/elisp/**/#*#
+/elisp/#*#
