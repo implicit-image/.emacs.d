@@ -196,7 +196,7 @@
 
 (defun +utils/ripgrep-modules ()
   (interactive)
-  (consult-ripgrep +init-module-path))
+  (consult-ripgrep ii/elisp-path))
 
 (defun +utils/ripgrep-user-directory ()
   (interactive)

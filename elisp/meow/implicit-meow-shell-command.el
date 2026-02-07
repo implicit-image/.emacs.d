@@ -1,18 +1,64 @@
-;;; -*- lexical-binding: t -*-
+;;; implicit-meow-shell-command.el --- summary -*- lexical-binding: t -*-
 
-(defvar ii/meow-shell-command--preview-buffer nil)
+;; Author: Błażej Niewiadomski
+;; Maintainer: Błażej Niewiadomski
+;; Version: version
+;; Package-Requires: ()
+;; Homepage: homepage
+;; Keywords: keywords
 
-(defvar ii/meow-shell-command--child-frame nil
-  "Child frame for shell command output preview.")
 
-(defvar ii/meow-shell-command--preview-frame-parameters '(())
-  "TODO")
+;; This file is not part of GNU Emacs
 
-(defvar ii/meow-shell-command--preview-buffer-parameters nil
-  "TODO")
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-(defun ii/meow-shell-command-- ())
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
-(defun ii/meow--execute-shell-command (command))
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+;;; Commentary:
+
+;; commentary
+
+;;; Code:
+
+(require 'async)
+(require 'implicit-ui)
+
+(defvar ii/meow-pending-shell-commands nil
+  "")
+
+(defun ii/meow-insert-async-shell-command (cmd)
+  (interactive (list (read-shell-command "Run: ")))
+  ;; (list (car elems) (cdr elems))))
+  (let* ((ov (ii/ui-make-placeholder-overlay (propertize (format "Running %s" cmd) 'face 'error)
+                                             cmd
+                                             "Waiting"
+                                             'success
+                                             #'ii/ui-placeholder-animate-elipsis
+                                             0.5))
+         (elems (string-split cmd " "))
+         (args (cdr elems)))
+    (async-start
+     (lambda ()
+       (eval `(process-lines-ignore-status cmd ,@args) (list (cons 'cmd (car elems)))))
+     (lambda (result)
+       (with-current-buffer (overlay-buffer ov)
+         (save-mark-and-excursion
+           (message "result is %S, type is %S" result (type-of result))
+           (goto-char (overlay-start ov))
+           (delete-overlay ov)
+           (insert (string-join result "\n"))))))))
+
 
 (provide 'implicit-meow-shell-command)
+
+;;; implicit-meow-shell-command.el ends here

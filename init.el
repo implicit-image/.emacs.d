@@ -61,16 +61,14 @@
 (use-package project
   :straight t)
 
-(defvar +init-module-path (expand-file-name "modules" user-emacs-directory))
-
 (defvar ii/elisp-path (expand-file-name "elisp" user-emacs-directory))
 
-(add-to-list 'load-path +init-module-path)
+(add-to-list 'load-path ii/elisp-path)
 
 (defvar +per-machine-config-feature (intern (concat "implicit-" (system-name))))
 
 ;; add everything to `load-path'
-(dolist (path (directory-files (expand-file-name "modules" user-emacs-directory)
+(dolist (path (directory-files (expand-file-name "elisp" user-emacs-directory)
                                t
                                "[^\.]+"))
   (add-to-list 'load-path path))
@@ -325,7 +323,7 @@
 
 (use-package implicit-utils
   :straight `(implicit-utils :type nil
-                             :local-repo ,(expand-file-name "config" +init-module-path))
+                             :local-repo ,(expand-file-name "config" ii/elisp-path))
   :autoload
   (+utils-whole-buffer-as-string
    +utils-get-region-contents
@@ -349,6 +347,12 @@
    :repeat-map next-defun-repeat-map
    ("\]" . +utils/forward-defun)
    ("\[" . +utils/backward-defun)))
+
+(use-package implicit-ui
+  :straight `(implicit-ui :type nil
+                          :local-repo ,(expand-file-name "ui" ii/elisp-path))
+  :hook
+  (gitignore-mode-hook . ii/gitignore-count-mode))
 
 (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?┃))
 (set-display-table-slot standard-display-table 'truncation (make-glyph-code 32))
@@ -509,7 +513,7 @@
 
 (use-package implicit-meow
   :straight `(implicit-meow :type nil
-                            :local-repo ,(expand-file-name "meow" +init-module-path))
+                            :local-repo ,(expand-file-name "meow" ii/elisp-path))
   :after (meow)
   :commands
   (+meow/command
@@ -621,9 +625,9 @@
   (after-change-major-mode-hook . ii/meow-treesitter-setup-local-defaults))
 
 (use-package surround
-  ;; :init
-  ;; (use-package-autoload-keymap
-  ;;  'surround-keymap 'surround t)
+  :init
+  (use-package-autoload-keymap
+   'surround-keymap 'surround t)
   :bind
   ( :map surround-keymap
     ("a" . surround-insert)))
@@ -1182,6 +1186,7 @@
         register-preview-delay 0.5))
 
 (use-package kmacro
+  :straight nil
   :bind
   ("C-c ks" . kmacro-start-macro)
   ("C-c ke" . kmacro-end-macro))
@@ -1354,6 +1359,7 @@ The function FOOTER is called to insert a footer."
                     `(secondary-selection ((t (:background ,(doom-color 'bg):extend nil))))
                     `(vertico-group-separator ((t (:background ,(doom-color 'bg-alt) :foreground ,(doom-color 'fg-alt) :strike-through t))))
                     `(vertico-group-title ((t (:background ,(doom-color 'bg-alt) :foreground ,(doom-color 'fg-alt)))))
+                    `(eldoc-box-body ((t (:background "black"))))
                     `(minibuffer-nonselected ((t (:background ,(doom-color 'bg-alt) :foreground ,(doom-color 'fg-alt) :extend nil))))
                     `(embark-selected ((t (:background ,(doom-color 'selection) :foreground unspecified))))
                     `(rg-file-tag-face ((t (:background :foreground ,(doom-color 'bg-alt) :extend t))))))
@@ -1361,7 +1367,7 @@ The function FOOTER is called to insert a footer."
 ;;;; Window Management
 (use-package implicit-windows
   :straight `(implicit-windows :type nil
-                               :local-repo ,(expand-file-name "windows" +init-module-path))
+                               :local-repo ,(expand-file-name "windows" ii/elisp-path))
   :bind*
   (("C-w C-`" . ii/windows-toggle-minibuffer-focus)
    ("C-w `" . ii/windows-quit-current-minibuffer)
@@ -1744,7 +1750,7 @@ The function FOOTER is called to insert a footer."
 
 (use-package implicit-vertico
   :straight `(implicit-vertico :type nil
-                               :local-repo ,(expand-file-name "vertico" +init-module-path)))
+                               :local-repo ,(expand-file-name "vertico" ii/elisp-path)))
 
 (use-package vertico-posframe
   :init
@@ -2121,23 +2127,26 @@ targets."
         eldoc-box-fringe-use-same-bg nil)
 
   (defun ii/eldoc-box--setup ()
-    (if eldoc-box-mode
+    (if (bound-and-true-p eldoc-box-hover-mode)
         (setq-local eldoc-idle-delay 0
                     eldoc-documentation-strategy 'eldoc-documentation-compose)))
   :config
   (setf (alist-get 'font eldoc-box-frame-parameters) +base/font-spec
-        (alist-get 'outer-border-width eldoc-box-frame-parameters) 2
-        (alist-get 'internal-border-width eldoc-box-frame-parameters) 2
-        (alist-get 'vertical-border eldoc-box-frame-parameters) 2
-        (alist-get 'border-width eldoc-box-frame-parameters) 2)
+        (alist-get 'outer-border-width eldoc-box-frame-parameters) 0
+        (alist-get 'internal-border-width eldoc-box-frame-parameters) 0
+        (alist-get 'vertical-border eldoc-box-frame-parameters) 0
+        (alist-get 'border-width eldoc-box-frame-parameters) 0)
 
+  (defun ii/eldoc-box-toggle (&rest args)
+    (if meow-insert-mode
+        (eldoc-box-hover-mode 1)
+      (eldoc-box-hover-mode -1)))
   :bind*
   (("C-c te" . eldoc-box-hover-mode)
    ("C-c ck" . eldoc-box-help-at-point))
   :hook
-  (prog-mode-hook . eldoc-box-hover-mode)
-  (eldoc-box-mode-hook . eldoc-box-hover-mode)
-  (eldoc-box-mode-hook . ii/eldoc-box--setup))
+  ;; (meow-switch-state-hook . ii/eldoc-box-toggle)
+  (eldoc-box-hover-mode-hook . ii/eldoc-box--setup))
 
 (use-package dumb-jump
   :init
@@ -2309,17 +2318,6 @@ targets."
     ("M-k" . drag-stuff-up)
     ("M-j" . drag-stuff-down)))
 
-;; (use-package combobulate
-;;   :disabled t
-;;   :straight (combobulate :type git
-;;                          :host github
-;;                          :nonrecursive t
-;;                          :repo "mickeynp/combobulate")
-;;   :config
-;;   (setq combobulate-flash-node nil)
-;;   :hook
-;;   ((css-ts-mode-hook html-ts-mode-hook json-ts-mode-hook js-ts-mode-hook typescript-ts-mode-hook tsx-ts-mode-hook python-ts-mode-hook yaml-ts-mode-hook toml-ts-mode-hook go-ts-mode-hook) . combobulate-mode))
-
 ;;;; Checkers
 (use-package flyspell
   :straight nil
@@ -2354,7 +2352,6 @@ targets."
 (use-package flymake
   :straight nil
   :init
-  (setq flymake-repeat-map (make-sparse-keymap))
   (setq flymake-show-diagnostics-at-end-of-line nil
         flymake-start-on-flymake-mode nil
         flymake-suppress-zero-counters nil
@@ -2557,8 +2554,6 @@ targets."
   (defun ii/compile-buffer-setup ()
     (add-hook 'window-selection-change-functions 'ii/compile--on-selection-change nil t))
 
-  :config
-  (require 'fancy-compilation)
   :bind*
   ("C-c c C-c" . compile)
   :hook
@@ -2567,6 +2562,7 @@ targets."
 
 (use-package fancy-compilation
   :commands (fancy-compilation-mode)
+  :after (compile)
   :config
   (fancy-compilation-mode 1))
 
@@ -2698,9 +2694,13 @@ targets."
   ( :map corfu-map
     ("SPC" . corfu-insert-separator)
     ("<space>" . corfu-insert-separator))
+
   :bind*
   (("C-TAB" . corfu-complete)
    ("C-c ta" . ii/corfu-toggle-auto)
+   ;; :map corfu-popupinfo-map
+   ;; ("C-M-v" . corfu-popupinfo-scroll-up)
+   ;; ("C-M-u" . corfu-popupinfo-scroll-down)
    :map corfu-map
    ("M-h" . corfu-popupinfo-documentation)
    ("M-g" . corfu-info-location)
@@ -3003,10 +3003,15 @@ targets."
   :config
   (defun ii/project--root-finder (dir)
     "Integrate .git project roots."
-    (let ((dotgit (and (setq dir (locate-dominating-file dir ".git"))
-                       (expand-file-name dir))))
-      (and dotgit
-           (cons 'transient (file-name-directory dotgit)))))
+    (let ((dotgit (and (setq gitdir (locate-dominating-file dir ".git"))
+                       (expand-file-name gitdir)))
+          (p (and (setq pdir (locate-dominating-file dir ".project"))
+                  (expand-file-name pdir))))
+      (if (or dotgit p)
+          (cons 'transient (file-name-directory
+                            (if (> (length dotgit) (length p))
+                                dotgit
+                              p))))))
 
   (defun ii/project-magit-status ()
     (interactive)
@@ -3388,7 +3393,7 @@ targets."
 
 (use-package implicit-org
   :straight `(implicit-org :type nil
-                           :local-repo ,(expand-file-name "org" +init-module-path))
+                           :local-repo ,(expand-file-name "org" ii/elisp-path))
   :commands
   (+org/rg-in-roam-notes)
   :autoload
