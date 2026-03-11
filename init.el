@@ -33,10 +33,10 @@
 ;; early org mode declaration to make sure the correct version gets loaded
 (use-package org
   :straight `(org
-              :fork (:host nil
-                           :repo "https://git.tecosaur.net/tec/org-mode.git"
-                           :branch "dev"
-                           :remote "tecosaur")
+              :fork ( :host nil
+                      :repo "https://git.tecosaur.net/tec/org-mode.git"
+                      :branch "dev"
+                      :remote "tecosaur")
               :files (:defaults "etc")
               :build t
               :pre-build
@@ -59,13 +59,16 @@
 
 
 (use-package project
-  :straight t)
+  :defer t
+  :straight (:type built-in))
 
 (defvar ii/elisp-path (expand-file-name "elisp" user-emacs-directory))
 
 (add-to-list 'load-path ii/elisp-path)
 
 (defvar +per-machine-config-feature (intern (concat "implicit-" (system-name))))
+
+(defvar ii/load-on-focus-loss-list nil)
 
 ;; add everything to `load-path'
 (dolist (path (directory-files (expand-file-name "elisp" user-emacs-directory)
@@ -75,7 +78,22 @@
 
 (require 'implicit-config-lib)
 
-(+set-env-vars-from-shell "PATH" "JAVA_HOME" "TERM" "EDITOR")
+(ii/when-idle! 5.0
+  (+set-env-vars-from-shell "PATH" "JAVA_HOME" "TERM" "EDITOR"))
+
+;; smart tab
+(defvar ii/smart-tab-skip-chars '(?\( ?\) ?{ ?} ?\[ ?\] ?\" ?\" ?\' ?\' ?\`)
+  "Chars to skip instead of trying to indent.")
+
+(defun ii/smart-tab (arg)
+  (interactive "P")
+  (let ((char (char-after)))
+    (cond ((memq char ii/smart-tab-skip-chars)
+           (forward-char arg))
+          (t
+           (funcall-interactively 'indent-for-tab-command arg)))))
+
+(bind-key [remap indent-for-tab-command] #'ii/smart-tab global-map)
 
 ;;;; Elisp Libraries
 (use-package async
@@ -102,7 +120,10 @@
       next-defun-repeat-map (make-sparse-keymap)
       outline-repeat-map (make-sparse-keymap)
       transpose-repeat-map (make-sparse-keymap))
+
 (unbind-key "C-z")
+(unbind-key "C-/")
+
 (define-prefix-command 'meow-toggle-prefix-command 'meow-toggle-prefix-map "toggle")
 (define-prefix-command 'meow-quit-prefix-command 'meow-quit-prefix-map "quit")
 (define-prefix-command 'meow-vc-prefix-command 'meow-vc-prefix-map "vc")
@@ -110,6 +131,7 @@
 (define-prefix-command 'meow-code-prefix-command 'meow-code-prefix-map "code")
 (define-prefix-command 'meow-mark-prefix-command 'meow-mark-prefix-map "mark")
 (define-prefix-command 'meow-C-z-prefix-command 'meow-C-z-prefix-map "C-z")
+(define-prefix-command 'meow-C-/-prefix-command 'meow-C-/-prefix-map "C-/")
 (bind-key "C-c t" meow-toggle-prefix-map)
 (bind-key "C-c q" meow-quit-prefix-map)
 (bind-key "C-c g" meow-vc-prefix-map)
@@ -117,7 +139,7 @@
 (bind-key "C-c c" meow-code-prefix-map)
 (bind-key "C-c m" meow-mark-prefix-map)
 (bind-key "C-z" 'meow-C-z-prefix-command)
-
+(bind-key "C-/" 'meow-C-/-prefix-command)
 (setopt indent-tabs-mode nil
         blink-cursor-mode nil)
 
@@ -127,17 +149,20 @@
               truncate-lines t
               make-backup-files nil
               backward-delete-char-untabify-method 'hungry
-              truncate-partial-width-windows nil
               indicate-buffer-boundaries nil
               cursor-in-non-selected-windows nil
               indicate-empty-lines nil
               treesit-font-lock-level 3
+              treesit-sexp-thing 'sexp
               set-mark-command-repeat-pop t
-              tab-width 4)
+              fill-column 80
+              tab-width 4
+              electric-indent-chars'(?\n ?\^?))
 
 (setq user-full-name "Błażej Niewiadomski"
       user-mail-address "blaz.nie@protonmail.com"
       visible-bell nil
+      ring-bell-function nil
       display-line-numbers-type 'relative
       hl-line-sticky-flag nil
       global-hl-line-sticky-flag nil
@@ -148,15 +173,16 @@
                                    (major-mode . vterm-mode)
                                    (major-mode . dired-sidebar-mode)))
       x-stretch-cursor nil
-      backup-by-copying t
       echo-keystrokes 0.01
-      scroll-step 0
+      ;; scrolling
+      scroll-step 1
       scroll-conservatively 100
       scroll-preserve-screen-position nil
       scroll-margin 7
       scroll-error-top-bottom t
-      comment-multi-line t
-      comment-empty-lines t
+      fast-but-imprecise-scrolling t
+      hscroll-step 1
+      hscroll-margin 2
       lazy-highlight-initial-delay 0
       completion-ignore-case t
       sentence-end-double-space nil
@@ -184,26 +210,79 @@
       visible-cursor nil
       global-mark-ring-max 32
       mark-ring-size 32
-      speedbar-use-images nil
-      speedbar-prefer-window t
-      speedbar-window-default-width 40
       explicit-shell-file-name (executable-find "bash")
       savehist-autosave-interval nil
       savehist-additional-variables
       '(kill-ring
-        register-alist
         mark-ring
         global-mark-ring
         search-ring
         regexp-search-ring
         comint-input-ring
         kmacro-ring)
+      ;; kmacro
       kmacro-ring-max 32
       kmacro-counter-value-start 1
+      ;; imenu
       imenu-auto-rescan t
       imenu-flatten t
       imenu-use-popup-menu 'on-mouse
-      text-scale-mode-step 1.1)
+      text-scale-mode-step 1.1
+      font-lock-maximum-decoration 2
+      delete-selection-save-to-register ?r
+      register-use-preview t
+      register-preview-delay 0.5
+      windmove-wrap-around nil
+      minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt)
+      enable-recursive-minibuffers t
+      completion-preview-minimum-symbol-length 4
+      dabbrev-upcase-means-case-search t
+      dabbrev-ignored-buffer-modes '(archive-mode image-mode docview-mode pdf-view-mode tags-table-mode csv-mode)
+      treesit-enabled-modes t
+      uniquify-buffer-name-style 'forward
+      ;;windows
+      highlight-nonselected-windows nil
+      global-text-scale-adjust-resizes-frames nil
+      truncate-partial-width-windows nil
+      ;;
+      kill-do-not-save-duplicates t
+      ;; undo
+      undo-limit (* 13 160000)
+      undo-strong-limit (* 13 240000)
+      undo-outer-limit (* 13 24000000)
+      ;; eval expr
+      eval-expression-print-length nil
+      eval-expression-print-level nil
+      ;;recentf
+      recentf-max-saved-items 300
+      recentf-max-menu-items 15
+      ;; tramp
+      remote-file-name-inhibit-cache 50
+      tramp-verbose 1
+      tramp-auto-save-directory (expand-file-name "tramp-autosave/" user-emacs-directory)
+      bookmark-save-flag 1
+      delete-by-moving-to-trash (not noninteractive)
+      remote-file-name-inhibit-delete-by-moving-to-trash t
+      find-file-suppress-same-file-warnings t
+      find-file-visit-truename t
+      ;; auto save
+      auto-save-default nil
+      auto-save-no-message t
+      auto-save-include-big-deletions t
+      auto-save-list-file-prefix (expand-file-name "autosave/" user-emacs-directory)
+      ;; backup
+      backup-directory-alist `(("." . ,(expand-file-name "backup" user-emacs-directory)))
+      tramp-backup-directory-alist backup-directory-alist
+      backup-by-copying-when-linked t
+      backup-by-copying t
+      delete-old-versions t
+      version-control t
+      kept-new-versions 5
+      kept-old-versions 5
+      ;; editing
+      delete-pair-blink-delay 0.03
+      comment-multi-line t
+      comment-empty-lines t)
 
 (bind-keys* ("C-=" . text-scale-increase)
             ("C--" . text-scale-decrease))
@@ -214,17 +293,27 @@
   (setq custom-file customization-file)
   (load custom-file 'noerror))
 
-(electric-pair-mode 1)
-(global-hl-line-mode 1)
-(repeat-mode 1)
-(savehist-mode 1)
-(save-place-mode 1)
-(column-number-mode 1)
-(delete-selection-mode 1)
-;; (desktop-save-mode 1)
-(set-frame-font +base/font-spec nil t t)
-(set-face-attribute 'default t
-                    :font +base/font-spec)
+
+(add-hook 'after-init-hook
+          (lambda ()
+            (global-hl-line-mode 1)
+            (save-place-mode 1)
+            (recentf-mode 1)
+            (column-number-mode 1)
+            (delete-selection-mode 1)
+            (savehist-mode 1)
+            ;; (desktop-save-mode 1)
+            ))
+
+;; load up `electric-pair-mode' only when its time for inserting text
+(ii/eval-on-first-hook meow-insert-enter-hook "electric-pairs" t (electric-pair-mode 1))
+
+(defun ii/emacs-unfocused-p ()
+  "Return non-nil if all Emacs frames are unfocused, nil otherwise."
+  (let ((focused (frame-focus-state (selected-frame))))
+    (dolist (f (frame-list) focused)
+      (setq focused (or (frame-focus-state f) focused)))
+    (not focused)))
 
 ;; add an option to diff current buffer with its file on disk
 (add-to-list 'save-some-buffers-action-alist
@@ -239,18 +328,49 @@
         paragraph-repeat-map (make-sparse-keymap)
         sentence-repeat-map (make-sparse-keymap)
         sexp-repeat-map (make-sparse-keymap)
-        list-repeat-map (make-sparse-keymap))
+        list-repeat-map (make-sparse-keymap)
+        forward-buffer-thing-repeat-map (make-sparse-keymap)
+        backward-buffer-thing-repeat-map (make-sparse-keymap))
+
+  (with-eval-after-load 'polymode
+    (advice-add 'display-line-numbers-mode :around #'polymode-inhibit-in-indirect-buffers))
 
   (defun ii/backward-down-list (arg interactive)
     (interactive "^p\nd")
     (down-list (- arg) interactive))
+  (with-eval-after-load 'completion-preview
+    (bind-keys
+     :map completion-preview-active-mode-map
+     ("M-n" . completion-preview-next-candidate)
+     ("M-p" . completion-preview-prev-candidate)
+     ("TAB" . completion-at-point)
+     ("<tab>" . completion-at-point)
+     ("M-TAB" . completion-preview-insert)))
 
+  (defun ii/filter-lines (negated)
+    (interactive "p")
+    (if negated
+        (command-execute #'flush-lines)
+      (command-execute #'keep-lines)))
+
+  (ii/when-idle! 2.0
+    (require 'server)
+    (when (not (server-running-p))
+      (server-mode 1)))
   :config
-  (require 'server)
-  (if (not (server-running-p))
-      (server-start))
+  (add-function :after after-focus-change-function
+                (defun ii/on-focus-out-load (&rest args)
+                  (when (ii/emacs-unfocused-p)
+                    (if (not (null ii/load-on-focus-loss-list))
+                        (let ((f (pop ii/load-on-focus-loss-list)))
+                          (message "Loaded %s" f)
+                          (require f))
+                      (remove-function after-focus-change-function 'ii/on-focus-out-load)))))
+
   :bind
-  (("C-c to" . toggle-option)
+  (("C-TAB" . completion-at-point)
+   ("C-<tab>" . completion-at-point)
+   ("C-c to" . toggle-option)
    ("C-c tde" . toggle-debug-on-error)
    ("C-c tdq" . toggle-debug-on-quit)
    ("C-c tl" . scroll-lock-mode)
@@ -260,7 +380,51 @@
    ("C-c q C-r" . restart-emacs)
    ("C-c b C-k" . kill-buffer)
    ("C-c b C-n" . narrow-to-region)
-   ("C-c b C-w" . widen))
+   ("C-c b C-w" . widen)
+   ("C-c rp" . (lambda ()
+                 (interactive)
+                 (+set-exec-path-from-shell)))
+   ("C-/ C-l" . copy-from-above-command)
+   ("C-c sr" . query-replace)
+   ("C-c sg" . query-replace-regexp)
+   ("C-c sl" . keep-lines)
+   ("C-c ks" . kmacro-start-macro)
+   ("C-c ke" . kmacro-end-macro)
+   ("C-c tA" . artist-mode)
+   ("M-RET" . recenter)
+   ("M-<return>" . recenter)
+
+   ;;;; windows
+   ("C-w C-h" . windmove-left)
+   ("C-w C-j" . windmove-down)
+   ("C-w C-k" . windmove-up)
+   ("C-w C-l" . windmove-right)
+   ("C-w H" . windmove-swap-states-left)
+   ("C-w J" . windmove-swap-states-down)
+   ("C-w K" . windmove-swap-states-up)
+   ("C-w L" . windmove-swap-states-right)
+   ("C-w h" . windmove-display-left)
+   ("C-w j" . windmove-display-down)
+   ("C-w k" . windmove-display-up)
+   ("C-w l" . windmove-display-right)
+   ("C-w C-f" . windmove-display-new-frame)
+   ("C-w C-t" . windmove-display-new-tab)
+   ("C-w C-d h" . windmove-delete-left)
+   ("C-w C-d j" . windmove-delete-down)
+   ("C-w C-d k" . windmove-delete-up)
+   ("C-w C-d l" . windmove-delete-right)
+   :repeat-map window-repeat-map
+   ("H" . windmove-swap-states-left)
+   ("J" . windmove-swap-states-down)
+   ("K" . windmove-swap-states-up)
+   ("L" . windmove-swap-states-right)
+   ("C-h" . windmove-left)
+   ("C-j" . windmove-down)
+   ("C-k" . windmove-up)
+   ("C-l" . windmove-right)
+   ("C-w C-r r" . rotate-windows)
+   ("C-w C-r b" . rotate-windows-back)
+   ("C-c tp" . completion-preview-mode))
   :bind*
   (;; dont use arrows
    ("<left>" . (lambda () (interactive) (message "No arrows!")))
@@ -268,47 +432,52 @@
    ("<up>" . (lambda () (interactive) (message "No arrows!")))
    ("<down>" . (lambda () (interactive) (message "No arrows!")))
    ("<menu>" . context-menu-open)
-   ("M-RET" . recenter)
-   ("M-<return>" . recenter)
    ("M-]" . forward-paragraph)
    ("M-[" . backward-paragraph)
-   :repeat-map paragraph-repeat-map
-   ("p" . forward-paragraph)
-   ("P" . backward-paragraph)
-   :repeat-map sentence-repeat-map
-   ("." . forward-sentence)
-   (">" . backward-sentence)
+   :map completion-in-region-mode-map
+   ("RET" . minibuffer-choose-completion)
+   ("M-n" . minibuffer-next-completion)
+   ("M-p" . minibuffer-previous-completion)
    :repeat-map sexp-repeat-map
    ("s" . forward-sexp)
    ("S" . backward-sexp)
    :repeat-map list-repeat-map
-   ("\]" . forward-list)
+   ("\]i" . forward-list)
    ("\[" . backward-list)
+   :repeat-map forward-buffer-thing-repeat-map
+   ("p" . forward-paragraph)
+   ("." . forward-sentence)
+   ("i" . forward-to-indentation)
+   :repeat-map backward-buffer-thing-repeat-map
+   ("p" . backward-paragraph)
+   ("." . backward-sentence)
+   ("i" . backward-to-indentation)
+   :repeat-map buffer-navigation-repeat-map
+   ("b" . next-buffer)
+   ("B" . previous-buffer)
+   ("K" . kill-this-buffer)
    :map goto-map
-   ("]p" . forward-paragraph)
-   ("[p" . backward-paragraph)
-   ("]." . forward-sentence)
-   ("[." . backward-sentence)
-   ("[f" . beginning-of-defun)
-   ("]s" . forward-sexp)
-   ("[s" . backward-sexp)
-   ("]]" . forward-list)
-   ("[[" . backward-list)
-   ("]}" . up-list)
-   ("[{" . backward-up-list)
-   ("]/" . down-list)
-   ("[/" . ii/backward-down-list)
-   ("] TAB" . forward-to-indentation)
-   ("[ TAB" . backward-to-indentation)
-   ("]l" . forward-line)
-   ("[l" . backward-line)
+   ("\]p" . forward-paragraph)
+   ("\[p" . backward-paragraph)
+   ("\]." . forward-sentence)
+   ("\[." . backward-sentence)
+   ("\[f" . beginning-of-defun)
+   ("\]s" . forward-sexp)
+   ("\[s" . backward-sexp)
+   ("\]l" . forward-list)
+   ("\[l" . backward-list)
+   ("\]}" . up-list)
+   ("\[{" . backward-up-list)
+   ("\]/" . down-list)
+   ("\[/" . ii/backward-down-list)
+   ("\]i" . forward-to-indentation)
+   ("\[i" . backward-to-indentation)
    ("g" . beginning-of-buffer)
    ("e" . end-of-buffer)
    ("f" . find-file-at-point)
    ("w" . browse-url-at-point)
    ("j" . next-line)
    ("k" . previous-line)
-   ("TAB" . nil)
    ("|" . move-to-column)
    ("l" . move-end-of-line)
    ("h" . move-beginning-of-line)
@@ -350,6 +519,7 @@
 
 (use-package implicit-ui
   :straight `(implicit-ui :type nil
+                          :build (:not compile) ;; async requires not compiling
                           :local-repo ,(expand-file-name "ui" ii/elisp-path))
   :hook
   (gitignore-mode-hook . ii/gitignore-count-mode))
@@ -383,7 +553,7 @@
       which-key-separator " "
       which-key-sort-order 'which-key-key-order-alpha
       which-key-side-window-slot 2
-      which-key-max-display-columns 1
+      which-key-max-display-columns 2
       which-key-prefix-prefix "+"
       which-key-compute-remaps t
       which-key-add-column-padding 1
@@ -392,11 +562,16 @@
       which-key-frame-max-height 10
       which-key-min-column-description-width 40)
 
-(add-hook 'meow-global-mode-hook
-          (defun ii/which-key--setup ()
-            (require 'which-key)
-            (which-key-mode)
-            (which-key-posframe-mode 1)))
+
+;; load which key only on first non-insert keypress
+(add-hook 'pre-command-hook (defun ii/which-key-setup ()
+                              (when (not (member this-command '(self-insert-command execute-extended-command)))
+                                (remove-hook 'pre-command-hook #'ii/which-key-setup)
+                                (repeat-mode 1)
+                                (require 'which-key)
+                                (which-key-mode 1)
+                                (which-key-posframe-mode 1))))
+
 
 (with-eval-after-load 'which-key
   (which-key-add-key-based-replacements
@@ -432,12 +607,16 @@
     "C-x vM" "Merge"
     "C-x vw" "Working tree"
     "C-x 8" "Insert Char"
+    "C-x 8 e" "Emoji"
     "C-x x" "Buffer Content"
     "C-x X" "Edebug"
     "C-x C-a" "Edebug"
     ;; C-c map
+    "C-c @" "Outline"
+    "C-c /" "grep"
     "C-c a" "LLM"
     "C-c b" "Buffer"
+    "C-c b`" "Switch to last buffer"
     "C-c c" "Code"
     "C-c d" "Directory"
     "C-c e" "Edit"
@@ -478,7 +657,6 @@
               (fh (plist-get info :parent-frame-height))
               (pw (plist-get info :posframe-width))
               (ph (plist-get info :posframe-height)))
-          (message "mode-line-height %S mini-height %S fw %S pw %S" h m fw pw)
           (cons (- fw pw 1)
                 (if (>= ph fh)
                     0
@@ -496,8 +674,9 @@
         which-key-posframe-poshandler 'ii/which-key-posframe-poshandler))
 
 (use-package kkp
-  :hook
-  (tty-setup-hook . global-kkp-mode))
+  :demand
+  :config
+  (global-kkp-mode 1))
 
 (use-package term-keys
   :straight (term-keys :type git
@@ -506,15 +685,15 @@
   :hook
   (tty-setup-hook . term-keys-mode))
 
-(use-package xclip
-  :if (+os/is-linux-p)
-  :hook
-  (tty-setup-hook . xclip-mode))
+;; (use-package xclip
+;;   :if (+os/is-linux-p)
+;;   :hook
+;;   (tty-setup-hook . xclip-mode))
 
 (use-package implicit-meow
   :straight `(implicit-meow :type nil
                             :local-repo ,(expand-file-name "meow" ii/elisp-path))
-  :after (meow)
+  ;; :after (meow)
   :commands
   (+meow/command
    +meow/yank
@@ -552,13 +731,6 @@
   :hook
   (meow-beacon-mode-hook . ii/meow--beacon-mode-setup)
   (after-change-major-mode-hook . ii/meow--setup-local-pairs))
-
-(use-package treesit
-  :straight nil
-  :init
-  (setq treesit-enabled-modes t)
-  ;; treat treesitter nodes as s-expressions
-  (setq-default treesit-sexp-thing 'sexp))
 
 (use-package meow-tree-sitter
   :init
@@ -625,6 +797,7 @@
   (after-change-major-mode-hook . ii/meow-treesitter-setup-local-defaults))
 
 (use-package surround
+  :defer t
   :init
   (use-package-autoload-keymap
    'surround-keymap 'surround t)
@@ -673,9 +846,7 @@
                            (format #("%d/%d" 0 5 (face font-lock-regexp-face))
                                    iedit-occurrence-index (iedit-counter)))))
   :bind*
-  ( :map iedit-mode-keymap
-    ()
-    :map isearch-mode-map
+  ( :map isearch-mode-map
     ("M-d" . iedit-mode-from-isearch)))
 
 (use-package multiple-cursors
@@ -707,6 +878,8 @@
    :exit
    ("m" . mc/mark-all-in-region)
    ("q" . ignore)))
+
+(use-package zones)
 
 (use-package meow
   :custom
@@ -745,7 +918,8 @@
       "meow state for `eat-mode'."
       :keymap meow-eat-state-map)
 
-    (setq meow-cursor-type-eat 'bar)
+    (setq meow-cursor-type-eat 'bar
+          meow-cursor-type-insert '(bar . 2))
 
     (meow-define-keys 'eat
       '("<escape>" . eat-self-input)
@@ -778,23 +952,9 @@
       "V" #'meow-normal-mode
       "SPC" #'meow-keypad)
 
-    ;;;; view state
-    (meow-define-state view
-      "meow state for viewing buffers."
-      :keymap meow-view-state-keymap)
+    (defvar meow-macro-sequence nil)
 
-    ;; (meow-define-keys 'view
-    ;;   '("\]" . "M-g ]")
-    ;;   '("\[" . "M-g [")
-    ;;   '("z" . recenter)
-    ;;   '("c" . recenter)
-    ;;   '("C-n" . forward-page)
-    ;;   '("C-p" . backward-page)
-    ;;   '("V" . meow-normal-mode))
-
-    (setq meow-cursor-type-view 'hollow)
-
-    ;;;; macro state (WIP)
+    ;;;;macro state (WIP)
     ;; TODO: actually implement this
     (defvar-keymap meow-macro-state-keymap
       :doc "Keymap for `meow-macro-mode'."
@@ -806,6 +966,12 @@
 
     (defvar running-macros nil
       "TODO")
+
+    (defvar meow-macro-sequence-size kmacro-ring-max)
+
+    (defvar meow-macro-sequence-ring (make-ring meow-macro-sequence-size))
+
+    (defvar meow-macro-sequence-last-state nil)
 
     (defun meow-macro (start)
       (interactive "p")
@@ -831,6 +997,46 @@
         (end-kbd-macro)
         (meow--beacon-apply-kmacros-from-macro))
       (meow--switch-state 'beacon))
+
+    (defun meow-macro-sequence-save (seq)
+      (if (and (ring-p meow-macro-sequence-ring)
+               (listp seq))
+          (ring-insert meow-macro-sequence-ring seq)
+        (user-error "Saving macro sequence failed")))
+
+    (defun meow-macro-insert ()
+      (meow-macro-mode -1)
+      (meow-insert)
+      (when defining-kbd-macro
+        (call-interactively #'kmacro-end-macro)
+        (add-to-list 'meow-macro-sequence last-kbd-macro))
+      (add-to-list meow-macro-sequence 'insert)
+      (call-interactively #'kmacro-start-macro))
+
+    (defun meow-beacon-setup-keys ()
+      (when meow-beacon-mode
+        ))
+
+    (add-hook 'meow-beacon-mode-hook #'meow-beacon-setup-keys)
+
+    (defun meow-macro-apply-sequence ()
+      (meow--beacon-apply-command (lambda ()
+                                    (interactive)
+                                    (let ((running-macros))
+                                      (dolist (macro meow-macro-sequence)
+                                        (cond ((vectorp macro)
+                                               (let ((last-kbd-macro macro))
+                                                 (when (symbolp meow-macro-sequence-last-state)
+                                                   (meow--switch-state meow-macro-sequence-last-state))
+                                                 (call-interactively #'kmacro-call-macro))
+                                               ((symbolp macro)
+                                                (setq meow-macro-sequence-last-state macro))
+                                               (t nil))))
+                                      ;; reset macro state
+                                      (setq meow-macro-sequence-last-state nil))))
+      (message "macro sequence was %S" meow-macro-sequence)
+      (meow-macro-sequence-save meow-macro-sequence)
+      (setq meow-macro-sequence nil))
 
     (defun meow--beacon-apply-kmacros-from-macro ()
       (meow--beacon-apply-command (lambda ()
@@ -869,10 +1075,6 @@
 
 
     (bind-key* "C-x C-k C-s" 'meow-beacon-macro-mode)
-    (add-hook 'meow-normal-mode-hook (lambda ()
-                                       (let ((inhibit-message t))
-                                         (message "visiting normal mode"))))
-
     (meow-leader-define-key
      ;; Use SPC (0-9) for digit arguments.
      '("1" . meow-digit-argument)
@@ -1036,10 +1238,10 @@
                                            (calibredb-show-mode . motion)
                                            (emms-playlist-mode . motion)
                                            (nov-mode . motion)
-                                           (archive-mode . test)
                                            (speed-type-mode . insert)
                                            (shell-mode . insert)
                                            (eat-mode . eat)
+                                           (vterm-mode . vterm)
                                            (eshell-mode . insert)
                                            (shell-command-mode . motion)
                                            (comint-mode . insert))))
@@ -1064,13 +1266,7 @@
                          'ii/meow--regexp-search-inner
                          'ii/meow--regexp-search-bounds)
 
-    (add-to-list 'meow-char-thing-table '(?\% . regexp-search))
-
-    (meow-thing-register 'string-search
-                         'ii/meow--search-inner
-                         'ii/meow--search-bounds)
-
-    (add-to-list 'meow-char-thing-table '(?\/ . search)))
+    (add-to-list 'meow-char-thing-table '(?/ . regexp-search)))
 
   (defun +load-meow ()
     "Load `meow'."
@@ -1080,6 +1276,7 @@
     (add-to-list 'meow-indicator-face-alist '(view . meow-motion-indicator))
     (add-to-list 'meow-indicator-face-alist '(macro . meow-normal-indicator))
     (setq-default meow-replace-state-name-list '((eat . "<T>")
+                                                 (vterm . "<V>")
                                                  (normal . "<N>")
                                                  (motion . "<M>")
                                                  (keypad . "<K>")
@@ -1109,7 +1306,11 @@
    :map help-map
    ("l" . load-library))
   :hook
-  (meow-switch-state-hook . ii/meow--line-numbers-toggle)
+  ;; since archive mode isnt properly detected by meow, i have to do this the hacky way
+  (meow-mode-hook . (lambda ()
+                      (if (eq major-mode 'archive-mode)
+                          (meow-motion-mode 1))))
+  ((meow-insert-enter-hook meow-insert-exit-hook) . ii/meow--line-numbers-toggle)
   (after-init-hook . +load-meow))
 
 (with-eval-after-load 'meow
@@ -1178,24 +1379,6 @@
         fringe-mode (cons 5 6)
         right-margin-width 1)
 
-(use-package register
-  :straight nil
-  :init
-  (setq delete-selection-save-to-register ?r
-        register-use-preview t
-        register-preview-delay 0.5))
-
-(use-package kmacro
-  :straight nil
-  :bind
-  ("C-c ks" . kmacro-start-macro)
-  ("C-c ke" . kmacro-end-macro))
-
-(use-package anzu
-  :bind*
-  (("C-c sr" . anzu-query-replace)
-   ("C-c sg" . anzu-query-replace-regexp)))
-
 (use-package rg
   :init
   (setq rg-align-position-numbers t)
@@ -1219,59 +1402,18 @@
 ;; emacs >= 31 includes `grep-edit-mode'
 (use-package wgrep
   :init
-  (setq wgrep-auto-save-buffer t))
+  (setq wgrep-auto-save-buffer t)
+  :bind*
+  ( :map grep-mode-map
+    ("e" . wgrep-change-to-wgrep-mode)))
 
 (use-package ast-grep
-  :after (consult)
-  :config
-  (cl-defun ii/embark-consult--export-ast-grep (&key header lines insert footer)
-    "Create a grep mode buffer listing LINES.
-The HEADER string is inserted at the top of the buffer.  The
-function INSERT is called to insert the LINES and should return a
-count of the matches (there may be more than one match per line).
-The function FOOTER is called to insert a footer."
-    (let ((buf (generate-new-buffer "*Embark Export Ast-Grep*")))
-      (with-current-buffer buf
-        (insert (propertize header 'wgrep-header t 'front-sticky t))
-        (let ((count (funcall insert lines)))
-          (funcall footer)
-          (goto-char (point-min))
-          (grep-mode)
-          (setq-local grep-num-matches-found count
-                      mode-line-process grep-mode-line-matches))
-        ;; Make this buffer current for next/previous-error
-        (setq next-error-last-buffer buf)
-        ;; Set up keymap before possible wgrep-setup, so that wgrep
-        ;; restores our binding too when the user finishes editing.
-        (use-local-map (make-composed-keymap
-                        embark-consult-rerun-map
-                        (current-local-map)))
-        ;; TODO Wgrep 3.0 and development versions use different names for the
-        ;; parser variable.
-        (defvar wgrep-header/footer-parser)
-        (defvar wgrep-header&footer-parser)
-        (setq-local wgrep-header/footer-parser #'ignore
-                    wgrep-header&footer-parser #'ignore)
-        (when (fboundp 'wgrep-setup) (wgrep-setup)))
-      (pop-to-buffer buf)))
+  :bind*
+  (("C-c / a" . ast-grep-project)))
 
-  (defun ii/embark-export-ast-grep ()
-    (embark-consult--export-grep
-     :header "Exported ast-grep results:\n\n"
-     :lines lines
-     :insert
-     (lambda (lines)
-       (dolist (line lines) (insert line "\n"))
-       (goto-char (point-min))
-       (let ((count 0) prop)
-         (cl-incf count))
-       count)
-     :footer #'ignore))
-  (add-to-list 'embark-exporters-alist '(ast-grep . ii/embark-export-ast-grep)))
-
-(use-package solaire-mode
-  :hook
-  (enable-theme-functions . solaire-global-mode))
+;; (use-package solaire-mode
+;;   :init
+;;   (solaire-global-mode 1))
 
 (use-package doom-themes
   :demand
@@ -1287,15 +1429,14 @@ The function FOOTER is called to insert a footer."
             doom-themes-enable-italic t
             doom-themes-treemacs-enable-variable-pitch nil
             doom-themes-treemacs-theme "doom-colors")
-      (doom-themes-visual-bell-config)
       (load-theme +base/theme t)))
   :config
-  (ii/appearance-setup-doom-themes)
+  ;; HACK: emacs 31 doesn't allow inheritance cycles, doom-themes still uses them: https://github.com/doomemacs/themes/issues/875
+  (setcdr (assoc 'gnus-group-news-low-empty doom-themes-base-faces)
+          '(:inherit 'gnus-group-mail-1-empty :weight 'normal))
   :hook
+  (after-init-hook . ii/appearance-setup-doom-themes)
   (server-after-make-frame-hook . ii/appearance-setup-doom-themes))
-
-(use-package rainbow-delimiters
-  :hook ((prog-mode-hook emacs-lisp-mode-hook) . rainbow-delimiters-mode))
 
 (use-package colorful-mode
   :init
@@ -1337,8 +1478,8 @@ The function FOOTER is called to insert a footer."
             ("HACK" . warning)
             ("TEMP" . warning)
             ("FIXME" . compilation-error)
-            ("XXXX*" . compilation-error)))
-    (global-hl-todo-mode 1))
+            ("XXXX*" . compilation-error))))
+  :hook ((prog-mode-hook org-mode-hook markdown-mode-hook) . hl-todo-mode)
   :bind*
   (("C-c st" . hl-todo-rgrep)
    :map goto-map
@@ -1347,22 +1488,60 @@ The function FOOTER is called to insert a footer."
    :map search-map
    ("t" . hl-todo-occur)))
 
+(defun ii/doom-theme-set-faces (theme)
+  ""
+  (let ((theme (symbol-name theme)))
+    (custom-set-faces
+     `(region ((t (:extend nil))))
+     `(eglot-inlay-hint-face ((t (:slant italic :inherit font-lock-comment-face)))))
+    (if (string-prefix-p "doom" theme)
+        (let* ((bg (doom-color 'bg))
+               (bg-alt (doom-color 'bg-alt))
+               (fg-alt (doom-color 'fg-alt))
+               (base3 (doom-color 'base3))
+               (base0 (doom-color 'base0))
+               (selection (doom-color 'selection))
+               (base4 (doom-color 'base4)))
+          (progn (message "Loading custom faces")
+                 (custom-set-faces
+                  `(secondary-selection (( t (:background ,bg :extend nil))))
+                  `(minibuffer-nonselected (( t (:background ,bg-alt :foreground ,fg-alt :extend nil))))
+                  `(whitespace-space (( t (:foreground ,base3))))
+                  `(iedit-occurrence (( t (:background ,base3 :foreground ,fg-alt :weight bold :inverse-video nil))))
+                  `(corfu-popupinfo ((t (:background ,base0))))
+                  `(vertico-group-separator (( t (:background ,bg-alt :foreground ,fg-alt :strike-through t))))
+                  `(vertico-group-title (( t (:background ,bg-alt :foreground ,fg-alt))))
+                  `(wgrep-face (( t (:background ,selection))))
+                  `(embark-selected (( t (:background ,selection :foreground unspecified))))
+                  `(which-key-posframe-border (( t (:background ,base4))))
+                  `(rg-file-tag-face (( t (:foreground ,bg-alt :extend t)))))))
+      (custom-reset-faces
+       `(secondary-selection ,theme)
+       `(minibuffer-nonselected ,theme)
+       `(whitespace-space ,theme)
+       `(iedit-occurrence ,theme)
+       `(vertico-group-separator ,theme)
+       `(vertico-group-title ,theme)
+       `(wgrep-face ,theme)
+       `(embark-selected ,theme)
+       `(which-key-posframe-border ,theme)
+       `(rg-file-tag-face ,theme)))))
+
+(defun ii/doom-theme-faces-ensure-last ()
+  (when (member 'ii/doom-theme-set-faces enable-theme-functions)
+    (remove-hook 'enable-theme-functions 'ii/doom-theme-set-faces))
+  (add-hook 'enable-theme-functions
+            #'ii/doom-theme-set-faces
+            99))
+
+(add-hook 'enable-theme-functions #'ii/doom-theme-set-faces 99)
+
+(add-hook 'meow-global-mode-hook #'ii/doom-theme-faces-ensure-last 99)
+
 (use-package doom-gruber-darker-theme
   :straight (doom-gruber-darker-theme :type git
                                       :host github
-                                      :repo "implicit-image/doom-gruber-darker-theme")
-  :config
-  ;; these faces are modified by meow and need to be overridden here
-  (custom-set-faces `(region ((t (:extend nil))))
-                    `(iedit-occurrence ((t (:background ,(doom-color 'base3) :foreground ,(doom-color 'fg-alt) :weight bold :inverse nil))))
-                    `(eldoc-posframe-background-face ((t (:background ,(doom-color 'bg-alt)))))
-                    `(secondary-selection ((t (:background ,(doom-color 'bg):extend nil))))
-                    `(vertico-group-separator ((t (:background ,(doom-color 'bg-alt) :foreground ,(doom-color 'fg-alt) :strike-through t))))
-                    `(vertico-group-title ((t (:background ,(doom-color 'bg-alt) :foreground ,(doom-color 'fg-alt)))))
-                    `(eldoc-box-body ((t (:background "black"))))
-                    `(minibuffer-nonselected ((t (:background ,(doom-color 'bg-alt) :foreground ,(doom-color 'fg-alt) :extend nil))))
-                    `(embark-selected ((t (:background ,(doom-color 'selection) :foreground unspecified))))
-                    `(rg-file-tag-face ((t (:background :foreground ,(doom-color 'bg-alt) :extend t))))))
+                                      :repo "implicit-image/doom-gruber-darker-theme"))
 
 ;;;; Window Management
 (use-package implicit-windows
@@ -1388,47 +1567,9 @@ The function FOOTER is called to insert a footer."
 (use-package window
   :straight nil
   :init
-
-  (defun ii/display-buffer-in-child-frame (buffer alist)
-    (let ((alist (append
-                  alist
-                  `((window-parameters . ((mode-line-format . none)))
-                    (child-frame-parameters . ((tool-bar-lines . 0)
-                                               (tab-bar-lines . 0)
-                                               (menu-bar-lines . 0)
-                                               (minibuffer . nil)
-                                               (unsplittable . t)
-                                               (no-other-frame . t)
-                                               (undecorated . t)))))))
-      (display-buffer-in-child-frame buffer alist)))
-
-  (defun ii/child-frame-consult-test ()
-    (interactive)
-    (let* ((alist `((window-parameters . ((mode-line-format . none)))
-                    (child-frame-parameters . ((tool-bar-lines . 0)
-                                               (tab-bar-lines . 0)
-                                               (minibuffer . t)
-                                               (font . ,+base/font-spec)
-                                               (width . 150)
-                                               (height . 70)
-                                               (menu-bar-lines . 0)
-                                               (undecorated . t)))))
-           (window (display-buffer-in-child-frame (current-buffer) alist))
-           (frame (window-frame window)))
-      (when frame
-        (with-selected-frame frame
-          (setopt vertico-multiform-categories
-                  '((embark-keybinding grid))
-                  vertico-multiform-commands
-                  '((consult-grep buffer)
-                    (consult-ripgrep buffer)
-                    (consult-find buffer)
-                    (consult-fd buffer)
-                    (affe-grep buffer)
-                    (affe-find buffer)))
-          (consult-fd default-directory)))))
-
   (setq window-repeat-map (make-sparse-keymap)
+        window-resize-pixelwise nil
+        resize-mini-windows 'grow-only
         switch-to-buffer-in-dedicated-window nil
         switch-to-buffer-obey-display-actions nil
         switch-to-buffer-preserve-window-point t
@@ -1438,11 +1579,17 @@ The function FOOTER is called to insert a footer."
                   (derived-mode . calibredb-edit-annotation-mode)
                   (derived-mode . calibredb-show-mode)))
            (display-buffer-same-window))
+          ;; register preview window
           ((or . ("\*Register Preview\*"
                   " \*Register Preview\*"
                   " \*Register Preview\* "))
            (display-buffer-below-selected)
            (window-parameters . ((mode-line-format . none))))
+          ((or . ((derived-mode . vc-git-region-history-mode)
+                  (derived-mode . vc-hg-region-history-mode)))
+           (display-buffer-use-some-window)
+           (post-command-select-window . t)
+           (inhibit-same-window . t))
           ((or . ((derived-mode . ibuffer-mode)
                   "\*Ibuffer\*"))
            (display-buffer-reuse-mode-window display-buffer-use-some-window))
@@ -1461,10 +1608,7 @@ The function FOOTER is called to insert a footer."
           ((and . ("\*Embark Export:*"
                    (or . ((derived-mode . grep-mode)
                           (derived-mode . occur-mode)))))
-           (display-buffer-in-side-window)
-           (side . bottom)
-           (height . 0.3)
-           (slot . 1))
+           (display-buffer-reuse-mode-window display-buffer-use-some-window))
           ;; bottom side window
           ((or . ((derived-mode . rg-mode)
                   (derived-mode . grep-mode)
@@ -1482,6 +1626,7 @@ The function FOOTER is called to insert a footer."
                   "\*lsp-bridge-doc\*"
                   "\*lspce-hover\*"
                   "\*lsp-help\*"
+                  "\*Agenda Commands\*"
                   "\*tide-documentation\*"
                   ;; "\*eldoc\*"
                   (derived-mode . help-mode)
@@ -1574,51 +1719,6 @@ The function FOOTER is called to insert a footer."
    :exit
    ("=" . balance-windows)))
 
-(use-package windmove
-  :straight nil
-  :init
-  (setq windmove-wrap-around nil)
-  :bind*
-  (("C-w C-h" . windmove-left)
-   ("C-w C-j" . windmove-down)
-   ("C-w C-k" . windmove-up)
-   ("C-w C-l" . windmove-right)
-   ("C-w H" . windmove-swap-states-left)
-   ("C-w J" . windmove-swap-states-down)
-   ("C-w K" . windmove-swap-states-up)
-   ("C-w L" . windmove-swap-states-right)
-   ("C-w h" . windmove-display-left)
-   ("C-w j" . windmove-display-down)
-   ("C-w k" . windmove-display-up)
-   ("C-w l" . windmove-display-right)
-   ("C-w C-f" . windmove-display-new-frame)
-   ("C-w C-t" . windmove-display-new-tab)
-   ("C-w C-d h" . windmove-delete-left)
-   ("C-w C-d j" . windmove-delete-down)
-   ("C-w C-d k" . windmove-delete-up)
-   ("C-w C-d l" . windmove-delete-right)
-   :repeat-map window-repeat-map
-   ("H" . windmove-swap-states-left)
-   ("J" . windmove-swap-states-down)
-   ("K" . windmove-swap-states-up)
-   ("L" . windmove-swap-states-right)
-   ("C-h" . windmove-left)
-   ("C-j" . windmove-down)
-   ("C-k" . windmove-up)
-   ("C-l" . windmove-right)))
-
-(use-package window-x
-  :straight nil
-  :bind*
-  (("C-w C-r r" . rotate-windows)
-   ("C-w C-r b" . rotate-windows-back)))
-
-(use-package uniquify
-  :straight nil
-  :demand
-  :config
-  (setq uniquify-buffer-name-style 'forward))
-
 ;;;; Modeline
 
 (setq mode-line-right-align-edge 'right-margin)
@@ -1645,6 +1745,7 @@ The function FOOTER is called to insert a footer."
 
 (defun ii/breadcrumbs--should-show-p ()
   (and buffer-file-name
+       (or (not header-line-format))
        (not (memq major-mode '(dired-mode wdired-mode)))))
 
 (defun ii/mode-line-update-project (&rest _args)
@@ -1668,36 +1769,36 @@ The function FOOTER is called to insert a footer."
                                                     face success)
                                        ,@(when file `(ii/breadcrumbs--separator ,file)))))))
 
-(add-hook 'window-buffer-change-functions 'ii/mode-line-update-project)
-(add-hook 'after-set-visited-file-name-hook 'ii/mode-line-update-project)
+(add-hook 'after-init-hook (defun ii/project-headerline-setup ()
+                             (add-hook 'window-buffer-change-functions 'ii/mode-line-update-project)
+                             (add-hook 'after-set-visited-file-name-hook 'ii/mode-line-update-project)))
 
 (defvar ii/breadcrumbs--separator " > "
   "Separator for breadcrumbs.")
 
-(setq-default header-line-format nil
-              mode-line-format
-              '((:eval (propertize " ●"
-                                   'face
-                                   (alist-get meow--current-state meow-indicator-face-alist)))
-                (multiple-cursors-mode mc/mode-line)
-                (iedit-mode iedit-mode-line)
-                "%n "
-                "%z%*%@ "
-                "%["
-                mode-line-buffer-identification
-                "%] "
-                mode-line-position
-                " %I"
-                mode-line-format-right-align
-                (lsp-mode lsp-modeline--diagnostics-string)
-                (lspce-mode (:eval (concat lspce--mode-line-format " ")))
-                (eglot--managed-mode (:eval (concat eglot-mode-line-format " ")))
-                (text-scale-mode text-scale-lighter)
-                mode-line-process
-                (flymake-mode flymake-mode-line-counters)
-                (vc-mode vc-mode)
-                " "
-                mode-name))
+(add-hook 'after-init-hook
+          (defun ii/reset-modeline ()
+            (setq-default header-line-format nil
+                          mode-line-format
+                          '((:eval (propertize " ●"
+                                               'face
+                                               (alist-get meow--current-state meow-indicator-face-alist)))
+                            (multiple-cursors-mode mc/mode-line)
+                            (iedit-mode iedit-mode-line)
+                            "%n "
+                            "%z%*%@ "
+                            "%["
+                            mode-line-buffer-identification
+                            "%] "
+                            mode-line-position
+                            " %I"
+                            mode-line-format-right-align
+                            (text-scale-mode text-scale-mode-lighter)
+                            mode-line-process
+                            (flymake-mode flymake-mode-line-counters)
+                            (vc-mode vc-mode)
+                            " "
+                            mode-name))))
 
 (setq read-buffer-completion-ignore-case t
       read-file-name-completion-ignore-case t
@@ -1712,41 +1813,14 @@ The function FOOTER is called to insert a footer."
       completions-detailed t
       completions-sort 'historical)
 
-(use-package completion-preview
-  :straight nil
-  :init
-  (setq completion-preview-minimum-symbol-length 5)
-  :bind*
-  (("C-c tp" . completion-preview-mode)
-   :map completion-preview-active-mode-map
-   ("M-n" . completion-preview-next-candidate)
-   ("M-p" . completion-preview-prev-candidate)
-   ("TAB" . completion-at-point)
-   ("<tab>" . completion-at-point)
-   ("M-TAB" . completion-preview-insert)))
-
-(use-package minibuffer
-  :straight nil
-  :init
-  (setq minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt)
-        enable-recursive-minibuffers t)
-  :bind*
-  ( :map completion-in-region-mode-map
-    ("RET" . minibuffer-choose-completion)
-    ("M-n" . minibuffer-next-completion)
-    ("M-p" . minibuffer-previous-completion))
-  :hook
-  (minibuffer-setup-hook . cursor-intangible-mode))
-
-(setq dabbrev-upcase-means-case-search t
-      dabbrev-ignored-buffer-modes '(archive-mode image-mode docview-mode pdf-view-mode tags-table-mode csv-mode))
+(add-hook 'minibuffer-setup-hook 'cursor-intangible-mode)
 
 (use-package marginalia
   :custom
   (marginalia-align 'center)
   (marginalia-align-offset 10)
-  :hook
-  (after-init-hook . marginalia-mode))
+  :init
+  (add-hook 'after-init-hook #'marginalia-mode))
 
 (use-package implicit-vertico
   :straight `(implicit-vertico :type nil
@@ -1775,9 +1849,6 @@ The function FOOTER is called to insert a footer."
                                           (popup-frames . nil)
                                           (inhibit-switch-frame . t)))
 
-  (advice-add 'garbage-collect :after (lambda () (let ((inhibit-message t))
-                                                   (message "garbage collecting..."))))
-
   :config
   (setopt vertico-multiform-categories
           '((embark-keybinding grid)
@@ -1796,18 +1867,14 @@ The function FOOTER is called to insert a footer."
             (project-find-file buffer)
             (affe-grep buffer)
             (affe-find buffer)
-            (eglot-code-actions posframe
-                                (vertico-posframe-poshandler . posframe-poshandler-point-frame-center)
-                                (vertico-posframe-border-width . 2))
+            (consult-line buffer)
+            (consult-line-multi buffer)
             (lsp-execute-code-action posframe
                                      (vertico-posframe-poshandler . posframe-poshandler-point-frame-center)
                                      (vertico-posframe-border-width . 2))
             (lspce-code-actions posframe
                                 (vertico-posframe-poshandler . posframe-poshandler-point-frame-center)
-                                (vertico-posframe-border-width . 2))
-            ("insert" posframe
-             (vertico-posframe-poshandler . posframe-poshandler-point-bottom-left-corner)
-             (vertico-posframe-border-width . 2))))
+                                (vertico-posframe-border-width . 2))))
   (vertico-multiform-mode)
   :hook
   (marginalia-mode-hook . vertico-mode)
@@ -1920,7 +1987,7 @@ targets."
 
 (use-package consult
   :autoload
-  (consult--read)
+  (consult--read consult--fast-abbreviate-file-name)
   :custom
   (xref-show-xrefs-function 'consult-xref)
   :init
@@ -1939,7 +2006,6 @@ targets."
 
   ;; setup preview for `find-file' and `project-find-file' commands
   (with-eval-after-load 'vertico
-    (require 'consult)
     (setq read-file-name-function #'ii/consult-find-file-with-preview)
 
     (defun ii/consult-find-file-with-preview (prompt &optional dir default mustmatch initial pred)
@@ -2027,12 +2093,6 @@ targets."
    :map vertico-map
    ("C-c C-h" . consult-history)))
 
-(use-package consult-omni
-  :straight ( :type git
-              :host github
-              :repo "armindarvish/consult-omni")
-  :after (consult))
-
 (use-package websocket)
 
 (use-package affe
@@ -2046,12 +2106,13 @@ targets."
     (cons input (apply-partially #'orderless--highlight input t)))
 
   (setq affe-regexp-compiler #'affe-orderless-regexp-compiler
-        affe-count 3000)
+        affe-count 10000)
 
   ;; Manual preview key for `affe-grep'
   (consult-customize affe-grep
                      :preview-key '(:debounce 0.05 any)
                      affe-find
+                     ii/browse-agenda-files
                      :state (consult--file-state)
                      :preview-key '(:debounce 0.1 any))
 
@@ -2093,21 +2154,12 @@ targets."
       eldoc-echo-area-use-multiline-p nil
       eldoc-echo-area-display-truncation-message nil)
 
-
-(add-hook 'eldoc-mode-hook (lambda ()
-                             (remove-hook 'pre-command-hook 'eldoc-pre-command-refresh-echo-area t)))
-
 (with-eval-after-load 'eldoc
   (remove-hook 'pre-command-hook 'eldoc-pre-command-refresh-echo-area))
 
 (use-package eldoc-box
   :init
   (defun ii/eldoc-box--position-function (width height)
-    ;; (cond ((frame-live-p corfu--frame)
-    ;;        (let ((corfu-pos (frame-position corfu--frame)))
-    ;;          (if (> (cdr corfu-pos) ))))
-    ;;       (t (eldoc-box--default-at-point-position-function-1)))
-
     (let* ((pos (eldoc-box--default-at-point-position-function width height))
            (x (car pos))
            (y (cdr pos)))
@@ -2121,28 +2173,32 @@ targets."
         eldoc-box-max-pixel-height (byte-compile-lambda
                                     '(lambda ()
                                        (if (display-graphic-p) 800 30)))
-        eldoc-box-position-function 'ii/eldoc-box--position-function
+        eldoc-box-position-function 'eldoc-box--default-upper-corner-position-function
         eldoc-box-doc-separator "\n-------------------------------\n"
         eldoc-box-only-multi-line nil
         eldoc-box-fringe-use-same-bg nil)
 
   (defun ii/eldoc-box--setup ()
     (if (bound-and-true-p eldoc-box-hover-mode)
-        (setq-local eldoc-idle-delay 0
-                    eldoc-documentation-strategy 'eldoc-documentation-compose)))
+        (setq-local eldoc-idle-delay 0.15
+                    eldoc-documentation-strategy 'eldoc-documentation-enthusiast)))
   :config
   (setf (alist-get 'font eldoc-box-frame-parameters) +base/font-spec
-        (alist-get 'outer-border-width eldoc-box-frame-parameters) 0
-        (alist-get 'internal-border-width eldoc-box-frame-parameters) 0
-        (alist-get 'vertical-border eldoc-box-frame-parameters) 0
-        (alist-get 'border-width eldoc-box-frame-parameters) 0)
+        (alist-get 'internal-border-width eldoc-box-frame-parameters) 2)
 
-  (defun ii/eldoc-box-toggle (&rest args)
-    (if meow-insert-mode
-        (eldoc-box-hover-mode 1)
-      (eldoc-box-hover-mode -1)))
+  (defun ii/eldoc-box-toggle (arg)
+    "Toggle what position function `eldoc-box' is using."
+    (interactive "p")
+    (message "prefix is %S" arg)
+    (cond ((eq (prefix-numeric-value arg) 1) (eldoc-box-hover-mode (if (bound-and-true-p eldoc-box-hover-mode) -1 1)))
+          (t
+           (when eldoc-box-hover-mode
+             (setq eldoc-box-position-function
+                   (if (eq eldoc-box-position-function 'eldoc-box--default-at-point-position-function)
+                       'eldoc-box--default-upper-corner-position-function
+                     'eldoc-box--default-at-point-position-function))))))
   :bind*
-  (("C-c te" . eldoc-box-hover-mode)
+  (("C-c te" . ii/eldoc-box-toggle)
    ("C-c ck" . eldoc-box-help-at-point))
   :hook
   ;; (meow-switch-state-hook . ii/eldoc-box-toggle)
@@ -2179,6 +2235,37 @@ targets."
   :init
   (setq xref-prompt-for-identifier nil
         xref-search-program 'ripgrep)
+
+  ;; Makes any xref buffer "exportable" to a grep buffer with "E" so you can edit it with "e".
+  (defun ii/xref-to-grep-compilation ()
+    "Export the current Xref results to a grep-like buffer (Emacs 30+)."
+    (interactive)
+    (unless (derived-mode-p 'xref--xref-buffer-mode)
+      (user-error "Not in an Xref buffer"))
+    (let* ((items (and (boundp 'xref--fetcher)
+                       (funcall xref--fetcher)))
+           (buf-name "*xref→grep*")
+           (grep-buf (get-buffer-create buf-name)))
+      (unless items
+        (user-error "No xref items found"))
+
+      (with-current-buffer grep-buf
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (insert (format "-*- mode: grep; default-directory: %S -*-\n\n"
+                          default-directory))
+          (dolist (item items)
+            (let* ((loc (xref-item-location item))
+                   (file (xref-file-location-file loc))
+                   (line (xref-file-location-line loc))
+                   (summary (xref-item-summary item)))
+              (insert (format "%s:%d:%s\n" file line summary)))))
+        (grep-mode))
+      (pop-to-buffer grep-buf)))
+
+  (with-eval-after-load 'xref
+    (define-key xref--xref-buffer-mode-map (kbd "E") #'ii/xref-to-grep-compilation))
+
   :bind*
   (("C-c jr" . xref-find-references)
    ("C-c jd" . xref-find-definitions)
@@ -2219,9 +2306,7 @@ targets."
    ("C-f" . helpful-callable)
    ("C-k" . helpful-key)
    ("C-o" . helpful-symbol)
-   ("C-!" . helpful-macro))
-  :hook
-  (helpful-mode-hook . rainbow-delimiters-mode))
+   ("C-!" . helpful-macro)))
 
 (use-package help
   :straight nil
@@ -2232,7 +2317,7 @@ targets."
   :config
   (bind-keys*
    :map help-mode-map
-   ("x?" . +lookup/documentation))
+   ("?" . +lookup/documentation))
   :bind
   ( :map help-map
     ("b" . describe-bindings)
@@ -2249,12 +2334,13 @@ targets."
 
 ;;;; Formatting
 (setopt editorconfig-exclude-modes '(lisp-interaction-mode))
-(add-hook 'after-init-hook 'editorconfig-mode)
+
+(ii/eval-on-first-hook find-file-hook "editorconfig" t (editorconfig-mode 1))
 
 (use-package apheleia
-  :defer 5
-  :hook
-  (after-init-hook . apheleia-global-mode))
+  :defer t
+  :init
+  (ii/eval-on-first-hook find-file-hook "apheleia" t (apheleia-global-mode 1)))
 
 (use-package align
   :straight nil
@@ -2274,7 +2360,7 @@ targets."
    ("C-?" . vundo-forward)))
 
 (setq show-paren-style 'parenthesis
-      show-paren-delay 0.01
+      show-paren-delay 0.05
       show-paren-context-when-offscreen t
       show-paren-when-point-inside-paren t
       show-paren-when-point-in-periphery t)
@@ -2286,8 +2372,8 @@ targets."
                           :host github
                           :repo "JasZhe/window-stool")
   :init
-  (setopt window-stool-n-from-top 3
-          window-stool-n-from-bottom 1)
+  (setopt window-stool-n-from-top 1
+          window-stool-n-from-bottom 2)
 
   (defmacro ii/window-stool--with-clear-buffer (buffer &rest body)
     "Evaluate BODY in BUFFER without `window-stool' overlay being present."
@@ -2297,8 +2383,26 @@ targets."
        (when ov (delete-overlay ov))
        ,@body
        (window-stool-single-overlay window (window-start window))))
+  ;; dont do window stool overlays while in inner buffers.
+  (with-eval-after-load 'polymode
+    (advice-add 'window-stool-mode :around #'polymode-inhibit-in-indirect-buffers))
 
   :hook
+  (minibuffer-setup-hook . (lambda ()
+                             (walk-windows
+                              (lambda (window)
+                                (with-current-buffer (window-buffer window)
+                                  (if (bound-and-true-p window-stool-mode)
+                                      (window-stool-mode -1))))
+                              'none)))
+  (minibuffer-exit-hook . (lambda ()
+                            (walk-windows
+                             (lambda (window)
+                               (with-current-buffer (window-buffer window)
+                                 (when (and (not (bound-and-true-p window-stool-mode))
+                                            (derived-mode-p '(prog-mode)))
+                                   (window-stool-mode 1)
+                                   (window-stool-single-overlay window (window-start))))))))
   (prog-mode-hook . window-stool-mode)
   (meow-view-mode-hook . (lambda ()
                            (if (and meow-view-mode
@@ -2330,10 +2434,14 @@ targets."
     (flyspell-goto-next-error (not next)))
 
   (defun ii/flyspell-mode-deferred ()
-    (ii/when-idle! 5.0 (flyspell-mode 1)))
+    (let ((buf (buffer-file-name)))
+      (ii/when-idle! 5.0 (with-current-buffer buf
+                           (flyspell-mode 1)))))
 
   (defun ii/flyspell-prog-mode-deferred ()
-    (ii/when-idle! 5.0 (flyspell-prog-mode)))
+    (let ((buf (buffer-file-name)))
+      (ii/when-idle! 5.0 (with-current-buffer buf
+                           (flyspell-prog-mode)))))
 
   :bind*
   ( :map goto-map
@@ -2342,7 +2450,6 @@ targets."
     :repeat-map meow-error-repeat-map
     ("," . flyspell-goto-next-error)))
 
-(add-hook 'prog-mode-hook 'ii/flyspell-prog-mode-deferred)
 (add-hook 'org-mode-hook 'ii/flyspell-mode-deferred)
 (add-hook 'markdown-mode-hook 'ii/flyspell-mode-deferred)
 (add-hook 'prog-mode-hook 'flymake-mode)
@@ -2355,7 +2462,7 @@ targets."
   (setq flymake-show-diagnostics-at-end-of-line nil
         flymake-start-on-flymake-mode nil
         flymake-suppress-zero-counters nil
-        flymake-no-changes-timeout 0.2
+        flymake-no-changes-timeout 1.0
         flymake-indicator-type 'margins
         flymake-fringe-indicator-position nil
         flymake-margin-indicator-position 'right-margin
@@ -2367,6 +2474,11 @@ targets."
                                            flymake-mode-line-warning-counter
                                            flymake-mode-line-note-counter
                                            ")"))
+
+  (with-eval-after-load 'polymode
+    (advice-add 'flymake-mode :around #'polymode-inhibit-in-indirect-buffers))
+
+
   (defun ii/flymake-next-note (arg)
     (interactive) "p"
     (flymake-goto-next-error arg '(:note) t))
@@ -2412,7 +2524,6 @@ targets."
                   ('fancy nil)
                   (_ 'short)))
     (when (bound-and-true-p flymake-mode)
-      (flymake-start '(on-display))
       (flymake--update-eol-overlays)
       (flymake--update-diagnostics-listings (current-buffer))))
 
@@ -2440,51 +2551,36 @@ targets."
   :straight '(flymake-jsts :type git :host github :repo "orzechowskid/flymake-jsts" :branch "main"))
 
 ;;;; Snippets
-(use-package yasnippet
+(use-package tempel
   :init
-  ;; lazuly load yasnippets on idle
-  (ii/when-idle! 3.0 (require 'yasnippet))
+  (defmacro ii/tempel-mode-templates! (mode &rest templates)
+    (declare (indent defun))
+    (let ((var (intern (concat (symbol-name mode) "-templates"))))
+      `(progn
+         (when  (not (boundp ',var)) ;; make sure to not override existing templates
+           (defvar ,var nil
+             ,(format "Templates for %s." (symbol-name mode))))
+         ;; (setq ,var ',templates)
+         (setq ,var (append ',templates ,var))
+         (add-hook ',(intern (concat (symbol-name mode) "-hook"))
+                   (lambda ()
+                     (add-hook 'tempel-template-sources ',var nil t))))))
 
-  (setq doom-snippets-enable-short-helpers t
-        yas-snippet-dirs (list (file-name-concat user-emacs-directory "straight" straight-build-dir "doom-snippets")
-                               (file-name-concat user-emacs-directory "snippets")
-                               (file-name-concat user-emacs-directory "straight" straight-build-dir "yasnippet-snippets/snippets")))
-  :bind*
-  (("C-TAB" . yasnippet-capf)
-   ("C-<tab>" . yasnippet-capf)
-   ("C-c is" . yas-insert-snippet))
-  :hook
-  ((emacs-lisp-mode-hook prog-mode-hook org-mode markdown-mode) . yas-minor-mode))
+  (ii/tempel-mode-templates! emacs-lisp-mode
+    (lambda "(lambda (" p ")" n> r> ")")
+    (defv "(defvar " p "\n  \"" p "\")")
+    (def "(defun " p " (" p ")\n  \"" p "\"" n> r> ")"))
 
-(use-package doom-snippets
-  :straight (doom-snippets :type git
-                           :host github
-                           :repo "doomemacs/snippets"
-                           :files ("*.el" "*"))
-  :init
-  (setq doom-snippets-enable-short-helpers t))
-
-(use-package yasnippet-snippets
-  :init
-  (with-eval-after-load 'yasnippet
-    (yasnippet-snippets-initialize)))
-
-(use-package indent
-  :straight nil
-  :init
-
-  (defvar ii/smart-tab-skip-chars '(?\( ?\) ?{ ?} ?\[ ?\] ?\" ?\" ?\' ?\' ?\`)
-    "Chars to skip instead of trying to indent.")
-
-  (defun ii/smart-tab (arg)
-    (interactive "P")
-    (let ((char (char-after)))
-      (cond ((memq char ii/smart-tab-skip-chars)
-             (forward-char arg))
-            (t
-             (funcall-interactively 'indent-for-tab-command arg)))))
   :bind
-  ([remap indent-for-tab-command] . ii/smart-tab))
+  (("C-/ C-/" . tempel-expand)
+   ("C-/ C-;" . tempel-complete)
+   ("C-c is" . tempel-insert)
+   :map tempel-map
+   ("TAB" . tempel-next)
+   ("<tab>" . tempel-next)
+   ("<backtab>" . tempel-previous)))
+
+(use-package tempel-collection)
 
 ;;;; Compiling, running and debugging cod
 
@@ -2521,20 +2617,20 @@ targets."
 (use-package comint
   :straight nil
   :init
-  (setopt comint-eol-on-send t
-          comint-prompt-read-only t)
+  (setq comint-eol-on-send t
+        comint-prompt-read-only t)
   :bind*
   (("C-c rc" . comint-run)))
 
 (use-package compile
   :straight nil
   :init
-  (setopt compilation-scroll-output t
-          compilation-auto-jump-to-first-error nil
-          compilation-max-output-line-length 500
-          compilation-search-all-directories t
-          compilation-context-lines t
-          compilation-skip-threshold 0)
+  (setq compilation-scroll-output t
+        compilation-auto-jump-to-first-error nil
+        compilation-max-output-line-length 500
+        compilation-search-all-directories t
+        compilation-context-lines t
+        compilation-skip-threshold 0)
 
 
   (defmacro ii/compile-register-build-file (name &rest args)
@@ -2563,8 +2659,8 @@ targets."
 (use-package fancy-compilation
   :commands (fancy-compilation-mode)
   :after (compile)
-  :config
-  (fancy-compilation-mode 1))
+  :hook
+  (after-init-hook . fancy-compilation-mode))
 
 (use-package shx
   :bind*
@@ -2581,14 +2677,19 @@ targets."
   (kill-emacs-hook . dape-breakpoint-save))
 
 (use-package cape
+  :bind
+  (("C-/ C-f" . cape-file)
+   ("C-/ /" . cape-dabbrev))
   :hook
   (completion-at-point-functions . cape-file))
 
 (use-package corfu
+  :autoload
+  (corfu--on)
   :init
   (setq corfu-cycle t
         corfu-echo-delay nil
-        corfu-auto-delay 0.1
+        corfu-auto-delay 0.05
         corfu-echo-mode nil
         corfu-preselect 'prompt
         corfu-preview-current nil
@@ -2605,13 +2706,26 @@ targets."
         corfu-on-exact-match 'insert
         global-corfu-test-minibuffer nil)
 
+  ;; setup corfu first time something asks
+  (ii/eval-on-first-execution completion-at-point
+    "corfu"
+    :before
+    (not (minibufferp))
+    (global-corfu-mode 1))
+
   :config
+  (with-eval-after-load 'corfu-popupinfo
+    (bind-keys*
+     :map corfu-popupinfo-map
+     ("C-M-v" . corfu-popupinfo-scroll-up)
+     ("C-M-u" . corfu-popupinfo-scroll-down)))
 
   (defun ii/corfu-toggle-auto ()
     (interactive)
     (when (bound-and-true-p corfu-mode)
-      (+toggle-var! corfu-auto)
-      (+toggle-var! corfu-preview-current t 'insert)
+      (message "Toggle auto completion.")
+      (setq-local corfu-auto (not corfu-auto))
+      (corfu-mode -1)
       (corfu-mode 1)))
 
   (setopt corfu--frame-parameters '((no-accept-focus . t)
@@ -2688,19 +2802,13 @@ targets."
 
   (add-to-list 'corfu-margin-formatters 'ii/corfu-margin-formatter)
   :hook
-  (after-init-hook . global-corfu-mode)
   (global-corfu-mode-hook . corfu-popupinfo-mode)
   :bind
   ( :map corfu-map
-    ("SPC" . corfu-insert-separator)
-    ("<space>" . corfu-insert-separator))
-
+    ("M-," . corfu-insert-separator))
   :bind*
   (("C-TAB" . corfu-complete)
    ("C-c ta" . ii/corfu-toggle-auto)
-   ;; :map corfu-popupinfo-map
-   ;; ("C-M-v" . corfu-popupinfo-scroll-up)
-   ;; ("C-M-u" . corfu-popupinfo-scroll-down)
    :map corfu-map
    ("M-h" . corfu-popupinfo-documentation)
    ("M-g" . corfu-info-location)
@@ -2708,9 +2816,8 @@ targets."
    ([tab] . corfu-next)
    ("<tab>" . corfu-next)
    ("TAB" . corfu-next)
-   ([backtab] . corfu-previous)
-   ("<backtab>" . corfu-previous)
-   ("S-TAB" . corfu-previous)))
+   ("C-TAB" . corfu-previous)
+   ("C-<tab>" . corfu-previous)))
 
 (use-package corfu-terminal
   :straight (corfu-terminal :type git
@@ -2722,6 +2829,7 @@ targets."
   (global-corfu-mode-hook . corfu-terminal-mode))
 
 (use-package lspce
+  :if (eq system-type 'gnu/linux)
   :straight `(lspce :type git
                     :host github
                     :repo "zbelial/lspce"
@@ -2800,9 +2908,10 @@ targets."
   (setq sideline-backends-left-skip-current-line t
         sideline-backends-right-skip-current-line t
         sideline-order-left 'down
+        sideline-delay 0.5
         sideline-order-right 'up
         sideline-format-left "%s   "
-        sideline-format-right "   %s"
+        sideline-format-right "%s"
         sideline-priority 100
         sideline-display-backend-name t
         sideline-backends-right nil)
@@ -2821,6 +2930,8 @@ targets."
 ;;;; Eglot
 (use-package eglot
   :init
+
+  (add-to-list 'ii/load-on-focus-loss-list 'eglot)
   (defun ii/eglot--setup (&rest _args)
     (when eglot-inlay-hints-mode
       (eglot-inlay-hints-mode -1))
@@ -2832,7 +2943,7 @@ targets."
           eglot-ignored-server-capabilities
           `(;; :hoverProvider
             ;; :completionProvider
-            ;; :signatureHelpProvider
+            ;; :signaturehelpprovider
             ;; :definitionProvider
             ;; :typeDefinitionProvider
             ;; :implementationProvider
@@ -2840,8 +2951,8 @@ targets."
             ;; :referencesProvider
             :documentHighlightProvider
             ;; :documentSymbolProvider
-            :workspaceSymbolProvider
-            :codeActionProvider
+            ;; :workspaceSymbolProvider
+            ;; :codeActionProvider
             :codeLensProvider
             :documentFormattingProvider
             :documentRangeFormattingProvider
@@ -2851,11 +2962,12 @@ targets."
             :colorProvider
             :foldingRangeProvider
             :executeCommandProvider
-            ;; :inlayHintProvider
+            :inlayHintProvider
             :semanticTokensProvider
-            :typeHierarchyProvider
-            :callHierarchyProvider
-            :diagnosticProvider))
+            ;; :typeHierarchyProvider
+            ;; :callHierarchyProvider
+            ;;:diagnosticProvider
+            ))
   :config
   (setopt eglot-code-action-indications '(eldoc-hint))
 
@@ -2863,7 +2975,9 @@ targets."
     (interactive)
     (let ((case-fold-search nil))
       (command-execute 'eglot-rename )))
+
   (add-to-list 'eglot-server-programs '(haskell-ts-mode "haskell-language-server-wrapper" "--lsp"))
+  (add-to-list 'eglot-server-programs '(python-ts-mode "rass" "python"))
   :bind*
   ( :map eglot-mode-map
     ("M-g R" . ii/eglot-rename)
@@ -2876,8 +2990,9 @@ targets."
 
 (use-package lsp-mode
   :init
+  ;; (add-to-list 'ii/load-on-focus-loss-list 'lsp-mode)
   (setq lsp-keymap-prefix "C-c c"
-        lsp-auto-configure nil
+        lsp-auto-configure t
         lsp-enable-suggest-server-download nil
         lsp-enable-symbol-highlighting nil
         lsp-enable-imenu t
@@ -2904,31 +3019,37 @@ targets."
 
 (use-package lsp-pyright
   :custom (lsp-pyright-langserver-command "basedpyright")
-  :after (lsp-mode)
   :init
+  (with-eval-after-load 'lsp-mode
+    (require 'lsp-pyright))
   (setq lsp-pyright-basedpyright-inlay-hints-generic-types t))
 
 (use-package lsp-haskell
-  :after (lsp-mode))
+  :init
+  (with-eval-after-load 'lsp-mode
+    (require 'lsp-haskell)))
 
 (use-package ccls
-  :after (lsp))
+  :init
+  (with-eval-after-load 'lsp-mode
+    (require 'ccls)))
 
 ;;; Indent indicators
 (use-package whitespace
   :straight nil
   :init
-  (setq whitespace-global-modes '(not image-mode nov-mode pdf-view-mode markdown-mode gfm-mode org-mode latex-mode dired-mode csv-mode nxml-mode ess-mode diff-mode wdired-mode magit-mode magit-diff-mode)
+  (setq whitespace-global-modes '(not fundamental-mode special-mode image-mode nov-mode pdf-view-mode archive-mode markdown-mode gfm-mode org-mode latex-mode dired-mode csv-mode nxml-mode ess-mode diff-mode wdired-mode magit-mode magit-diff-mode)
         whitespace-display-mappings '((space-mark 32 [183] [46])
                                       (space-mark 160 [164] [95])
                                       (newline-mark 10 [36 10])
                                       (tab-mark 9 [187 9] [92 9]))
-        whitespace-style '(face tab-mark spaces page-delimiters trailing space-after-tab newline indentation))
+        whitespace-style '(face tab-mark space-mark spaces page-delimiters trailing space-after-tab newline indentation)
+        whitespace-line-column nil)
   :bind*
   ("C-c tS" . whitespace-toggle-options)
   :hook
-  (before-save-hook . whitespace-cleanup)
-  (after-init-hook . global-whitespace-mode))
+  (after-init-hook . global-whitespace-mode)
+  (before-save-hook . whitespace-cleanup))
 
 (use-package outline
   :straight nil
@@ -2939,7 +3060,7 @@ targets."
           outline-minor-mode-highlight nil
           outline-blank-line t)
 
-  (defvar ii/outline-minor-mode-ellipsis " ...v "
+  (defvar ii/outline-minor-mode-ellipsis "  "
     "String used for hidden outline entries.")
 
   (defun ii/outline-minor-mode--set-elipsis (ellipsis)
@@ -2969,14 +3090,20 @@ targets."
     ("TAB" . outline-cycle)))
 
 (use-package indent-bars
+  :disabled
   :straight (indent-bars :type git
                          :host github
                          :repo "jdtsmith/indent-bars")
   :commands
   indent-bars-mode
   :init
+
+  (with-eval-after-load 'polymode
+    (advice-add 'indent-bars-mode :around #'polymode-inhibit-in-indirect-buffers))
+
   (setq indent-bars-color '(highlight :face-bg t :blend 0.5)
         indent-bars-starting-column 0
+        indent-bars-treesit-support t
         indent-bars-display-on-blank-lines t
         indent-bars-pattern "."
         indent-bars-no-descend-lists t
@@ -2985,9 +3112,14 @@ targets."
         indent-bars-prefer-character t)
 
   (defvar ii/indent-bars-exclude-modes '(emacs-lisp-mode
+                                         lisp-data-mode
                                          lisp-interaction-mode
                                          clojure-mode
                                          lisp-mode
+                                         html-ts-mode
+                                         html-mode
+                                         mhtml-mode
+                                         mhtml-ts-mode
                                          python-ts-mode
                                          python-mode
                                          common-lisp-mode
@@ -2996,11 +3128,12 @@ targets."
     "TODO")
   (defun ii/indent-bars--maybe-turn-on ()
     (when (not (memq major-mode ii/indent-bars-exclude-modes))
-      (indent-bars-mode)))
+      (whitespace-toggle-options '(space-mark))
+      (indent-bars-mode 1)))
   (add-hook 'prog-mode-hook 'ii/indent-bars--maybe-turn-on))
 
 (use-package project
-  :config
+  :init
   (defun ii/project--root-finder (dir)
     "Integrate .git project roots."
     (let ((dotgit (and (setq gitdir (locate-dominating-file dir ".git"))
@@ -3026,22 +3159,23 @@ targets."
   (setopt project-buffers-viewer 'ii/project-list-buffers-consult
           project-compilation-buffer-name-function 'project-prefixed-buffer-name
           project-vc-extra-root-markers '("package.json" "cargo.toml" ".+\.cabal"))
-
-  (add-to-list 'project-switch-commands '(project-dired "Open root dir"))
-  (add-to-list 'project-switch-commands '(ii/project-magit-status "Magit status" ?m))
-  (add-to-list 'project-switch-commands '(affe-find "Fuzzy Find file" ?F))
-  (add-to-list 'project-switch-commands '(eat-project "Eat" ?E))
-  (add-to-list 'project-switch-commands '(affe-grep "Fuzzy find rx" ?/)))
+  (with-eval-after-load 'project
+    (add-to-list 'project-switch-commands '(project-dired "Open root dir"))
+    (add-to-list 'project-switch-commands '(ii/project-magit-status "Magit status" ?m))
+    (add-to-list 'project-switch-commands '(affe-find "Fuzzy Find file" ?F))
+    (add-to-list 'project-switch-commands '(eat-project "Eat" ?E))
+    (add-to-list 'project-switch-commands '(affe-grep "Fuzzy find rx" ?/))))
 
 (use-package envrc
+  :defer 4
   :bind*
   ( :map envrc-mode-map
     ("C-c rr" . envrc-reload)
     ("C-c ra" . envrc-allow)
     ("C-c rl" . envrc-show-log)
     ("C-c r." . envrc-reload-all))
-  :hook
-  (after-init-hook . envrc-global-mode))
+  :config
+  (envrc-global-mode 1))
 
 (use-package docker
   :bind*
@@ -3058,7 +3192,9 @@ targets."
 ;; Version Control
 (setopt vc-make-backup-files nil
         vc-display-status t
+        vc-follow-symlinks t
         diff-font-lock-syntax t
+        custom-magic-show nil
         diff-refine 'navigation
         diff-refine-nonmodified t
         diff-font-lock-prettify t
@@ -3086,7 +3222,8 @@ targets."
   :preface
   (setq magit-auto-revert-mode nil)
   :init
-  (ii/when-idle! 7.0 (require 'magit))
+  ;; load on next idle period
+  (add-to-list 'ii/load-on-focus-loss-list 'magit)
   (setq forge-add-default-bindings t
         magit-git-executable (+os/per-system! :wsl "git"
                                               :linux "git"
@@ -3120,10 +3257,14 @@ targets."
                                        (unknown . "?")
                                        (ignored . "i"))
         diff-hl-reference-revision nil)
+
+  (ii/eval-on-first-hook find-file-hook "diff-hl" t (global-diff-hl-mode 1))
+  :bind
+  (("M-g \]g" . diff-hl-next-hunk)
+   ("M-g \[g" . diff-hl-previous-hunk))
   :hook
   (dired-mode-hook . diff-hl-dired-mode)
-  (global-diff-hl-mode-hook . diff-hl-margin-mode)
-  (after-init-hook . global-diff-hl-mode))
+  (global-diff-hl-mode-hook . diff-hl-margin-mode))
 
 ;; Terminal Emulation
 
@@ -3144,15 +3285,19 @@ targets."
    ("V" . ii/project-vterm)))
 
 (use-package eat
-  :config
-  (setopt eat-shell (+os/per-system! :linux "zsh" :win "bash")
-          eat-enable-blinking-text nil
-          eat-term-scrollback-size (* 1000 1000)
-          eat-enable-shell-prompt-annotation nil
-          eat-minimum-latency 0.005)
+  :init
+  (setq eat-shell (+os/per-system! :linux "zsh" :win "bash")
+        eat-enable-blinking-text nil
+        eat-term-scrollback-size (* 1000 1000)
+        eat-enable-shell-prompt-annotation nil
+        eat-minimum-latency 0.002)
   ;;; eat sets the terminfo directory to the straight build path, which contains only source and emacs Info files. This points it to the actual repo.
   (setq eat-term-terminfo-directory (expand-file-name "straight/repos/eat/terminfo" user-emacs-directory))
-  (eat-eshell-mode 1)
+  (add-hook 'eat-mode-hook (lambda ()
+                             (setq-local process-adaptive-read-buffering t)))
+  (ii/eval-on-first-hook eat-mode-hook "eat-eshell-mode" t (eat-eshell-mode 1))
+  ()
+
   :bind*
   (("C-c oe" . eat)
    :map project-prefix-map
@@ -3171,21 +3316,24 @@ targets."
         auto-revert-use-notify nil
         auto-revert-stop-on-user-input nil
         revert-without-query (list "."))
-  :config
   ;; taken from doom emacs
   ;; https://github.com/doomemacs/doomemacs/blob/57818a6da90fbef39ff80d62fab2cd319496c3b9/lisp/doom-editor.el#L243
   (defun ii/auto-revert-buffer (&optional _)
     "Auto revert current buffer if necessary."
-    (unless (or auto-revert-mode
+    (require 'autorevert)
+    (unless (or (bound-and-true-p auto-revert-mode)
                 (active-minibuffer-window)
                 (and buffer-file-name
                      auto-revert-remote-files
                      (file-remote-p buffer-file-name nil t)))
       (let ((auto-revert-mode t))
         (auto-revert-handler))))
-
+  (defun ii/auto-revert-setup ()
+    (add-hook 'window-selection-change-functions #'ii/auto-revert-buffer)
+    (add-hook 'window-buffer-change-functions #'ii/auto-revert-buffer)
+    (remove-hook 'after-init-hook #'ii/auto-revert-setup))
   :hook
-  ((window-selection-change-functions window-buffer-change-functions) . ii/auto-revert-buffer))
+  (after-init-hook . ii/auto-revert-setup))
 
 (use-package ibuffer
   :straight nil
@@ -3224,6 +3372,8 @@ targets."
                     (name . "^\\*Help\\*$")
                     (name . "^\\*info\\*$")
                     (name . "^\\*helpful"))))))
+
+
   :config
   (if (< emacs-major-version 31)
       ;; redefine ibuffer size column to display human readable sizes
@@ -3297,22 +3447,24 @@ targets."
    :map ibuffer-mode-map
    ("/^" . ibuffer-pop-filter)))
 
+(use-package ibuffer-vc)
+
 (with-eval-after-load 'recentf
   (add-to-list 'recentf-exclude ".*[0-9a-z]+\.\\(png\\|jpg\\|jpeg\\|webp\\|svg\\|gif\\)")
   (add-to-list 'recentf-exclude ".*\.priv/.*"))
 
-(recentf-mode 1)
-
 (use-package files
   :straight nil
-  :config
+  :init
   (setq find-sibling-rules
         `(("[^/]\.c" "\\\\1.h")))
   :bind*
   ("C-c br" . revert-buffer)
+  ("C-c fa" . find-alternate-file)
   ("C-c fs" . find-sibling-file))
 
 (use-package files-x
+  :defer t
   :straight nil
   :bind*
   (("C-c ilp" . modify-file-local-variable-prop-line)
@@ -3320,9 +3472,9 @@ targets."
 
 (use-package dired
   :straight nil
+  :defer t
   :init
-  (setq dired-dwim-target t
-        dired-listing-switches "-alh --group-directories-first"
+  (setq dired-listing-switches "-alh --group-directories-first"
         dired-recursive-copies 'always
         dired-recursive-deletes 'top
         dired-kill-when-opening-new-dired-buffer nil
@@ -3334,7 +3486,8 @@ targets."
         dired-clean-confirm-killing-deleted-buffers nil)
   :bind*
   (("M-g M-d" . dired-at-point)
-   ("C-c d ")
+   ("C-c d ." . dired-at-point)
+   ("C-c d d" . dired-jump)
    :map dired-mode-map
    ("e" . wdired-change-to-wdired-mode)
    ("-" . dired-up-directory)))
@@ -3343,21 +3496,7 @@ targets."
   :straight nil
   :init
   (setq wdired-allow-to-change-permissions t
-        wdired-use-dired-vertical-movement 'sometimes)
-  :config
-
-  (defun ii/wdired-new-file ()
-    "Create new file entry"
-    (interactive)
-    (when (boundp 'wdired--old-content)
-      comment-
-      (message "old content: %S" (take 10 wdired--old-content)))
-    (goto-char (line-end-position))
-    (let ((inhibit-read-only t))
-      (newline)))
-
-  (defun ii/wdired-new-directory ()))
-
+        wdired-use-dired-vertical-movement 'sometimes))
 
 (use-package diredfl
   :hook
@@ -3373,14 +3512,40 @@ targets."
            (extension "svg" "svgz" "gif" "jpg" "jpeg" "png" "tiff" "xbm" "xpm" "picon" "icon" "pict" "icon" "rgba" "xcf"))-
           ("markup"
            (extension "typ" "tex" "md" "org")))
-        dired-filter-verbose nil)
+        dired-filter-verbose nil
+        dired-subtree-line-prefix " >")
   :bind*
   ( :map dired-mode-map
+    ("zc" . dired-ranger-copy)
+    ("zp" . dired-ranger-paste)
+    ("zm" . dired-ranger-move)
     ("TAB" . dired-subtree-toggle)
     ("<tab>". dired-subtree-toggle))
   :hook
   (dired-mode-hook . dired-filter-mode)
   (dired-mode-hook . dired-collapse-mode))
+
+(use-package dired-sidebar
+  :init
+  (setq dired-sidebar-theme nil
+        dired-sidebar-should-follow-file nil
+        dired-sidebar-skip-subtree-parent t
+        dired-sidebar-follow-file-idle-delay 0.5
+        dired-sidebar-refresh-on-special-commands nil
+        dired-sidebar-no-delete-other-windows nil
+        dired-sidebar-pop-to-sidebar-on-toggle-open nil)
+
+  (defun ii/dired-sidebar-maybe-follow (&rest _args)
+    (when (dired-sidebar-showing-sidebar-p)
+      (dired-sidebar-follow-file)))
+
+  (with-eval-after-load 'dired-sidebar
+    (add-hook 'window-selection-change-functions #'ii/dired-sidebar-maybe-follow)
+    (add-hook 'window-buffer-change-functions #'ii/dired-sidebar-maybe-follow)
+    (add-hook 'find-file-hook #'ii/dired-sidebar-maybe-follow))
+
+  :bind
+  (("C-c tD" . dired-sidebar-toggle-sidebar)))
 
 ;;;; remote
 (setq auth-sources '("~/.authinfo" "~/.authinfo.gpg" "~/.netrc"))
@@ -3424,22 +3589,26 @@ targets."
         +org/tasks-file (substitute-in-file-name "$HOME/org/agenda/tasks.org")
         +org/journal-file (substitute-in-file-name "$HOME/org/journal.org")
         +org/metrics-file (substitute-in-file-name "$HOME/org/metrics.org")
+        +org/birthdays-file (substitute-in-file-name "$HOME/org/agenda/birthdays.org")
         org-hide-emphasis-markers 1
-        org-directory "~/org/"
+        org-directory (expand-file-name "~/org/")
         org-hide-macro-markers 1
         org-latex-packages-alist '(("" "color" t) ("" "tikz" t))
         org-confirm-babel-evaluate nil
         org-md-headline-style 'setext
         org-odt-preferred-output-format "doc"
         org-return-follows-link t
+        org-use-fast-todo-selection 'expert
         ;; agenda
+        org-agenda-restore-windows-after-quit t
         org-log-done 'time
         org-log-into-drawer t
         org-refile-targets '(("archive.org" :maxlevel . 1)
+                             ("agenda.org" :maxlevel . 1)
                              ("tasks.org" :maxlevel . 1))
         org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANCELLED(k@)")))
 
   ;;;; tags
   (setq org-tag-alist
@@ -3457,55 +3626,102 @@ targets."
 
 ;;;; capture templates
   (setq org-capture-templates
-;;;; tasks
-        `(("t" "Tasks / Projects")
-;;;; add a task
-          ("tt" "Task" entry (file+olp ,+org/tasks-file "TODOS")
-           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-;;;; add next immidiate task
-          ("tn" "Next Task" entry (file+headline +org/tasks-file "Tasks")
-           "** NEXT %? \nDEADLINE: %t")
-;;;; journal
-          ("j" "Journal Entries")
-;;;;
-          ("jj" "Journal" entry
-           (file+olp+datetree +org/journal-file)
-           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-           ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-           :clock-in :clock-resume
-           :empty-lines 1)
-          ("jm" "Meeting" entry
-           (file+olp+datetree +org/journal-file)
-           "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-           :clock-in :clock-resume
-           :empty-lines 1)
-          ("w" "Workflows")
-          ("we" "Checking Email" entry (file+olp+datetree +org/journal-file)
-           "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
-          ("m" "Metrics Capture")
-          ("mw" "Weight" table-line (file+headline +org/metrics-file "Weight")
-           "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
+        ;; tasks
+        `(;; agenda
+          ("a" "Agenda entry" entry
+           (file ,+org/agenda-file)
+           "* %^t %i"
+           :kill-buffer)
+          ;; add a birthday
+          ("b" "Birthday" entry (file ,+org/birthdays-file)
+           "* %^t %i"
+           :kill-buffer)
+          ;; add a general task
+          ("t" "General task" entry (file+olp ,+org/tasks-file "TASKS")
+           "* TODO %?\n %U\n %i"
+           :prepend
+           :kill-buffer)
 
-  (setq org-agenda-files `(,(expand-file-name "agenda/agenda.org" org-directory)
-                           ,(expand-file-name "agenda/birthdays.org" org-directory)
-                           ,(expand-file-name "agenda/habits.org" org-directory)
-                           ,(expand-file-name "agenda/tasks.org" org-directory))
+          ;; tasks related to current file
+          ("f" "File-specific task")
+          ("ft" "TODO" entry (file+olp ,+org/tasks-file "TASKS")
+           "* TODO %F: %?\n %i")
+          ("fb" "BACKLOG" entry (file+olp ,+org/tasks-file "TASKS")
+           "* BACKLOG %F: %?\n %i")
+          ("fp" "PLAN" entry (file+olp ,+org/tasks-file "TASKS")
+           "* PLAN %F: %?\n %i")
+          ("fr" "READY" entry (file+olp ,+org/tasks-file "TASKS")
+           "* READY %F: %?\n %i")
+          ("fa" "ACTIVE" entry (file+olp ,+org/tasks-file "TASKS")
+           "* ACTIVE %F: %?\n %i")
+          ("fv" "REVIEW" entry (file+olp ,+org/tasks-file "TASKS")
+           "* REVIEW %F: %?\n %i")
+          ("fw" "WAIT" entry (file+olp ,+org/tasks-file "TASKS")
+           "* WAIT %F: %?\n %i")
+          ("fh" "HOLD" entry (file+olp ,+org/tasks-file "TASKS")
+           "* HOLD %F: %?\n %i")
+          ("fc" "COMPLETED" entry (file+olp ,+org/tasks-file "TASKS")
+           "* COMPLETED %F: %?\n %i")
+          ("fk" "CANCELLED" entry (file+olp ,+org/tasks-file "TASKS")
+           "* CANCELLED %F: %?\n %i")
+
+          ;; tasks related to current project
+          ("p" "Project-specific tasks")
+          ("pt" "TODO" entry (file+olp ,+org/tasks-file "TASKS")
+           "* TODO %(project-root (project-current t)): %?\n %i")
+          ("pb" "BACKLOG" entry (file+olp ,+org/tasks-file "TASKS")
+           "* BACKLOG %(project-root (project-current t)): %?\n %i")
+          ("pp" "PLAN" entry (file+olp ,+org/tasks-file "TASKS")
+           "* PLAN %(project-root (project-current t)): %?\n %i")
+          ("pr" "READY" entry (file+olp ,+org/tasks-file "TASKS")
+           "* READY %(project-root (project-current t)): %?\n %i")
+          ("pa" "ACTIVE" entry (file+olp ,+org/tasks-file "TASKS")
+           "* ACTIVE %(project-root (project-current t)): %?\n %i")
+          ("pv" "REVIEW" entry (file+olp ,+org/tasks-file "TASKS")
+           "* REVIEW %(project-root (project-current t)): %?\n %i")
+          ("pw" "WAIT" entry (file+olp ,+org/tasks-file "TASKS")
+           "* WAIT %(project-root (project-current t)): %?\n %i")
+          ("ph" "HOLD" entry (file+olp ,+org/tasks-file "TASKS")
+           "* HOLD %(project-root (project-current t)): %?\n %i")
+          ("pc" "COMPLETED" entry (file+olp ,+org/tasks-file "TASKS")
+           "* COMPLETED %(project-root (project-current t)): %?\n %i")
+          ("pk" "CANCELLED" entry (file+olp ,+org/tasks-file "TASKS")
+           "* CANCELLED %(project-root (project-current t)): %?\n %i")
+
+          ;; journal
+          ("j" "Journal Entries")
+          ("jj" "Journal" entry
+           (file+olp+datetree ,+org/journal-file)
+           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+           :clock-in :clock-resume
+           :empty-lines 1)))
+
+  (defun ii/agenda-title (arg &rest args)
+    "custom"
+    (let ((inhibit-read-only t))
+      (insert arg)))
+
+
+  (setq org-agenda-files (list (expand-file-name "agenda/" org-directory))
         org-agenda-skip-unavailable-files t
         org-agenda-breadcrumbs-separator ">"
         org-agenda-start-with-log-mode t
         org-agenda-span 'month
         org-agenda-custom-commands
         '(("d" "Dashboard"
-           ((agenda "" ((org-deadline-warning-days 7)))
-            (todo "NEXT"
-                  ((org-agenda-overriding-header "Next Tasks")))
-            (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+           ((ii/agenda-title "DASHBOARD")
+            (agenda "" ((org-deadline-warning-days 7)))
+            (todo "NEXT" ((org-agenda-overriding-header "Next Tasks")))
+            (todo "TODO" nil)
+            (todo "ACTIVE"
+                  ((org-agenda-overriding-header "Active Projects")
+                   (org-agenda-files org-agenda-files)))
+            (todo "HOLD" ((org-agenda-overriding-header "Projects On Hold")))))
 
           ("n" "Next Tasks"
-           ((todo "NEXT"
+           ((ii/agenda-title "NEXT TASKS")
+            (todo "NEXT"
                   ((org-agenda-overriding-header "Next Tasks")))))
-
-          ("W" "Work Tasks" tags-todo "+work-email")
 
           ;; Low-effort next actions
           ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
@@ -3514,7 +3730,11 @@ targets."
             (org-agenda-files org-agenda-files)))
 
           ("w" "Workflow Status"
-           ((todo "WAIT"
+           ((ii/agenda-title "WORKFLOW STATUS")
+            (todo "HOLD"
+                  ((org-agenda-overriding-header "On Hold")
+                   (org-agenda-files org-agenda-files)))
+            (todo "WAIT"
                   ((org-agenda-overriding-header "Waiting on External")
                    (org-agenda-files org-agenda-files)))
             (todo "REVIEW"
@@ -3540,14 +3760,136 @@ targets."
             (todo "CANCELLED"
                   ((org-agenda-overriding-header "Cancelled Projects")
                    (org-agenda-files org-agenda-files)))))))
+
   :config
+
+  (defun ii/org-capture-file-task ()
+    "Capture a file task"
+    (interactive)
+    (org-capture nil "f"))
+
+  (defun ii/org-capture-project-task ()
+    "Capture a project task."
+    (interactive)
+    (org-capture nil "p"))
+
+  (defun ii/browse-agenda-files ()
+    (interactive)
+    (affe-find (expand-file-name "agenda/" org-directory)))
+
+  (defun ii/org-project-tasks (project-root)
+    (interactive (list (project-root (project-current t))))
+    (let ((org-agenda-regexp-filter-preset (list project-root))
+          (org-agenda-custom-commands
+           (list `("p" "Project status"
+                   ((ii/agenda-title (concat "PROJECT STATUS: " ,project-root))
+                    (todo "HOLD"
+                          ((org-agenda-overriding-header "On Hold")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "WAIT"
+                          ((org-agenda-overriding-header "Waiting on External")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "REVIEW"
+                          ((org-agenda-overriding-header "In Review")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "PLAN"
+                          ((org-agenda-overriding-header "In Planning")
+                           (org-agenda-todo-list-sublevels nil)
+                           (org-agenda-files org-agenda-files)))
+                    (todo "BACKLOG"
+                          ((org-agenda-overriding-header "Project Backlog")
+                           (org-agenda-todo-list-sublevels nil)
+                           (org-agenda-files org-agenda-files)))
+                    (todo "READY"
+                          ((org-agenda-overriding-header "Ready for Work")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "TODO"
+                          ((org-agenda-overriding-header "Things to do")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "ACTIVE"
+                          ((org-agenda-overriding-header "Active Projects")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "COMPLETED"
+                          ((org-agenda-overriding-header "Completed Projects")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "CANCELLED"
+                          ((org-agenda-overriding-header "Cancelled Projects")
+                           (org-agenda-files org-agenda-files))))))))
+      (org-agenda nil "p")))
+
+  (defun ii/org-file-tasks (file)
+    (interactive (list (buffer-file-name)))
+    (let ((org-agenda-regexp-filter-preset (list file))
+          (org-agenda-custom-commands
+           (list `("f" "File status"
+                   ((ii/agenda-title (concat "FILE STATUS: " ,file))
+                    (todo "HOLD"
+                          ((org-agenda-overriding-header "On Hold")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "WAIT"
+                          ((org-agenda-overriding-header "Waiting on External")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "REVIEW"
+                          ((org-agenda-overriding-header "In Review")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "PLAN"
+                          ((org-agenda-overriding-header "In Planning")
+                           (org-agenda-todo-list-sublevels nil)
+                           (org-agenda-files org-agenda-files)))
+                    (todo "BACKLOG"
+                          ((org-agenda-overriding-header "Project Backlog")
+                           (org-agenda-todo-list-sublevels nil)
+                           (org-agenda-files org-agenda-files)))
+                    (todo "READY"
+                          ((org-agenda-overriding-header "Ready for Work")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "TODO"
+                          ((org-agenda-overriding-header "Things to do")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "ACTIVE"
+                          ((org-agenda-overriding-header "Active Projects")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "COMPLETED"
+                          ((org-agenda-overriding-header "Completed Projects")
+                           (org-agenda-files org-agenda-files)))
+                    (todo "CANCELLED"
+                          ((org-agenda-overriding-header "Cancelled Projects")
+                           (org-agenda-files org-agenda-files))))))))
+      (org-agenda nil "f")))
+
+  (defun ii/org-maybe-update-agenda ()
+    "Update existing agenda views if changing todo state in agenda files."
+    (when (member default-directory org-agenda-files)
+      (when-let* ((buf (get-buffer org-agenda-buffer-name)))
+        (with-current-buffer buf
+          (org-agenda-redo-all t)))
+      (save-buffer)))
+
+  (defun ii/org-summary-todo (done not-done)
+    (let ((org-log-done org-todo-log-states))
+      (org-todo (if (= not-done 0) "DONE" "TODO")))
+    (org-save-all-org-buffers))
+
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
-  :bind*
-  (("C-c oa" . org-agenda))
+  (advice-add 'org-agenda-refile :after 'org-save-all-org-buffers)
+  ;; (advice-add 'org-agenda-todo :after 'org-save-all-org-buffers)
+
+  (add-hook 'org-after-todo-state-change-hook #'ii/org-maybe-update-agenda)
+  (add-hook 'org-after-todo-statistics-hook #'ii/org-summary-todo)
+  :bind
+  (("C-c oa" . org-agenda)
+   ("C-c oc" . org-capture)
+   ("C-c oT" . org-todo-list)
+   ("C-c ft" . ii/org-file-tasks)
+   ("C-c fA" . ii/browse-agenda-files)
+   :map project-prefix-map
+   ("t" . ii/org-project-tasks))
   :hook
   (org-mode-hook . visual-line-mode)
   (org-mode-hook . org-indent-mode)
-  (org-ode-hook . org-latex-preview-mode))
+  (org-mode-hook . org-latex-preview-mode))
+
+(use-package org-gcal)
 
 (use-package org-download)
 
@@ -3598,6 +3940,8 @@ targets."
            :target (file+head "%(+roam/template-fn--file-in-subdir \"/learning\")"
                               "#+title: %^{title}\n")
            :unnarrowed t)))
+
+
   :hook
   (org-roam-mode-hook . +org-roam-mode--setup)
   :bind*
@@ -3666,8 +4010,7 @@ targets."
   :functions
   (calibredb-candidates)
   :bind*
-  (("C-c oc" . calibredb)
-   ("C-c oC" . calibredb-consult-read)))
+  (("C-c oC" . calibredb)))
 
 (use-package annotate
   :hook
@@ -3675,19 +4018,45 @@ targets."
 
 (use-package org-noter
   :custom
-  (org-noter-default-notes-file-names '("booknotes.org" "notes.org"))
-  (org-noter-notes-search-path '("~/org/booknotes"))
+  (org-noter-default-notes-file-names nil)
+  (org-noter-notes-search-path `(,(substitute-in-file-name "~/org/roam/booknotes/")))
   (org-noter-default-heading-title  "page $p$")
   (org-noter-auto-save-last-location t)
   (org-noter-kill-frame-at-session-end nil)
   (org-noter-always-create-frame nil)
   (org-noter-insert-selected-text-inside-note t)
+  :init
+
+  (defun ii/org-noter-read-book ()
+    (let ((cands (calibredb-candidates)))
+      (calibredb-get-file-path (consult--read cands
+                                              :prompt "Pick a book"
+                                              :lookup #'consult--lookup-cdr
+                                              :sort nil))))
+
+  (defun ii/org-noter-init-from-org ()
+    (if-let* ((doc-file (ii/org-noter-read-book)))
+        (progn
+          (message "doc file is %s" doc-file)
+          (org-set-property org-noter-property-doc-file doc-file)
+          (org-noter nil))
+      (user-error "Couldn't initialize org-noter session")))
+
+  (defun ii/org-noter-start-session ()
+    (interactive)
+    (cond ((eq major-mode 'org-mode) (ii/org-noter-init-from-org))
+          ((member major-mode '(pdf-view-mode djvu-mode nov-mode doc-view-mode))
+           (org-noter))
+          (t (user-error "This command can be used only in `org-mode', `pdf-view-mode', `nov-mode', `djvu-mode', `doc-view-mode'"))))
   :bind*
-  ( :map pdf-view-mode-map
+  ( :map org-mode-map
+    ("C-c nn" . ii/org-noter-start-session)
+    :map pdf-view-mode-map
     ("C-c nn" . org-noter)
     :map nov-mode-map
     ("C-c nn" . org-noter)
-    :map djvu-mode-
+    :map djvu-read-mode-map
+    ("C-c nn" . org-noter)
     :map org-noter-doc-mode-map
     ("i" . org-noter-insert-note)
     ("i" . org-noter-insert-precise-note)
@@ -3804,31 +4173,6 @@ targets."
                  :type git
                  :repo "lizqwerscott/mcp.el"))
 
-(use-package aidermacs
-  :straight (aidermacs :type git
-                       :host github
-                       :branch "main"
-                       :repo "MatthewZMD/aidermacs")
-  :init
-  (setopt aidermacs-default-model "openrouter/mistralai/mistral-7b-instruct:free"
-          aidermacs-editor-model "openrouter/mistralai/mistral-7b-instruct:free"
-          aidermacs-weak-model "openrouter/mistralai/mistral-7b-instruct:free"
-          aidermacs-vterm-use-theme-colors t
-          aidermacs-backend 'comint
-          aidermacs-default-chat-mode 'architect)
-  :config
-  (ii/preload-api-keys!
-   ("openrouter.ai" "OPENROUTER_API_KEY")
-   ("api.deepseek.com" "DEEPSEEK_API_KEY"))
-
-  (add-to-list 'display-buffer-alist '((derived-mode . aidermacs-comint-mode)
-                                       (display-buffer-use-some-window)))
-  (aidermacs-setup-minor-mode)
-  :custom
-  (aidermacs-use-architect-mode t)
-  :bind*
-  (("C-c aa" . aidermacs-transient-menu)))
-
 (use-package gptel
   :config
   (setq gptel-model 'kwaipilot/kat-coder-pro:free
@@ -3848,6 +4192,8 @@ targets."
         gptel-backend ii/gptel-deepseek)
   :hook
   (gptel-mode-hook . visual-line-mode)
+  (gptel-post-stream-hook . gptel-auto-scroll)
+  (gptel-post-response-function . gptel-end-of-response)
   :bind*
   (("C-c ag" . gptel-menu)
    ("C-c a C-g" . gptel)
@@ -3856,7 +4202,8 @@ targets."
    :package embark
    ("R" . gptel-rewrite)))
 
-(use-package gptel-agent)
+(use-package gptel-agent
+  :after (gptel))
 
 (use-package chatgpt-shell)
 
@@ -3886,8 +4233,8 @@ targets."
       image-use-external-converter t
       image-auto-resize 'fit-window)
 
-(with-eval-after-load 'image
-  (bind-keys* :map image-map
+(with-eval-after-load 'image-mode
+  (bind-keys* :map image-mode-map
               ("<mouse-1>" . +utils/open-random-file-in-dir)
               ("r" . +utils/open-random-file-in-dir)))
 
@@ -3907,7 +4254,7 @@ targets."
 (add-to-list 'auto-mode-alist '("\\.cjs\\'" . json-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.jsonc*\\'" . json-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.php\\'" . php-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+(add-to-list 'auto-mode-alist '("\\(?:\\.\\(?:p\\(?:th\\|y[iw]?\\)\\)\\|/\\(?:SCons\\(?:\\(?:crip\\|truc\\)t\\)\\)\\)\\'" . python-ts-mode))
 (add-to-list 'auto-mode-alist '("\\/git-rebase-todo\\'" . conf-mode))
 
 (use-package tide
@@ -4059,6 +4406,8 @@ targets."
   :mode "\\.nix\\'")
 
 (use-package nwscript-mode
+  ;; :straight nil
+  ;; :load-path "/home/b/programming/nwscript-mode.el/"
   :straight (nwscript-mode :type git
                            :host github
                            :repo "implicit-image/nwscript-mode.el")
@@ -4067,34 +4416,54 @@ targets."
   :init
   (setopt nwscript-compiler-executable (substitute-in-file-name "$HOME/.local/bin/nwnsc.exe"))
   :config
+  ;; configure tempel templates
   ;; add base game includes
   (let ((file (substitute-in-file-name "$HOME/nwn2mods/game-includes")))
     (if (file-directory-p file)
         (add-to-list 'nwscript-include-dirs file))))
-;; :straight (nwscript-mode :type git
-;;                          :host github
-;;                          :branch "master"
-;;                          :repo "implicit-image/nwscript-mode.el"))
 
 (use-package csv-mode
   :init
-  (add-to-list 'auto-mode-alist '("\\.2da\\'" . csv-mode))
-  :config
-  (defun ii/csv-mode--setup ()
-    (cond ((string-equal (file-name-extension (buffer-file-name)) "2da")
-           (save-mark-and-excursion
-             (when (null csv-align-mode)
-               (csv-align-mode 1))
-             (goto-char (point-min))
-             ;; find row with id 0
-             (search-forward-regexp "^0 ")
-             ;; go line up to header line
-             (previous-line)
-             ;; set csv header
-             (csv-header-line t)
-             (setq-local buffer-invisibility-spec nil)))
-          (t nil)))
-  (add-hook 'csv-mode-hook 'ii/csv-mode--setup))
+  (defun 2da-previous-field (n)
+    (interactive "p")
+    (2da-next-field (- n)))
+
+  (defun 2da-next-field (n)
+    (interactive "p")
+    (dotimes (_ (abs n))
+      (2da--forward-field-1 (> n 0))))
+
+  (defun 2da--forward-field-1 (forward)
+    (cond (forward
+           (cond ((eolp) (forward-line))
+                 (t (when (thing-at-point 'symbol)
+                      (forward-symbol 1))
+                    (forward-whitespace 1))))
+          (t
+           (cond ((bolp) (forward-symbol -1))
+                 (t (when (thing-at-point 'symbol)
+                      (forward-symbol -1)))))))
+
+  (define-derived-mode 2da-mode csv-mode "2da"
+    "Major mode for editing Bioware's 2da files."
+    :interactive t
+    (when font-lock-mode (font-lock-mode -1))
+    (csv-align-mode 1)
+    (setq-local csv-separators '("\t" "")
+                csv-separator-chars '(?\t 32)
+                font-lock-keywords nil
+                csv-separator-regexp "[\t ]+"
+                csv-font-lock-keywords nil
+                csv-field-quotes nil))
+
+  (bind-keys :map 2da-mode-map
+             ("TAB" . 2da-next-field)
+             ("C-<tab>" . 2da-previous-field)
+             ("C-TAB" . 2da-previous-field))
+
+  (add-to-list 'auto-mode-alist '("\\.2da\\'" . 2da-mode))
+  :bind
+  (("C-c C-l" . csv-header-line)))
 
 (use-package crystal-mode
   :init
@@ -4120,8 +4489,12 @@ targets."
   (setq elfeed-db-directory (expand-file-name ".elfeed" user-emacs-directory)
         elfeed-enclosure-default-dir user-emacs-directory))
 
+(use-package ement)
+
+(use-package mastodon)
+
 ;; no config required
-(ii/packages! f dash ov embark-consult verb devdocs vlf yasnippet-capf realgud lsp-metals ob-sql-mode djvu forge org-contrib htmlize ox-rss org-roam-ui ement mastodon elfeed poly-markdown poly-R poly-org fsharp-mode erlang cuda-mode powershell nushell-mode xenops auctex ocaml-ts-mode dune reason-mode solidity-mode lean-mode d-mode gdscript-mode nim-mode gpr-mode idris-mode vhdl-ts-mode vhdl-ext nasm-mode masm-mode fasm-mode riscv-mode mips-mode fstar-mode sharper shader-mode sln-mode csproj-mode robe otp edts ess purescript-mode dart-mode common-lisp-snippets geiser racket-mode clj-refactor clojure-snippets cider clojure-mode groovy-mode sbt-mode pyvenv)
+(ii/packages! f dash ov embark-consult verb devdocs vlf realgud lsp-metals ob-sql-mode djvu forge org-contrib htmlize ox-rss org-roam-ui poly-markdown poly-R poly-org fsharp-mode erlang cuda-mode powershell nushell-mode xenops auctex ocaml-ts-mode dune reason-mode solidity-mode lean-mode d-mode gdscript-mode nim-mode gpr-mode idris-mode vhdl-ts-mode vhdl-ext nasm-mode masm-mode fasm-mode riscv-mode mips-mode fstar-mode sharper shader-mode sln-mode csproj-mode robe otp edts ess purescript-mode dart-mode common-lisp-snippets geiser racket-mode clj-refactor clojure-snippets cider clojure-mode groovy-mode sbt-mode pyvenv)
 
 ;; load os-specific stuff
 (+os/per-system!
@@ -4136,6 +4509,20 @@ targets."
  (prefer-coding-system 'utf-8)
  :wsl
  (add-to-list 'exec-path "/mnt/c/Program Files/Mozilla Firefox/"))
+
+(+font--setup)
+
+;;;; for profiling
+
+(when init-file-debug
+  (profiler-start 'cpu+mem)
+  (message "starting profiler at %S" (current-time-string))
+  (add-hook 'after-init-hook (lambda ()
+                               (profiler-stop)
+                               (profiler-report)
+                               (message "finishing profiling at %S" (current-time-string)))
+            99))
 ;; aliases
 
 ;;; init.el ends here;;
+

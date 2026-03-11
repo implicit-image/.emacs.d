@@ -45,6 +45,7 @@
 
 (defun +org/rg-in-roam-notes ()
   (interactive)
+  (require 'org-roam)
   (consult-ripgrep org-roam-directory ""))
 
 (defun +org-template-fn--file-in-subdir (&optional dir)

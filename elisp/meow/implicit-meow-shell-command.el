@@ -33,30 +33,33 @@
 (require 'async)
 (require 'implicit-ui)
 
-(defvar ii/meow-pending-shell-commands nil
-  "")
-
 (defun ii/meow-insert-async-shell-command (cmd)
   (interactive (list (read-shell-command "Run: ")))
-  ;; (list (car elems) (cdr elems))))
   (let* ((ov (ii/ui-make-placeholder-overlay (propertize (format "Running %s" cmd) 'face 'error)
                                              cmd
                                              "Waiting"
                                              'success
                                              #'ii/ui-placeholder-animate-elipsis
-                                             0.5))
-         (elems (string-split cmd " "))
-         (args (cdr elems)))
+                                             0.5)))
     (async-start
      (lambda ()
-       (eval `(process-lines-ignore-status cmd ,@args) (list (cons 'cmd (car elems)))))
+       (shell-command-to-string cmd))
      (lambda (result)
        (with-current-buffer (overlay-buffer ov)
          (save-mark-and-excursion
-           (message "result is %S, type is %S" result (type-of result))
+           (ii/with-no-message!
+            (message "result is %S, type is %S" result (type-of result)))
            (goto-char (overlay-start ov))
-           (delete-overlay ov)
-           (insert (string-join result "\n"))))))))
+           (ii/ui-delete-placeholder-overlay ov)
+           (ii/ui-make-confirmation-overlay result
+                                            (lambda (ov)
+                                              (message "Confirmed!")
+                                              (save-mark-and-excursion
+                                                (let ((content (overlay-get ov 'ii/ui-content)))
+                                                  (goto-char (overlay-start ov))
+                                                  (ii/ui-delete-confirmation-overlay ov)
+                                                  (insert content)))))))))))
+
 
 
 (provide 'implicit-meow-shell-command)

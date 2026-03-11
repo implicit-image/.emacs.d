@@ -40,29 +40,34 @@
   "TODO")
 
 (defun ii/vertico--restore-window-config ()
-  (when (window-configuration-p ii/vertico--window-config)
-    (set-window-configuration ii/vertico--window-config)
-    (setq ii/vertico--window-config nil))
+  (require 'pulse)
+  ;; (when (window-configuration-p ii/vertico--window-config)
+  ;;   (set-window-configuration ii/vertico--window-config)
+  ;;   (setq ii/vertico--window-config nil))
+  (with-selected-window (selected-window)
+    (pulse-momentary-highlight-region (window-start) (window-end)))
   (remove-hook 'minibuffer-exit-hook 'ii/vertico--restore-window-config))
 
-(defun ii/vertico--buffer-get-display-alist-props (wider command)
+(defun ii/vertico--buffer-get-display-alist-props (wider command last-win)
   (if (null wider)
       '(:width 1.0 :height 0.3 :side bottom)
     (let* ((width (cond ((memq command (car (alist-get 0.5 ii/vertico--buffer-width-alist nil nil 'eql))) 0.5)
                         ((memq command (car (alist-get 0.35 ii/vertico--buffer-width-alist nil nil 'eql))) 0.25)
                         (t 0.5)))
-           (side (if (or (>= (window-left-column (selected-window)) (/ (1- (frame-width)) 2))
+           (win-left (window-pixel-left last-win))
+           (frame-width (frame-width))
+           (side (if (or (>= (window-left-column last-win) (/ (1- frame-width) 2))
                          (equal width 0.25))
                      'left
                    'right)))
-      (message "width %S side %S si-minibufer %S" width side (minibufferp))
       `( :width ,width
          :height 1.0
          :side ,side))))
 
-(defun ii/vertico--get-buffer-alist (command)
+(defun ii/vertico--get-buffer-alist (command last-win)
   (let ((props (ii/vertico--buffer-get-display-alist-props (>= (frame-pixel-width) (frame-pixel-height))
-                                                           command)))
+                                                           command
+                                                           last-win)))
     `((window-width . ,(plist-get props :width))
       (inhibit-same-window . t)
       (window-height . ,(plist-get props :height))
@@ -73,12 +78,14 @@
 (defun ii/vertico--buffer-mode-display-buffer (buffer alist)
   "Display BUFFER in side window, hiding other windows but the selected one."
   (setq ii/vertico--window-config (current-window-configuration))
-  (when (not (one-window-p)) (delete-other-windows))
-  (add-hook 'minibuffer-exit-hook 'ii/vertico--restore-window-config)
-  (cond ((with-current-buffer (window-buffer (minibuffer-selected-window))
-           (eq major-mode 'vertico-buffer-mode))
-         (display-buffer-same-window buffer alist))
-        (t (display-buffer-in-side-window buffer (append (ii/vertico--get-buffer-alist this-command) alist)))))
+  (let* ((last-win (minibuffer-selected-window))
+         (new-alist (append (ii/vertico--get-buffer-alist this-command last-win) alist)))
+    (when (not (one-window-p)) (delete-other-windows))
+    (add-hook 'minibuffer-exit-hook 'ii/vertico--restore-window-config)
+    (cond ((with-current-buffer (window-buffer (minibuffer-selected-window))
+             (eq major-mode 'vertico-buffer-mode))
+           (display-buffer-same-window buffer alist))
+          (t (display-buffer-in-side-window buffer new-alist)))))
 
 (defvar ii/vertico-embark-select-overlays nil
   "TODO")

@@ -26,7 +26,7 @@
       inhibit-splash-screen t
       initial-major-mode 'fundamental-mode
       initial-scratch-message nil
-      inhibit-redisplay nil
+      inhibit-redisplay t
       ;; disable gc, we are garbage collecting on idle
       gc-cons-threshold most-positive-fixnum
       use-file-dialog nil
@@ -90,7 +90,7 @@
 (add-hook 'minibuffer-setup-hook 'my-minibuffer-setup-hook)
 
 ;; run garbage collection on idle
-(run-with-idle-timer 2.0 t 'garbage-collect)
+(run-with-idle-timer 2.5 t 'garbage-collect)
 
 ;; garbage collect on focus-out
 (advice-add 'after-focus-change-function :after 'garbage-collect)

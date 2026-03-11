@@ -1,13 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 (require 'cl-lib)
 
-(defvar-local +indent-tab-function 'indent-for-tab-command)
-
 (defvar-local +search-buffer-function 'isearch-forward)
-
-(defvar-local +lookup-definition-function 'xref-find-definitions)
-
-(defvar-local +lookup-references-function 'xref-find-references)
 
 (defvar-local +lookup-documentation-function 'eldoc-doc-buffer)
 
@@ -180,24 +174,32 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
 ;;;###autoload
 (defun +set-env-vars-from-shell (&rest vars)
   "Set all environment variables in VARS."
-  (let ((assocs (mapcar
-                 (lambda (assoc)
-                   (let* ((binding (string-split (string-trim assoc) "="))
-                          (symbol (car binding))
-                          (val (cadr binding)))
-                     (cons symbol val)))
-                 (string-split (shell-command-to-string "env") "\n")))
-        (inhibit-message t))
-    (dolist (assoc assocs)
-      (let ((var (car assoc)))
-        (if (string-equal var "PATH")
-            (mapc (lambda (path)
-                    (when init-file-debug
-                      (message path))
-                    (add-to-list 'exec-path path))
-                  (string-split (cdr assoc) ":"))
-          (when (memq var vars)
-            (setenv var (cadr assoc))))))))
+  (let ((proc (start-process "env-vars"
+                             (get-buffer-create "* env-vars*")
+                             shell-file-name
+                             "-c"
+                             "env")))
+    (set-process-sentinel proc
+                          (lambda (proc status)
+                            (with-current-buffer (process-buffer proc)
+                              (let ((assocs (mapcar
+                                             (lambda (assoc)
+                                               (let* ((binding (string-split (string-trim assoc) "="))
+                                                      (symbol (car binding))
+                                                      (val (cadr binding)))
+                                                 (cons symbol val)))
+                                             (string-split (buffer-substring-no-properties (point-min) (point-max)) "\n")))
+                                    (inhibit-message t))
+                                (dolist (assoc assocs)
+                                  (let ((var (car assoc)))
+                                    (if (string-equal var "PATH")
+                                        (mapc (lambda (path)
+                                                (when init-file-debug
+                                                  (message path))
+                                                (add-to-list 'exec-path path))
+                                              (string-split (cdr assoc) ":"))
+                                      (when (memq var vars)
+                                        (setenv var (cadr assoc))))))))))))
 
 (defun +char-whitespace? (char)
   "Check if CHAR is whitespace."
@@ -220,22 +222,6 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
   "Return t if current system is probably WSL, nil otherwise."
   (and (+os/is-linux-p)
        (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop")))
-
-(defun +lookup/definition ()
-  (interactive)
-  (command-execute +lookup-definition-function))
-
-(defun +lookup/references ()
-  (interactive)
-  (command-execute +lookup-references-function))
-
-(defun +lookup/implementation ()
-  (interactive)
-  (message "not implemented yet!"))
-
-(defun +lookup/web ()
-  (interactive)
-  (message "not implemented yet!"))
 
 (defun +lookup/documentation (&optional popup-window)
   (interactive "P")
@@ -282,5 +268,32 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
                                 default-directory)))
      ,@body))
 
+(defmacro ii/eval-on-first-execution (func name how pred &rest body)
+  (declare (indent defun))
+  (let ((adv-symbol (intern (concat "ii/" name "--on-first-" (symbol-name func) "-" (symbol-name how) "-execution-setup"))))
+    `(advice-add ',func ,how (defun ,adv-symbol (&rest args)
+                               (when ,pred
+                                 (advice-remove ',func ',adv-symbol)
+                                 (message "Setting up %s" ,name)
+                                 ,@body)))))
+
+(defmacro ii/eval-on-first-hook (hook name pred &rest body)
+  (declare (indent defun))
+  (let ((func-symbol (intern (concat "ii/" name "--on-first-" (symbol-name hook) "-setup"))))
+    `(add-hook ',hook (defun ,func-symbol (&rest args)
+                        (when ,pred
+                          (remove-hook ',hook ',func-symbol)
+                          (message "Setting up %s" ,name)
+                          ,@body)))))
+
+(defmacro ii/eval-on-first-function (func name how pred &rest body)
+  "For use with hooks that require `add-function'."
+  (declare (indent defun))
+  (let ((func-symbol (intern (concat "ii/" name "--on-first-" (symbol-name func) "-setup"))))
+    `(add-function :after ,func (defun ,func-symbol (&rest args)
+                                  (when ,pred
+                                    (remove-function ,func ',func-symbol)
+                                    (message "Setting up %s" ,name)
+                                    ,@body)))))
 
 (provide 'implicit-config-lib)

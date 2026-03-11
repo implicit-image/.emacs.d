@@ -187,11 +187,16 @@
 
 (defun +utils/open-random-file-in-dir (dir)
   (interactive (list default-directory))
-  (if-let ((files (seq-remove
+  (if-let ((file (seq-random-elt
+                  (seq-remove
                    (lambda (file)
                      (string-equal file (buffer-file-name (current-buffer))))
-                   (directory-files dir))))
-      (find-alternate-file (seq-random-elt files))
+                   (directory-files dir)))))
+      (progn (clear-minibuffer-message)
+             (message "Opening %s" file)
+             (find-alternate-file file)
+             (run-with-timer 1.0 nil (lambda ()
+                                       (message " "))))
     (error "There are no ther files in %s" dir)))
 
 (defun +utils/ripgrep-modules ()

@@ -4,6 +4,7 @@
 (require 'meow)
 (require 'surround)
 (require 'implicit-meow-surround)
+(require 'implicit-ui)
 ;; (require 'implicit-meow-thing)
 ;; (require 'implicit-meow-beacon)
 
@@ -21,6 +22,8 @@
 (declare-function iedit-counter "iedit-mode")
 (declare-function iedit-goto-first-occurrence "iedit-mode")
 (declare-function iedit-restrict-region "iedit-mode")
+
+(declare-function async-start "async")
 
 ;;;; Variables
 
@@ -54,6 +57,7 @@
   "Setup mark setting on next editing command."
   (add-hook 'post-self-insert-hook 'ii/meow--next-change-callback 0 t))
 
+;;;###autoload
 (defun ii/meow--next-change-callback ()
   "If the last mark was saved on different position than current, set mark."
   (let ((last-pos (car mark-ring)))
@@ -66,40 +70,30 @@
   (let* ((rg (car (if regex-p
                       regexp-search-ring
                     search-ring)))
-         (end (save-mark-and-excursion
-                (isearch-end-of-buffer)
-                (line-end-position)))
+         (forward-fn (if regex-p
+                         'search-forward-regexp
+                       'search-forward))
+         (backward-fn (if regex-p
+                          'search-backward-regexp
+                        'search-backward))
          (beg (save-mark-and-excursion
-                (isearch-beginning-of-buffer)
-                (line-beginning-position))))
-    (cons beg end)))
-
-(defun ii/meow--search-inner (regex-p)
-  "Return bounds between last and next search result."
-  (isearch-forward regex-p)
-  (let* ((rg (car (if regex-p
-                      regexp-search-ring
-                    search-ring)))
-         (beg (save-mark-and-excursion
-                (or (isearch)
-                    (point-min))))
+                (goto-char (point-min))
+                (funcall forward-fn rg (point-max) t 1)
+                (goto-char (match-beginning 0))
+                (line-beginning-position)))
          (end (save-mark-and-excursion
-                (or (search-forward-regexp rg nil t 1)
-                    (point-max)))))
-    (isearch-done)
-    (cons beg end)))
+                (goto-char (point-max))
+                (funcall backward-fn rg beg t 1)
+                (goto-char (match-end 0))
+                (line-end-position))))
+    (when (and beg end)
+      (cons beg end))))
 
 (defun ii/meow--regexp-search-inner ()
   (ii/meow--search-inner t))
 
 (defun ii/meow--regexp-search-bounds ()
   (ii/meow--search-bounds t))
-
-(defun ii/meow--string-search-inner ()
-  (ii/meow--search-inner nil))
-
-(defun ii/meow--string-search-bounds ()
-  (ii/meow--search-bounds nil))
 
 ;;;; Commands
 
@@ -111,6 +105,7 @@
   (interactive "p")
   (forward-symbol (- (or n 1))))
 
+;;;###autoload
 (defun +meow/yank (&optional save)
   (interactive "P")
   (when (region-active-p)
@@ -164,7 +159,7 @@
                 (or prefix-arg 1)))
   (ii/meow--beacon-change-surrounding-chars n (ii/meow--surround-get-matching-pair char)))
 
-
+;;;###autoload
 (defun ii/meow-switch-char-case (&optional offset)
   "Toggle case of char at point."
   (interactive)
@@ -199,6 +194,7 @@
              (not (null ii/meow--toggle-case-original-text)))
     (replace-region-contents beg end ii/meow--toggle-case-original-text 0)))
 
+;;;###autoload
 (defun ii/meow-toggle-case-region (beg end)
   "Toggle the case of all characters from BEG to END."
   (interactive (list (region-beginning)
@@ -210,6 +206,7 @@
         (delete-char 1)
         (insert (funcall (if (char-uppercase-p char) 'downcase 'upcase) char))))))
 
+;;;###autoload
 (defun ii/meow-switch-case (&optional arg)
   (interactive "p")
   (meow--with-selection-fallback
@@ -313,6 +310,7 @@
 (defun ii/meow-insert-shell-output ()
   (interactive))
 
+;;;###autoload
 (defun ii/meow-command (&optional arg)
   (interactive))
 
@@ -385,5 +383,33 @@
 (defun ii/meow-noop ()
   "Does nothing."
   (interactive))
+
+(defun ii/meow-insert-async-shell-command (cmd)
+  (interactive (list (read-shell-command "Run: ")))
+  (let* ((ov (ii/ui-make-placeholder-overlay (propertize (format "Running %s" cmd) 'face 'error)
+                                             cmd
+                                             "Waiting"
+                                             'success
+                                             #'ii/ui-placeholder-animate-elipsis
+                                             0.5)))
+    (async-start
+     (lambda ()
+       (shell-command-to-string cmd))
+     (lambda (result)
+       (with-current-buffer (overlay-buffer ov)
+         (save-mark-and-excursion
+           (ii/with-no-message!
+            (message "result is %S, type is %S" result (type-of result)))
+           (goto-char (overlay-start ov))
+           (ii/ui-delete-placeholder-overlay ov)
+           (ii/ui-make-confirmation-overlay result
+                                            (lambda (ov)
+                                              (message "Confirmed!")
+                                              (save-mark-and-excursion
+                                                (let ((content (overlay-get ov 'ii/ui-content)))
+                                                  (goto-char (overlay-start ov))
+                                                  (ii/ui-delete-confirmation-overlay ov)
+                                                  (insert content)))))))))))
+
 
 (provide 'implicit-meow)
