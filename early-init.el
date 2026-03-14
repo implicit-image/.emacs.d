@@ -26,7 +26,7 @@
       inhibit-splash-screen t
       initial-major-mode 'fundamental-mode
       initial-scratch-message nil
-      inhibit-redisplay t
+      inhibit-redisplay (not init-file-debug)
       ;; disable gc, we are garbage collecting on idle
       gc-cons-threshold most-positive-fixnum
       use-file-dialog nil

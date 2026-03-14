@@ -338,6 +338,7 @@
   (defun ii/backward-down-list (arg interactive)
     (interactive "^p\nd")
     (down-list (- arg) interactive))
+
   (with-eval-after-load 'completion-preview
     (bind-keys
      :map completion-preview-active-mode-map
@@ -366,6 +367,9 @@
                           (message "Loaded %s" f)
                           (require f))
                       (remove-function after-focus-change-function 'ii/on-focus-out-load)))))
+  (defun ii/reload-path-from-shell ()
+    (interactive)
+    (+set-exec-path-from-shell))
 
   :bind
   (("C-TAB" . completion-at-point)
@@ -374,6 +378,7 @@
    ("C-c tde" . toggle-debug-on-error)
    ("C-c tdq" . toggle-debug-on-quit)
    ("C-c tl" . scroll-lock-mode)
+   ("C-c ts" . toggle-case-fold-search)
    ("C-c q C-s" . save-buffers-kill-emacs)
    ("C-c q C-a" . kill-emacs)
    ("C-c q C-b" . kill-current-buffer)
@@ -381,9 +386,7 @@
    ("C-c b C-k" . kill-buffer)
    ("C-c b C-n" . narrow-to-region)
    ("C-c b C-w" . widen)
-   ("C-c rp" . (lambda ()
-                 (interactive)
-                 (+set-exec-path-from-shell)))
+   ("C-c rp" . ii/reload-path-from-shell)
    ("C-/ C-l" . copy-from-above-command)
    ("C-c sr" . query-replace)
    ("C-c sg" . query-replace-regexp)
@@ -393,6 +396,18 @@
    ("C-c tA" . artist-mode)
    ("M-RET" . recenter)
    ("M-<return>" . recenter)
+   ;; lines
+   ("C-c ld" . kill-matching-lines)
+   ("C-c lw" . copy-matching-lines)
+   ("C-c ls" . sort-lines)
+   ("C-c lf" . flush-lines)
+   ("C-c lk" . keep-lines)
+   ("C-c lK" . consult-keep-lines)
+   ("C-c lo" . occur)
+   ("C-c lb" . delete-blank-lines)
+   ("C-c le" . ensure-empty-lines)
+   ("C-c lx" . delete-duplicate-lines)
+   ("C-c lh" . highlight-lines-matching-regex)
 
    ;;;; windows
    ("C-w C-h" . windmove-left)
@@ -485,7 +500,7 @@
    ("+" . duplicate-dwim))
   :hook
   ((window-setup-hook server-after-make-frame-hook) . +font--setup)
-  ((help-mode-hook helpful-mode-hook lsp-ui-doc-hook) . visual-line-mode)
+  ((help-mode-hook helpful-mode-hook) . visual-line-mode)
   (gfm-mode-hook . display-line-numbers-mode)
   (prog-mode-hook . display-line-numbers-mode)
   (after-init-hook . (lambda () (message (emacs-init-time)))))
@@ -506,7 +521,6 @@
    ("C-c fD" . +utils/delete-visited-file)
    ("C-c fP" . +utils/browse-modules)
    ("C-c fp" . +utils/ripgrep-user-directory)
-   ("C-c fR" . +utils/rename-visited-file)
    ("C-c fy" . +utils/yank-current-file)
    ("C-c fY" . +utils/yank-current-path)
    ("C-c tf" . +utils/consult-set-font-family)
@@ -1293,7 +1307,6 @@
    ("C-c twm" . menu-bar-mode)
    ("C-c twt" . tool-bar-mode)
    ("C-c tV" . visual-line-mode)
-   ("C-c if" . insert-file)
    ("C-c ic" . insert-char)
    ("C-c ib" . insert-buffer)
    ("C-c b`" . meow-last-buffer)
@@ -1450,7 +1463,6 @@
     css-ts-mode-hook
     web-mode-hook
     help-mode-hook
-    lsp-help-mode-hook
     helpful-mode-hook)
    . colorful-mode))
 
@@ -1974,12 +1986,6 @@ targets."
    ("C-c C-s" . embark-select)
    ("C-c C-c" . embark-collect)))
 
-(use-package consult-lsp
-  :bind
-  ( :map lsp-mode-map
-    ("C-c cs" . consult-lsp-symbols)
-    ("C-c cd" . consult-lsp-diagnostics)))
-
 (use-package consult-eglot
   :bind
   ( :map eglot-mode-map
@@ -2068,7 +2074,6 @@ targets."
    ("C-c sI" . consult-imenu-multi)
    ("C-c sb" . consult-line)
    ("C-c sB" . consult-line-multi)
-   ("C-c so" . consult-outline)
    ("C-c se" . consult-flymake)
    ("C-c sc" . consult-compile-error)
    ("C-c //" . consult-ripgrep)
@@ -2084,6 +2089,7 @@ targets."
    ("C-x r\"" . consult-register-load)
    ("C-x r\'" . consult-register-store)
    ("C-x rj" . consult-register)
+   ("C-c so" . consult-outline)
    :map help-map
    ("C-i" . consult-info)
    :map project-prefix-map
@@ -2214,19 +2220,24 @@ targets."
   (with-eval-after-load 'nwscript-mode
     (add-to-list 'dumb-jump-find-rules
                  '( :type "function" :supports ("rg" "git-grep") :language "nwscript"
-                    :regex "\\(struct +[A-Za-z0-9\_]+|int|void|float|object|itemproperty|effect|talent|location|command|action|cassowary|event|json|sqlquery|vector|string\\)[ \t]+\\([A-Za-z]+[A-Za-z_0-9]*\\)\\([ \t]*([^{]*)\\)[ \t\n]*{"
+                    :regex "\\b(struct +[A-Za-z0-9\_]+|int|void|float|object|itemproperty|effect|talent|location|command|action|cassowary|event|json|sqlquery|vector|string)[ \t]+\\sJJJ *([ \t]*([^{]*))[ \t\n]*{"
                     :tests ("void Func() {" "struct ps_effect Fire(struct test Test, int num)")
                     :not ("void Func();" "struct ps_test {" "struct ps_test\n{" "")))
     (add-to-list 'dumb-jump-find-rules
                  '( :type "type" :supports ("rg" "git-grep") :language "nwscript"
-                    :regex "\\(struct +[A-Za-z0-9\_]+\\|int\\|void\\|float\\|object\\|itemproperty\\|effect\\|talent\\|location\\|command\\|action\\|cassowary\\|event\\|json\\|sqlquery\\|vector\\|string\\)[ \t]+\\(\\s+JJJ[ \t]*\\)\\(([A-Za-z0-9_, \n=]*)\\);"
-                    :tests ("struct Parser {" "struct ps_effect {" "struct ps_test \n{" "struct Str \n{")
-                    :not ("struct ps_effect PSTest()" "struct ")))
+                    :regex "\\b(struct \\s*JJJ[\n\t {]*"
+                    :tests ("struct test {" "struct test {" "struct test \n{" "struct test \n{")
+                    :not ("struct ps_effect test()" "struct test;")))
     (add-to-list 'dumb-jump-find-rules
                  '( :type "variable" :supports ("rg" "git-grep") :language "nwscript"
-                    :regexp "\\b\\(const[ \t]+\\(int\\|float\\|string\\)[ \t]+\\)\\([A-Z0-9_]+\\)[ \t]+=.*"
+                    :regexp "\\b(const[ \t]+(int|float|string)[ \t]+)\\s*JJJ[ \t]+=.*"
                     :tests ("const int PS_VAR = 234;" "const string ps_str = \"fsfs\"")
-                    :not ("int a = 213213;" "int PS_CONST_FUN"))))
+                    :not ("int test = 213213;" "int test" "const vector test = [1, 2, 4];")))
+    (add-to-list 'dumb-jump-find-rules
+                 '( :type "variable" :supports ("rg" "git-grep") :language "nwscript"
+                    :regexp "\\b(struct +[A-Za-z0-9\_]+|int|void|float|object|itemproperty|effect|talent|location|command|action|cassowary|event|json|sqlquery|vector|string)\\s*JJJ.*;"
+                    :tests ("struct ps_effect test;" "int test = 423423432;")
+                    :not ("test = 23423;" "ps_effect test = FUNC();"))))
   :hook
   (xref-backend-functions . dumb-jump-xref-activate))
 
@@ -2345,7 +2356,8 @@ targets."
 (use-package align
   :straight nil
   :bind*
-  (("C-c ea" . align)))
+  (("C-c ea" . align)
+   ("C-c eA" . align-entire)))
 
 (use-package vundo
   :custom
@@ -2828,80 +2840,9 @@ targets."
   :hook
   (global-corfu-mode-hook . corfu-terminal-mode))
 
-(use-package lspce
-  :if (eq system-type 'gnu/linux)
-  :straight `(lspce :type git
-                    :host github
-                    :repo "zbelial/lspce"
-                    :files (:defaults
-                            ,(pcase system-type
-                               ('gnu/linux "lspce-module.so")
-                               ('darwin "lspce-module.dylib")))
-                    :pre-build ,(pcase system-type
-                                  ('gnu/linux '(("cargo" "build" "--release") ("cp" "./target/release/liblspce_module.so" "./lspce-module.so")))
-                                  ('darwin '(("cargo" "build" "--release") ("cp" "./target/release/liblspce_module.dylib" "./lspce-module.dylib")))))
-  :init
-  (setq lspce-prefix-map (make-sparse-keymap)
-        lspce-server-programs '(("rust" "rust-analyzer" "")
-                                ("python" "jedi-language-server" "")
-                                ("python" "pylsp" "")
-                                ("python" "basedpyright-langserver" "--stdio")
-                                ("haskell" "haskell-language-server-wrapper" "--lsp")
-                                ("C" "ccls" "")
-                                ("sh" "bash-language-server" "start")
-                                ("go" "gopls" "")
-                                ("nix" "nixd" "")
-                                ("nix-ts" "nixd" "")
-                                ("typescript" "typescript-language-server" "--stdio")
-                                ("js" "typescript-language-server" "--stdio")
-                                ("java" "jdtls" ""))
-        lspce-enable-eldoc t
-        lspce-eldoc-enable-hover t
-        lspce-eldoc-enable-signature t
-        lspce-enable-flymake t
-        lspce-log-level 4
-        lspce-completion-no-annotation nil
-        lspce-send-changes-idle-time 0.5
-        lspce-enable-imenu-index-function t
-        lspce-modes-enable-single-file-root '(python-ts-mode typescript-ts-mode c-ts-mode)
-        lspce-xref-append-implementations-to-definitions t
-        lspce-call-hierarchy-show-position t)
-
-  (defun ii/lspce-eldoc-function (callback)
-    "Modified eldoc function that doesn't display backend name."
-    (when lspce-mode
-      (let ((hover-info (and lspce-eldoc-enable-hover (lspce--hover-at-point)))
-            (signature (and lspce-eldoc-enable-signature (lspce--signature-at-point)))
-            backend
-            content
-            document)
-        (when hover-info
-          (setq content (lspce--eldoc-render-markup (nth 1 hover-info))))
-        (cond
-         ((and signature content)
-          (setq document (concat signature "\n\n" content)))
-         ((or signature content)
-          (setq document (concat signature content))))
-        (when document
-          ;; (setq backend (propertize "[lspce]\n" 'face 'lspce-eldoc-backend-face))
-          (funcall callback document)))))
-
-  (advice-add 'lspce-eldoc-function :override 'ii/lspce-eldoc-function)
-  :bind*
-  ( :map lspce-mode-map
-    ("M-g a" . lspce-code-actions)
-    ("M-s r" . lspce-rename)
-    ("C-c ci" . lspce-incoming-calls)
-    ("C-c co" . lspce-outgoing-calls)))
-
 (use-package sideline-eglot
   :init
   (setq sideline-eglot-code-actions-prefix "! "))
-
-(use-package sideline-lsp
-  :init
-  (setq sideline-lsp-ignore-duplicate t
-        sideline-lsp-code-actions-prefix "! "))
 
 (use-package sideline
   :init
@@ -2924,7 +2865,6 @@ targets."
         (setq-local sideline-backends-right backends)
         (sideline-mode 1))))
   :hook
-  (lsp-mode-hook . ii/sideline--local-setup)
   (eglot-managed-mode-hook . ii/sideline--local-setup))
 
 ;;;; Eglot
@@ -2977,7 +2917,40 @@ targets."
       (command-execute 'eglot-rename )))
 
   (add-to-list 'eglot-server-programs '(haskell-ts-mode "haskell-language-server-wrapper" "--lsp"))
-  (add-to-list 'eglot-server-programs '(python-ts-mode "rass" "python"))
+
+  ;; rassumfrassum setup
+  (when nil
+    (defvar rass-from-git nil
+      "Non-nil if the rassumfrassum multiplexer is installed from github.")
+
+    (defvar rass-command "rass")
+
+    (defvar rass-directory (expand-file-name "./local/rassumfrassum" user-emacs-directory))
+
+    (defmacro ii/rass-eglot-cmd (servers &rest options)
+      (cond ((stringp rass-command)
+             `(,rass-command ,@options ,@(mapcar (lambda (server) ) servers)))))
+
+    (when (not (executable-find "rass"))
+      (message "rass not found,")
+      (when (and (executable-find "python")
+                 (executable-find "git"))
+        (message "Downloading rass")
+        (setq rass-from-git t)
+        (let ((proc (start-process-shell-command "rass-download" (get-buffer-create " *rass-download") (format "git clone --depth 1 https://github.com/joaotavora/rassumfrassum %s" rass-directory))))
+          (set-process-sentinel proc
+                                (lambda (proc out)
+                                  (pcase (process-status proc)
+                                    ('exit )))))
+        (setq rass-command (format "PYTHONPATH=%s/src python -m rassumfrassum" rass-directory)))))
+
+
+  (when (executable-find "rass")
+    (add-to-list 'eglot-server-programs '((python-ts-mode python-mode) "rass" "python"))
+    ;; (add-to-list 'eglot-server-programs '(rust-ts-mode "rass" "-- rust-analyzer"))
+    ;; (add-to-list 'eglot-server-programs '(tsx-ts-mode (lambda (int project)
+    ;;                                                     (let ))))
+    )
   :bind*
   ( :map eglot-mode-map
     ("M-g R" . ii/eglot-rename)
@@ -2987,52 +2960,6 @@ targets."
     ("C-c ct" . eglot-show-type-hierarchy)
     ("C-c cf" . eglot-format)
     ("C-c ca" . eglot-code-actions)))
-
-(use-package lsp-mode
-  :init
-  ;; (add-to-list 'ii/load-on-focus-loss-list 'lsp-mode)
-  (setq lsp-keymap-prefix "C-c c"
-        lsp-auto-configure t
-        lsp-enable-suggest-server-download nil
-        lsp-enable-symbol-highlighting nil
-        lsp-enable-imenu t
-        lsp-enable-completion t
-        lsp-enable-file-watchers t
-        lsp-enable-folding nil
-        lsp-eldoc-render-all t
-        lsp-enable-on-type-formatting nil
-        lsp-enable-flymake t
-        lsp-headerline-breadcrumb-enable nil
-        lsp-completion-provider :none
-        lsp-diagnostics-provider :flymake))
-
-(use-package lsp-ui
-  :init
-  (setq lsp-ui-doc-enable t
-        lsp-ui-peek-enable t
-        lsp-ui-imenu-enable t
-        lsp-ui-sideline-enable nil)
-  :config
-  (setf  (alist-get 'font lsp-ui-doc-frame-parameters) +base/font-spec)
-  (setopt lsp-ui-sideline-show-diagnostics nil
-          lsp-ui-sideline-ignore-duplicate nil))
-
-(use-package lsp-pyright
-  :custom (lsp-pyright-langserver-command "basedpyright")
-  :init
-  (with-eval-after-load 'lsp-mode
-    (require 'lsp-pyright))
-  (setq lsp-pyright-basedpyright-inlay-hints-generic-types t))
-
-(use-package lsp-haskell
-  :init
-  (with-eval-after-load 'lsp-mode
-    (require 'lsp-haskell)))
-
-(use-package ccls
-  :init
-  (with-eval-after-load 'lsp-mode
-    (require 'ccls)))
 
 ;;; Indent indicators
 (use-package whitespace
@@ -3146,6 +3073,24 @@ targets."
                                 dotgit
                               p))))))
 
+  (defun ii/project-occur (regexp n)
+    (interactive (list (read-regexp "Search for: ") (prefix-numeric-value prefix-arg)))
+    (if-let* ((p (project-current t)))
+        (multi-occur (project-buffers p) regexp n)
+      (message "Project not found.")))
+
+  (defun ii/project-multi-isearch (ignore-mode)
+    (interactive "p")
+    (let ((bufs (match-buffers (if (not ignore-mode) `(derived-mode . ,major-mode) t)
+                               (project-buffers (project-current t)))))
+      (multi-isearch-buffers bufs)))
+
+  (defun ii/project-multi-isearch-regexp (ignore-mode)
+    (interactive "p")
+    (let ((bufs (match-buffers (if (not ignore-mode) `(derived-mode . ,major-mode) t)
+                               (project-buffers (project-current t)))))
+      (multi-isearch-buffers-regexp bufs)))
+
   (defun ii/project-magit-status ()
     (interactive)
     (magit-status (project-root (project-current))))
@@ -3164,7 +3109,12 @@ targets."
     (add-to-list 'project-switch-commands '(ii/project-magit-status "Magit status" ?m))
     (add-to-list 'project-switch-commands '(affe-find "Fuzzy Find file" ?F))
     (add-to-list 'project-switch-commands '(eat-project "Eat" ?E))
-    (add-to-list 'project-switch-commands '(affe-grep "Fuzzy find rx" ?/))))
+    (add-to-list 'project-switch-commands '(affe-grep "Fuzzy find rx" ?/)))
+  :bind
+  ( :map project-prefix-map
+    ("S" . ii/project-multi-isearch)
+    ("G" . ii/project-multi-isearch-regexp)
+    ("O" . ii/project-occur)))
 
 (use-package envrc
   :defer 4
@@ -3296,7 +3246,6 @@ targets."
   (add-hook 'eat-mode-hook (lambda ()
                              (setq-local process-adaptive-read-buffering t)))
   (ii/eval-on-first-hook eat-mode-hook "eat-eshell-mode" t (eat-eshell-mode 1))
-  ()
 
   :bind*
   (("C-c oe" . eat)
@@ -3458,17 +3407,37 @@ targets."
   :init
   (setq find-sibling-rules
         `(("[^/]\.c" "\\\\1.h")))
+
+  (defun ii/buffer-toggle-modified ()
+    (interactive)
+    (set-buffer-modified-p (not (buffer-modified-p))))
+
   :bind*
-  ("C-c br" . revert-buffer)
-  ("C-c fa" . find-alternate-file)
-  ("C-c fs" . find-sibling-file))
+  (("C-c br" . revert-buffer)
+   ("C-c bR" . revert-buffer-with-fine-grain)
+   ("C-c dC" . copy-directory)
+   ("C-c dD" . delete-directory)
+   ("C-c d+" . make-directory)
+   ("C-c dd" . pwd)
+   ("C-c if" . insert-file)
+   ("C-c iF" . insert-file-literally)
+   ("C-c b~" . ii/buffer-toggle-modified)
+   ("C-c fa" . find-alternate-file)
+   ("C-c fR" . rename-visited-file)
+   ("C-c f^" . recover-this-file)
+   ("C-c fs" . find-sibling-file)))
 
 (use-package files-x
   :defer t
   :straight nil
   :bind*
   (("C-c ilp" . modify-file-local-variable-prop-line)
-   ("C-c flv" . modify-file-local-variable)))
+   ("C-c flv" . modify-file-local-variable)
+   ("C-c dla" . add-dir-local-variable)
+   ("C-c dld" . delete-dir-local-variable)
+   ("C-c dlc" . copy-file-locals-to-dir-locals)
+   ("C-c dlf" . copy-dir-locals-to-file-locals)
+   ("C-c dlF" . copy-dir-locals-to-file-locals-prop-line)))
 
 (use-package dired
   :straight nil
@@ -3486,8 +3455,12 @@ targets."
         dired-clean-confirm-killing-deleted-buffers nil)
   :bind*
   (("M-g M-d" . dired-at-point)
-   ("C-c d ." . dired-at-point)
-   ("C-c d d" . dired-jump)
+   ("C-c d." . dired-at-point)
+   ("C-c df" . dired-find-file)
+   ("C-c dd" . dired-jump)
+   ("C-c d/" . find-dired)
+   ("C-c d*" . find-grep-dired)
+   ("C-c dn" . find-name-dired)
    :map dired-mode-map
    ("e" . wdired-change-to-wdired-mode)
    ("-" . dired-up-directory)))
@@ -3728,6 +3701,77 @@ targets."
            ((org-agenda-overriding-header "Low Effort Tasks")
             (org-agenda-max-todos 20)
             (org-agenda-files org-agenda-files)))
+          ;; file status
+          ("f" "File status"
+           ((ii/agenda-title (concat "FILE STATUS: " (buffer-file-name)))
+            (todo "HOLD"
+                  ((org-agenda-overriding-header "On Hold")
+                   (org-agenda-files org-agenda-files)))
+            (todo "WAIT"
+                  ((org-agenda-overriding-header "Waiting on External")
+                   (org-agenda-files org-agenda-files)))
+            (todo "REVIEW"
+                  ((org-agenda-overriding-header "In Review")
+                   (org-agenda-files org-agenda-files)))
+            (todo "PLAN"
+                  ((org-agenda-overriding-header "In Planning")
+                   (org-agenda-todo-list-sublevels nil)
+                   (org-agenda-files org-agenda-files)))
+            (todo "BACKLOG"
+                  ((org-agenda-overriding-header "Project Backlog")
+                   (org-agenda-todo-list-sublevels nil)
+                   (org-agenda-files org-agenda-files)))
+            (todo "READY"
+                  ((org-agenda-overriding-header "Ready for Work")
+                   (org-agenda-files org-agenda-files)))
+            (todo "TODO"
+                  ((org-agenda-overriding-header "Things to do")
+                   (org-agenda-files org-agenda-files)))
+            (todo "ACTIVE"
+                  ((org-agenda-overriding-header "Active Projects")
+                   (org-agenda-files org-agenda-files)))
+            (todo "COMPLETED"
+                  ((org-agenda-overriding-header "Completed Projects")
+                   (org-agenda-files org-agenda-files)))
+            (todo "CANCELLED"
+                  ((org-agenda-overriding-header "Cancelled Projects")
+                   (org-agenda-files org-agenda-files)))))
+
+          ;; project status
+          ("p" "Project status"
+           ((ii/agenda-title (concat "PROJECT STATUS: " (project-root (project-current t))))
+            (todo "HOLD"
+                  ((org-agenda-overriding-header "On Hold")
+                   (org-agenda-files org-agenda-files)))
+            (todo "WAIT"
+                  ((org-agenda-overriding-header "Waiting on External")
+                   (org-agenda-files org-agenda-files)))
+            (todo "REVIEW"
+                  ((org-agenda-overriding-header "In Review")
+                   (org-agenda-files org-agenda-files)))
+            (todo "PLAN"
+                  ((org-agenda-overriding-header "In Planning")
+                   (org-agenda-todo-list-sublevels nil)
+                   (org-agenda-files org-agenda-files)))
+            (todo "BACKLOG"
+                  ((org-agenda-overriding-header "Project Backlog")
+                   (org-agenda-todo-list-sublevels nil)
+                   (org-agenda-files org-agenda-files)))
+            (todo "READY"
+                  ((org-agenda-overriding-header "Ready for Work")
+                   (org-agenda-files org-agenda-files)))
+            (todo "TODO"
+                  ((org-agenda-overriding-header "Things to do")
+                   (org-agenda-files org-agenda-files)))
+            (todo "ACTIVE"
+                  ((org-agenda-overriding-header "Active Projects")
+                   (org-agenda-files org-agenda-files)))
+            (todo "COMPLETED"
+                  ((org-agenda-overriding-header "Completed Projects")
+                   (org-agenda-files org-agenda-files)))
+            (todo "CANCELLED"
+                  ((org-agenda-overriding-header "Cancelled Projects")
+                   (org-agenda-files org-agenda-files)))))
 
           ("w" "Workflow Status"
            ((ii/agenda-title "WORKFLOW STATUS")
@@ -3779,82 +3823,12 @@ targets."
 
   (defun ii/org-project-tasks (project-root)
     (interactive (list (project-root (project-current t))))
-    (let ((org-agenda-regexp-filter-preset (list project-root))
-          (org-agenda-custom-commands
-           (list `("p" "Project status"
-                   ((ii/agenda-title (concat "PROJECT STATUS: " ,project-root))
-                    (todo "HOLD"
-                          ((org-agenda-overriding-header "On Hold")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "WAIT"
-                          ((org-agenda-overriding-header "Waiting on External")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "REVIEW"
-                          ((org-agenda-overriding-header "In Review")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "PLAN"
-                          ((org-agenda-overriding-header "In Planning")
-                           (org-agenda-todo-list-sublevels nil)
-                           (org-agenda-files org-agenda-files)))
-                    (todo "BACKLOG"
-                          ((org-agenda-overriding-header "Project Backlog")
-                           (org-agenda-todo-list-sublevels nil)
-                           (org-agenda-files org-agenda-files)))
-                    (todo "READY"
-                          ((org-agenda-overriding-header "Ready for Work")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "TODO"
-                          ((org-agenda-overriding-header "Things to do")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "ACTIVE"
-                          ((org-agenda-overriding-header "Active Projects")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "COMPLETED"
-                          ((org-agenda-overriding-header "Completed Projects")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "CANCELLED"
-                          ((org-agenda-overriding-header "Cancelled Projects")
-                           (org-agenda-files org-agenda-files))))))))
+    (let ((org-agenda-regexp-filter (list project-root)))
       (org-agenda nil "p")))
 
   (defun ii/org-file-tasks (file)
     (interactive (list (buffer-file-name)))
-    (let ((org-agenda-regexp-filter-preset (list file))
-          (org-agenda-custom-commands
-           (list `("f" "File status"
-                   ((ii/agenda-title (concat "FILE STATUS: " ,file))
-                    (todo "HOLD"
-                          ((org-agenda-overriding-header "On Hold")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "WAIT"
-                          ((org-agenda-overriding-header "Waiting on External")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "REVIEW"
-                          ((org-agenda-overriding-header "In Review")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "PLAN"
-                          ((org-agenda-overriding-header "In Planning")
-                           (org-agenda-todo-list-sublevels nil)
-                           (org-agenda-files org-agenda-files)))
-                    (todo "BACKLOG"
-                          ((org-agenda-overriding-header "Project Backlog")
-                           (org-agenda-todo-list-sublevels nil)
-                           (org-agenda-files org-agenda-files)))
-                    (todo "READY"
-                          ((org-agenda-overriding-header "Ready for Work")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "TODO"
-                          ((org-agenda-overriding-header "Things to do")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "ACTIVE"
-                          ((org-agenda-overriding-header "Active Projects")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "COMPLETED"
-                          ((org-agenda-overriding-header "Completed Projects")
-                           (org-agenda-files org-agenda-files)))
-                    (todo "CANCELLED"
-                          ((org-agenda-overriding-header "Cancelled Projects")
-                           (org-agenda-files org-agenda-files))))))))
+    (let ((org-agenda-regexp-filter (list file)))
       (org-agenda nil "f")))
 
   (defun ii/org-maybe-update-agenda ()
@@ -4494,7 +4468,7 @@ targets."
 (use-package mastodon)
 
 ;; no config required
-(ii/packages! f dash ov embark-consult verb devdocs vlf realgud lsp-metals ob-sql-mode djvu forge org-contrib htmlize ox-rss org-roam-ui poly-markdown poly-R poly-org fsharp-mode erlang cuda-mode powershell nushell-mode xenops auctex ocaml-ts-mode dune reason-mode solidity-mode lean-mode d-mode gdscript-mode nim-mode gpr-mode idris-mode vhdl-ts-mode vhdl-ext nasm-mode masm-mode fasm-mode riscv-mode mips-mode fstar-mode sharper shader-mode sln-mode csproj-mode robe otp edts ess purescript-mode dart-mode common-lisp-snippets geiser racket-mode clj-refactor clojure-snippets cider clojure-mode groovy-mode sbt-mode pyvenv)
+(ii/packages! f dash ov embark-consult verb devdocs vlf realgud ob-sql-mode djvu forge org-contrib htmlize ox-rss org-roam-ui poly-markdown poly-R poly-org fsharp-mode erlang cuda-mode powershell nushell-mode xenops auctex ocaml-ts-mode dune reason-mode solidity-mode lean-mode d-mode gdscript-mode nim-mode gpr-mode idris-mode vhdl-ts-mode vhdl-ext nasm-mode masm-mode fasm-mode riscv-mode mips-mode fstar-mode sharper shader-mode sln-mode csproj-mode robe otp edts ess purescript-mode dart-mode common-lisp-snippets geiser racket-mode clj-refactor clojure-snippets cider clojure-mode groovy-mode sbt-mode pyvenv)
 
 ;; load os-specific stuff
 (+os/per-system!
