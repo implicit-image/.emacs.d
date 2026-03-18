@@ -13,6 +13,9 @@
 !/local/*.md
 !/local/**
 !/local/
+!/rass-presets/
+!/rass-presets/*
+!/rass-presets/**
 /elisp/**/#*#
 /elisp/#*#
 /elisp/**/*.elc

@@ -114,14 +114,19 @@
       meow-vterm-state-map (make-sparse-keymap)
       meow-eat-toggle-map (make-sparse-keymap)
       meow-mc-global-map (make-sparse-keymap)
-      treesit-auto-install-grammar 'always
-      flymake-prefix-map (make-sparse-keymap)
       meow-error-repeat-map (make-sparse-keymap)
+      flymake-prefix-map (make-sparse-keymap)
       next-defun-repeat-map (make-sparse-keymap)
       outline-repeat-map (make-sparse-keymap)
-      transpose-repeat-map (make-sparse-keymap))
+      transpose-repeat-map (make-sparse-keymap)
+      project-dired-prefix-map (make-sparse-keymap)
+      treesit-auto-install-grammar 'always)
 
+;; unbind kill
+(unbind-key "C-w")
+;; unbind suspend
 (unbind-key "C-z")
+;; unbind undo
 (unbind-key "C-/")
 
 (define-prefix-command 'meow-toggle-prefix-command 'meow-toggle-prefix-map "toggle")
@@ -132,6 +137,7 @@
 (define-prefix-command 'meow-mark-prefix-command 'meow-mark-prefix-map "mark")
 (define-prefix-command 'meow-C-z-prefix-command 'meow-C-z-prefix-map "C-z")
 (define-prefix-command 'meow-C-/-prefix-command 'meow-C-/-prefix-map "C-/")
+(define-prefix-command 'project-dired-prefix-command 'project-dired-prefix-map "project-direed")
 (bind-key "C-c t" meow-toggle-prefix-map)
 (bind-key "C-c q" meow-quit-prefix-map)
 (bind-key "C-c g" meow-vc-prefix-map)
@@ -140,6 +146,8 @@
 (bind-key "C-c m" meow-mark-prefix-map)
 (bind-key "C-z" 'meow-C-z-prefix-command)
 (bind-key "C-/" 'meow-C-/-prefix-command)
+(bind-key "C-x pd" 'project-dired-prefix-command)
+
 (setopt indent-tabs-mode nil
         blink-cursor-mode nil)
 
@@ -514,7 +522,7 @@
    +utils--desktop-buffer-predicate)
   :commands
   (+utils/open-random-file-in-dir)
-  :bind*
+  :bind
   (("M-<backspace>" . backward-kill-word)
    ("C-c f%" . +utils/open-random-file-in-dir)
    ("C-c fC" . +utils/copy-visited-file)
@@ -727,7 +735,7 @@
   (setq ii/meow-toggle-case-repeat-map (make-sparse-keymap))
   :config
   (add-to-list 'meow-selection-command-fallback '(ii/meow-toggle-case . ii/meow-toggle-char-case))
-  :bind*
+  :bind
   (("C-c ei" . ii/meow-increment-number-at-point)
    ("C-c ed" . ii/meow-decrement-number-at-point)
    ("C-c ee" . ii/meow-iedit-mode)
@@ -826,7 +834,7 @@
               :repo "knu/operate-on-number.el")
   :init
   (setq ii/operate-on-number-map (make-sparse-keymap))
-  :bind*
+  :bind
   ( :map ii/operate-on-number-map
     ("+" . apply-operation-to-number-at-point)
     ("-" . apply-operation-to-number-at-point)
@@ -859,7 +867,7 @@
                           (:eval
                            (format #("%d/%d" 0 5 (face font-lock-regexp-face))
                                    iedit-occurrence-index (iedit-counter)))))
-  :bind*
+  :bind
   ( :map isearch-mode-map
     ("M-d" . iedit-mode-from-isearch)))
 
@@ -872,7 +880,7 @@
   :bind
   ( :map mc/keymap
     ("<return>" . nil))
-  :bind*
+  :bind
   (("C->" . mc/mark-next-like-this)
    ("C-<" . mc/mark-previous-like-this)
    ("C-c m<" . mc/mark-previous-like-this)
@@ -1298,7 +1306,7 @@
                                                  (view . "<V>")
                                                  (macro . "<M>")
                                                  (beacon . "<B>"))))
-  :bind*
+  :bind
   (("M-SPC" . meow-keypad)
    ("M-<backspace>" . meow-backward-kill-symbol)
    ("C-o" . meow-pop-or-unpop-to-mark)
@@ -1400,7 +1408,7 @@
                 outline-heading-end-regexp "\n"))
   :config
   (rg-enable-default-bindings)
-  :bind*
+  :bind
   (("C-c /'" . rg-dwim)
    ("C-c /p" . rg-project)
    ("C-c /s" . rg-isearch-project)
@@ -1416,12 +1424,12 @@
 (use-package wgrep
   :init
   (setq wgrep-auto-save-buffer t)
-  :bind*
+  :bind
   ( :map grep-mode-map
     ("e" . wgrep-change-to-wgrep-mode)))
 
 (use-package ast-grep
-  :bind*
+  :bind
   (("C-c / a" . ast-grep-project)))
 
 ;; (use-package solaire-mode
@@ -1456,7 +1464,7 @@
   (setq colorful-use-prefix t
         colorful-only-strings 'only-prog
         colorful-allow-mouse-clicks nil)
-  :bind*
+  :bind
   (("C-c tc" . colorful-mode))
   :hook
   ((css-mode-hook
@@ -1492,7 +1500,7 @@
             ("FIXME" . compilation-error)
             ("XXXX*" . compilation-error))))
   :hook ((prog-mode-hook org-mode-hook markdown-mode-hook) . hl-todo-mode)
-  :bind*
+  :bind
   (("C-c st" . hl-todo-rgrep)
    :map goto-map
    ("]t" . hl-todo-next)
@@ -1559,7 +1567,7 @@
 (use-package implicit-windows
   :straight `(implicit-windows :type nil
                                :local-repo ,(expand-file-name "windows" ii/elisp-path))
-  :bind*
+  :bind
   (("C-w C-`" . ii/windows-toggle-minibuffer-focus)
    ("C-w `" . ii/windows-quit-current-minibuffer)
    ("C-w \m" . +windows/toggle-maximize-window)
@@ -1700,7 +1708,7 @@
           ;; bottom side window
           ((or . ((derived-mode . proced-mode)))
            (display-buffer-same-window))))
-  :bind*
+  :bind
   (("C-c twd" . window-toggle-dedicated)
    ("C-c bp" . previous-buffer)
    ("C-c bn" . next-buffer)
@@ -1883,10 +1891,7 @@
             (consult-line-multi buffer)
             (lsp-execute-code-action posframe
                                      (vertico-posframe-poshandler . posframe-poshandler-point-frame-center)
-                                     (vertico-posframe-border-width . 2))
-            (lspce-code-actions posframe
-                                (vertico-posframe-poshandler . posframe-poshandler-point-frame-center)
-                                (vertico-posframe-border-width . 2))))
+                                     (vertico-posframe-border-width . 2))))
   (vertico-multiform-mode)
   :hook
   (marginalia-mode-hook . vertico-mode)
@@ -2122,7 +2127,7 @@ targets."
                      :state (consult--file-state)
                      :preview-key '(:debounce 0.1 any))
 
-  :bind*
+  :bind
   (("C-c /?" . affe-grep)
    ("C-c f?" . affe-find)))
 
@@ -2187,7 +2192,7 @@ targets."
   (defun ii/eldoc-box--setup ()
     (if (bound-and-true-p eldoc-box-hover-mode)
         (setq-local eldoc-idle-delay 0.15
-                    eldoc-documentation-strategy 'eldoc-documentation-enthusiast)))
+                    eldoc-documentation-strategy 'eldoc-documentation-default)))
   :config
   (setf (alist-get 'font eldoc-box-frame-parameters) +base/font-spec
         (alist-get 'internal-border-width eldoc-box-frame-parameters) 2)
@@ -2203,7 +2208,7 @@ targets."
                    (if (eq eldoc-box-position-function 'eldoc-box--default-at-point-position-function)
                        'eldoc-box--default-upper-corner-position-function
                      'eldoc-box--default-at-point-position-function))))))
-  :bind*
+  :bind
   (("C-c te" . ii/eldoc-box-toggle)
    ("C-c ck" . eldoc-box-help-at-point))
   :hook
@@ -2220,7 +2225,7 @@ targets."
   (with-eval-after-load 'nwscript-mode
     (add-to-list 'dumb-jump-find-rules
                  '( :type "function" :supports ("rg" "git-grep") :language "nwscript"
-                    :regex "\\b(struct +[A-Za-z0-9\_]+|int|void|float|object|itemproperty|effect|talent|location|command|action|cassowary|event|json|sqlquery|vector|string)[ \t]+\\sJJJ *([ \t]*([^{]*))[ \t\n]*{"
+                    :regex "\\b(struct +[A-Za-z0-9\_]+|int|void|float|object|itemproperty|effect|talent|location|command|action|cassowary|event|json|sqlquery|vector|string)[ \t]+\\s*JJJ *([ \t]*([^{]*))[ \t\n]*{"
                     :tests ("void Func() {" "struct ps_effect Fire(struct test Test, int num)")
                     :not ("void Func();" "struct ps_test {" "struct ps_test\n{" "")))
     (add-to-list 'dumb-jump-find-rules
@@ -2237,7 +2242,9 @@ targets."
                  '( :type "variable" :supports ("rg" "git-grep") :language "nwscript"
                     :regexp "\\b(struct +[A-Za-z0-9\_]+|int|void|float|object|itemproperty|effect|talent|location|command|action|cassowary|event|json|sqlquery|vector|string)\\s*JJJ.*;"
                     :tests ("struct ps_effect test;" "int test = 423423432;")
-                    :not ("test = 23423;" "ps_effect test = FUNC();"))))
+                    :not ("test = 23423;" "ps_effect test = FUNC();")))
+    (add-to-list 'dumb-jump-language-comments '(:comment "//" :language "nwscript") )
+    (add-to-list 'dumb-jump-language-file-exts '(:language "nwscript" :ext "nss" :agtype nil :rgtype nil)))
   :hook
   (xref-backend-functions . dumb-jump-xref-activate))
 
@@ -2277,7 +2284,7 @@ targets."
   (with-eval-after-load 'xref
     (define-key xref--xref-buffer-mode-map (kbd "E") #'ii/xref-to-grep-compilation))
 
-  :bind*
+  :bind
   (("C-c jr" . xref-find-references)
    ("C-c jd" . xref-find-definitions)
    :map goto-map
@@ -2355,14 +2362,14 @@ targets."
 
 (use-package align
   :straight nil
-  :bind*
+  :bind
   (("C-c ea" . align)
-   ("C-c eA" . align-entire)))
+   ("C-c eA" . align-regexp)))
 
 (use-package vundo
   :custom
   (vundo-window-max-height 6)
-  :bind*
+  :bind
   (("C-x u" . vundo)
    :map vundo-mode-map
    ("r" . vundo-forward)
@@ -2422,7 +2429,7 @@ targets."
                                (window-stool-mode -1)
                              (when (and (not meow-view-mode) (not window-stool-mode))
                                (window-stool-mode 1)))))
-  :bind*
+  :bind
   ("C-c tws" . window-stool-mode))
 
 (use-package drag-stuff
@@ -2455,7 +2462,7 @@ targets."
       (ii/when-idle! 5.0 (with-current-buffer buf
                            (flyspell-prog-mode)))))
 
-  :bind*
+  :bind
   ( :map goto-map
     ("]," . flyspell-goto-next-error)
     ("[," . +flyspell/goto-prev-error)
@@ -2544,7 +2551,7 @@ targets."
               ("t" . ii/flymake-toggle-eol))
   :bind-keymap*
   ("C-c !" . flymake-prefix-map)
-  :bind*
+  :bind
   ( :map flymake-mode-map
     ("C-c t!" . ii/flymake-toggle-eol)
     :map goto-map
@@ -2559,13 +2566,11 @@ targets."
     :repeat-map meow-error-repeat-map
     ("d" . flymake-goto-next-error)))
 
-(use-package flymake-jsts
-  :straight '(flymake-jsts :type git :host github :repo "orzechowskid/flymake-jsts" :branch "main"))
-
 ;;;; Snippets
 (use-package tempel
   :init
   (defmacro ii/tempel-mode-templates! (mode &rest templates)
+    "declare TEMPLATES as additional tempel templates for MODE."
     (declare (indent defun))
     (let ((var (intern (concat (symbol-name mode) "-templates"))))
       `(progn
@@ -2604,7 +2609,7 @@ targets."
           next-error-highlight-no-select t
           next-line-add-newlines nil)
 
-  :bind*
+  :bind
   ( ("C-x k" . kill-current-buffer)
     ("C-c bK" . kill-current-buffer)
     ("C-c bx" . scratch-buffer)
@@ -2631,7 +2636,7 @@ targets."
   :init
   (setq comint-eol-on-send t
         comint-prompt-read-only t)
-  :bind*
+  :bind
   (("C-c rc" . comint-run)))
 
 (use-package compile
@@ -2662,8 +2667,8 @@ targets."
   (defun ii/compile-buffer-setup ()
     (add-hook 'window-selection-change-functions 'ii/compile--on-selection-change nil t))
 
-  :bind*
-  ("C-c c C-c" . compile)
+  :bind
+  ("C-c cc" . compile)
   :hook
   (compilation-filter-hook . ansi-color-compilation-filter)
   (compilation-mode-hook . ii/compile-buffer-setup))
@@ -2675,7 +2680,7 @@ targets."
   (after-init-hook . fancy-compilation-mode))
 
 (use-package shx
-  :bind*
+  :bind
   (("C-c rs" . shx)))
 
 (use-package dape
@@ -2763,42 +2768,42 @@ targets."
                                     (inhibit-double-buffering . t)))
 
   (defvar ii/corfu-formatter-id-mapping
-    '((array :str "[ ]  " :face  font-lock-type-face)
-      (boolean :str "0|1  " :face font-lock-builtin-face)
-      (class :str "cls  " :face font-lock-type-face)
-      (color :str "rgb  " :face success)
-      (command :str "cmd  " :face default)
-      (constant :str "cnst " :face font-lock-constant-face)
-      (constructor :str "cons " :face font-lock-function-name-face)
-      (enummember :str "enum "  :face  font-lock-builtin-face)
-      (enum-member :str  "enum " :face font-lock-builtin-face)
-      (enum :str "enum " :face font-lock-builtin-face)
-      (event :str "evnt " :face font-lock-warning-face)
-      (field :str   "fld  " :face font-lock-variable-name-face)
-      (file :str "file " :face font-lock-string-face)
-      (folder :str "dir  " :face font-lock-doc-face)
-      (interface :str "intf " :face font-lock-type-face)
-      (keyword :str "key  " :face font-lock-keyword-face)
-      (macro :str "macr " :face font-lock-keyword-face)
-      (magic  :str "mgc  " :face font-lock-builtin-face)
-      (method  :str "mth  " :face font-lock-number-face)
-      (function :str "fun  " :face font-lock-function-name-face)
-      (module :str "mod  " :face font-lock-preprocessor-face)
-      (numeric :str "num  " :face font-lock-builtin-face)
-      (operator :str "op   " :face font-lock-comment-delimiter-face)
-      (param :str "par  " :face default)
-      (property :str "prop " :face font-lock-variable-name-face)
-      (reference :str "ref  " :face font-lock-variable-name-face)
-      (snippet :str "<s>  " :face font-lock-string-face)
-      (string :str "str  " :face font-lock-string-face)
-      (struct :str "{ }  " :face  font-lock-variable-name-face)
-      (text :str "txt  " :face font-lock-doc-face)
-      (typeparameter :str "<T>  " :face font-lock-type-face)
+    '((array          :str "[ ]  " :face  font-lock-type-face)
+      (boolean        :str "0|1  " :face font-lock-builtin-face)
+      (class          :str "cls  " :face font-lock-type-face)
+      (color          :str "rgb  " :face success)
+      (command        :str "cmd  " :face default)
+      (constant       :str "cnst " :face font-lock-constant-face)
+      (constructor    :str "cons " :face font-lock-function-name-face)
+      (enummember     :str "enum "  :face  font-lock-builtin-face)
+      (enum-member    :str  "enum " :face font-lock-builtin-face)
+      (enum           :str "enum " :face font-lock-builtin-face)
+      (event          :str "evnt " :face font-lock-warning-face)
+      (field          :str   "fld  " :face font-lock-variable-name-face)
+      (file           :str "file " :face font-lock-string-face)
+      (folder         :str "dir  " :face font-lock-doc-face)
+      (interface      :str "intf " :face font-lock-type-face)
+      (keyword        :str "key  " :face font-lock-keyword-face)
+      (macro          :str "macr " :face font-lock-keyword-face)
+      (magic          :str "mgc  " :face font-lock-builtin-face)
+      (method         :str "mth  " :face font-lock-number-face)
+      (function       :str "fun  " :face font-lock-function-name-face)
+      (module         :str "mod  " :face font-lock-preprocessor-face)
+      (numeric        :str "num  " :face font-lock-builtin-face)
+      (operator       :str "op   " :face font-lock-comment-delimiter-face)
+      (param          :str "par  " :face default)
+      (property       :str "prop " :face font-lock-variable-name-face)
+      (reference      :str "ref  " :face font-lock-variable-name-face)
+      (snippet        :str "<s>  " :face font-lock-string-face)
+      (string         :str "str  " :face font-lock-string-face)
+      (struct         :str "{ }  " :face  font-lock-variable-name-face)
+      (text           :str "txt  " :face font-lock-doc-face)
+      (typeparameter  :str "<T>  " :face font-lock-type-face)
       (type-parameter :str  "<T>  " :face font-lock-type-face)
-      (unit :str "unit " :face font-lock-constant-face)
-      (value :str "val  " :face font-lock-builtin-face)
-      (variable :str "var  " :face font-lock-variable-name-face)
-      (t :str "-----"  :face  font-lock-warning-face)))
+      (unit           :str "unit " :face font-lock-constant-face)
+      (value          :str "val  " :face font-lock-builtin-face)
+      (variable       :str "var  " :face font-lock-variable-name-face)
+      (t              :str "-----"  :face  font-lock-warning-face)))
 
   (defun ii/corfu-margin-formatter (_)
     "Margin formatter for corfu."
@@ -2854,7 +2859,7 @@ targets."
         sideline-format-left "%s   "
         sideline-format-right "%s"
         sideline-priority 100
-        sideline-display-backend-name t
+        sideline-display-backend-name nil
         sideline-backends-right nil)
 
   (defun ii/sideline--local-setup ()
@@ -2894,14 +2899,14 @@ targets."
             ;; :workspaceSymbolProvider
             ;; :codeActionProvider
             :codeLensProvider
-            :documentFormattingProvider
-            :documentRangeFormattingProvider
+            ;; :documentFormattingProvider
+            ;; :documentRangeFormattingProvider
             :documentOnTypeFormattingProvider
             ;; :renameProvider
             :documentLinkProvider
             :colorProvider
             :foldingRangeProvider
-            :executeCommandProvider
+            ;; :executeCommandProvider
             :inlayHintProvider
             :semanticTokensProvider
             ;; :typeHierarchyProvider
@@ -2947,14 +2952,20 @@ targets."
 
   (when (executable-find "rass")
     (add-to-list 'eglot-server-programs '((python-ts-mode python-mode) "rass" "python"))
-    ;; (add-to-list 'eglot-server-programs '(rust-ts-mode "rass" "-- rust-analyzer"))
+    (add-to-list 'eglot-server-programs '((rust-ts-mode rust-mode) "rass" "--" "rust-analyzer"))
+    (add-to-list 'eglot-server-programs '((c-mode c-ts-mode) "ccls"))
+    (add-to-list 'eglot-server-programs '((typescript-ts-mode tsx-ts-mode)
+                                          "rass"
+                                          "--" "typescript-language-server" "--stdio"
+                                          "--" "eslint" "--stdio"
+                                          "--" "tailwindcss-language-server" "--stdio"))
     ;; (add-to-list 'eglot-server-programs '(tsx-ts-mode (lambda (int project)
     ;;                                                     (let ))))
     )
-  :bind*
+  :bind
   ( :map eglot-mode-map
-    ("M-g R" . ii/eglot-rename)
-    ("M-g y" . eglot-find-typeDefinition)
+    ("M-g R"  . ii/eglot-rename)
+    ("M-g y"  . eglot-find-typeDefinition)
     ("C-c cr" . ii/eglot-rename)
     ("C-c ch" . eglot-show-call-hierarchy)
     ("C-c ct" . eglot-show-type-hierarchy)
@@ -2972,7 +2983,7 @@ targets."
                                       (tab-mark 9 [187 9] [92 9]))
         whitespace-style '(face tab-mark space-mark spaces page-delimiters trailing space-after-tab newline indentation)
         whitespace-line-column nil)
-  :bind*
+  :bind
   ("C-c tS" . whitespace-toggle-options)
   :hook
   (after-init-hook . global-whitespace-mode)
@@ -3008,7 +3019,7 @@ targets."
   :hook
   ((grep-mode-hook rg-mode-hook prog-mode-hook) . outline-minor-mode)
   (outline-minor-mode-hook . ii/outline-minor-mode--setup)
-  :bind*
+  :bind
   ( :map outline-minor-mode-map
     ("M-TAB" . outline-cycle)
     ("M-g [@" . outline-previous-heading)
@@ -3099,6 +3110,21 @@ targets."
     (interactive)
     (consult-project-buffer))
 
+  (defun ii/project-find-dired ()
+    (interactive)
+    (ii/with-project-root!
+      (find-dired)))
+
+  (defun ii/project-find-grep-dired ()
+    (interactive)
+    (ii/with-project-root!
+      (find-grep-dired)))
+
+  (defun ii/project-find-name-dired ()
+    (interactive)
+    (ii/with-project-root!
+      (find-name-dired)))
+
   (add-hook 'project-find-functions 'ii/project--root-finder)
 
   (setopt project-buffers-viewer 'ii/project-list-buffers-consult
@@ -3114,11 +3140,14 @@ targets."
   ( :map project-prefix-map
     ("S" . ii/project-multi-isearch)
     ("G" . ii/project-multi-isearch-regexp)
-    ("O" . ii/project-occur)))
+    ("O" . ii/project-occur)
+    ("d/" . ii/project-find-dired)
+    ("d*" . ii/project-find-grep-dired)
+    ("dn" . ii/project-find-name-dired)))
 
 (use-package envrc
   :defer 4
-  :bind*
+  :bind
   ( :map envrc-mode-map
     ("C-c rr" . envrc-reload)
     ("C-c ra" . envrc-allow)
@@ -3128,7 +3157,7 @@ targets."
   (envrc-global-mode 1))
 
 (use-package docker
-  :bind*
+  :bind
   (("C-c odd" . docker)
    ("C-c odi" . docker-images)
    ("C-c odv" . docker-volumes)))
@@ -3136,7 +3165,7 @@ targets."
 (use-package kele
   :config
   (kele-mode 1)
-  :bind*
+  :bind
   (("C-c ok" . kele-dispatch)))
 
 ;; Version Control
@@ -3161,12 +3190,12 @@ targets."
 (use-package git-modes)
 
 (use-package git-timemachine
-  :bind*
-  (("C-c g C-t t" . git-timemachine-toggle)
+  :bind
+  (("C-c g tt" . git-timemachine-toggle)
    :map git-timemachine-mode-map
-   ("C-c g C-t b" . git-timemachine-blame)
-   ("C-c g C-t n" . git-timemachine-show-next-revision)
-   ("C-c g C-t p" . git-timemachine-show-previous-revision)))
+   ("C-c g tb" . git-timemachine-blame)
+   ("C-c g tn" . git-timemachine-show-next-revision)
+   ("C-c g tp" . git-timemachine-show-previous-revision)))
 
 (use-package magit
   :preface
@@ -3187,12 +3216,12 @@ targets."
         magit-log-section-commit-count 15)
   :hook
   (magit-process-find-password-functions . magit-process-password-auth-source)
-  :bind*
+  :bind
   (("C-c gg" . magit-status)
    ("C-c gb" . magit-blame)
    ("C-c gd" . magit-diff)
    ("C-c gx" . magit-dispatch)
-   ("C-c g C-i" . magit-gitignore-in-topdir)))
+   ("C-c gi" . magit-gitignore-in-topdir)))
 
 (use-package diff-hl
   :init
@@ -3247,7 +3276,7 @@ targets."
                              (setq-local process-adaptive-read-buffering t)))
   (ii/eval-on-first-hook eat-mode-hook "eat-eshell-mode" t (eat-eshell-mode 1))
 
-  :bind*
+  :bind
   (("C-c oe" . eat)
    :map project-prefix-map
    ("e" . eat-project)
@@ -3391,7 +3420,7 @@ targets."
         (with-current-buffer (window-buffer (selected-window))
           (setq-local ii/ibuffer-prev-window prev-window)))))
 
-  :bind*
+  :bind
   (("C-c bi" . ii/ibuffer)
    :map ibuffer-mode-map
    ("/^" . ibuffer-pop-filter)))
@@ -3412,13 +3441,13 @@ targets."
     (interactive)
     (set-buffer-modified-p (not (buffer-modified-p))))
 
-  :bind*
+  :bind
   (("C-c br" . revert-buffer)
    ("C-c bR" . revert-buffer-with-fine-grain)
-   ("C-c dC" . copy-directory)
-   ("C-c dD" . delete-directory)
-   ("C-c d+" . make-directory)
-   ("C-c dd" . pwd)
+   ("C-c dc" . copy-directory)
+   ("C-c dd" . delete-directory)
+   ("C-c dm" . make-directory)
+   ("C-c dp" . pwd)
    ("C-c if" . insert-file)
    ("C-c iF" . insert-file-literally)
    ("C-c b~" . ii/buffer-toggle-modified)
@@ -3430,7 +3459,7 @@ targets."
 (use-package files-x
   :defer t
   :straight nil
-  :bind*
+  :bind
   (("C-c ilp" . modify-file-local-variable-prop-line)
    ("C-c flv" . modify-file-local-variable)
    ("C-c dla" . add-dir-local-variable)
@@ -3453,11 +3482,11 @@ targets."
         dired-omit-verbose nil
         dired-vc-rename-file t
         dired-clean-confirm-killing-deleted-buffers nil)
-  :bind*
+  :bind
   (("M-g M-d" . dired-at-point)
    ("C-c d." . dired-at-point)
-   ("C-c df" . dired-find-file)
-   ("C-c dd" . dired-jump)
+   ("C-c df" . dired)
+   ("C-c dj" . dired-jump)
    ("C-c d/" . find-dired)
    ("C-c d*" . find-grep-dired)
    ("C-c dn" . find-name-dired)
@@ -3487,13 +3516,13 @@ targets."
            (extension "typ" "tex" "md" "org")))
         dired-filter-verbose nil
         dired-subtree-line-prefix " >")
-  :bind*
+  :bind
   ( :map dired-mode-map
-    ("zc" . dired-ranger-copy)
-    ("zp" . dired-ranger-paste)
-    ("zm" . dired-ranger-move)
-    ("TAB" . dired-subtree-toggle)
-    ("<tab>". dired-subtree-toggle))
+    ("zc"    . dired-ranger-copy)
+    ("zp"    . dired-ranger-paste)
+    ("zm"    . dired-ranger-move)
+    ("TAB"   . dired-subtree-toggle)
+    ("<tab>" . dired-subtree-toggle))
   :hook
   (dired-mode-hook . dired-filter-mode)
   (dired-mode-hook . dired-collapse-mode))
@@ -3528,6 +3557,11 @@ targets."
   (add-to-list 'tramp-connection-properties '(nil
                                               "session-timeout"
                                               "240")))
+
+(use-package tramp-rpc
+  :straight ( :type git
+              :host github
+              :repo "ArthurHeymans/emacs-tramp-rpc"))
 
 (use-package implicit-org
   :straight `(implicit-org :type nil
@@ -3918,7 +3952,7 @@ targets."
 
   :hook
   (org-roam-mode-hook . +org-roam-mode--setup)
-  :bind*
+  :bind
   (("C-c nf" . org-roam-node-find)
    ("C-c nr" . org-roam-node-random)
    ("C-c nc" . org-roam-capture)
@@ -3983,7 +4017,7 @@ targets."
   (add-hook 'calibredb-search-mode-hook 'ii/calibredb--setup)
   :functions
   (calibredb-candidates)
-  :bind*
+  :bind
   (("C-c oC" . calibredb)))
 
 (use-package annotate
@@ -4022,7 +4056,7 @@ targets."
           ((member major-mode '(pdf-view-mode djvu-mode nov-mode doc-view-mode))
            (org-noter))
           (t (user-error "This command can be used only in `org-mode', `pdf-view-mode', `nov-mode', `djvu-mode', `doc-view-mode'"))))
-  :bind*
+  :bind
   ( :map org-mode-map
     ("C-c nn" . ii/org-noter-start-session)
     :map pdf-view-mode-map
@@ -4130,7 +4164,7 @@ targets."
          meow-insert-mode
          (not (bolp))
          (looking-at-p "\s*$")))
-  :bind*
+  :bind
   (("C-c at" . minuet-auto-suggestion-mode)
    ("C-c a TAB" . minuet-show-suggestion)
    :map minuet-active-mode-map
@@ -4168,9 +4202,9 @@ targets."
   (gptel-mode-hook . visual-line-mode)
   (gptel-post-stream-hook . gptel-auto-scroll)
   (gptel-post-response-function . gptel-end-of-response)
-  :bind*
+  :bind
   (("C-c ag" . gptel-menu)
-   ("C-c a C-g" . gptel)
+   ("C-c aG" . gptel)
    ("C-c ar" . gptel-rewrite)
    :map embark-region-map
    :package embark
@@ -4198,7 +4232,7 @@ targets."
         claude-code-ide-terminal-backend 'eat)
   :config
   (claude-code-ide-emacs-tools-setup)
-  :bind* ("C-c ac" . claude-code-ide-menu))
+  :bind ("C-c ac" . claude-code-ide-menu))
 
 (use-package eca)
 
@@ -4437,7 +4471,8 @@ targets."
 
   (add-to-list 'auto-mode-alist '("\\.2da\\'" . 2da-mode))
   :bind
-  (("C-c C-l" . csv-header-line)))
+  ( :map 2da-mode-map
+    ("C-c C-l" . csv-header-line)))
 
 (use-package crystal-mode
   :init
@@ -4451,7 +4486,7 @@ targets."
 (use-package speed-type
   :init
   (setq speed-type-save-statistic-option 'always)
-  :bind*
+  :bind
   (("C-c ott" . speed-type-text)
    ("C-c otb" . speed-type-buffer)
    ("C-c otr" . speed-type-region)

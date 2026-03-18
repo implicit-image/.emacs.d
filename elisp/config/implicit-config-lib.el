@@ -264,7 +264,7 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
 
 (defmacro ii/with-project-root! (&rest body)
   (declare (indent defun))
-  `(let ((default-directory (or (project-root (project-current))
+  `(let ((default-directory (or (project-root (project-current t))
                                 default-directory)))
      ,@body))
 
