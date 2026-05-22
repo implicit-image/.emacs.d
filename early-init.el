@@ -1,7 +1,7 @@
 ;;; early-init.el early-init emacs file -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2024 Błażej Niewiadomski
-;; Author: Błażej Niewiadomski <blaz.nie@protonmail.com>
+;; Copyright (C) 2024 B a ej Niewiadomski
+;; Author: B a ej Niewiadomski <blaz.nie@protonmail.com>
 ;; This file is not part of GNU Emacs.
 ;;; Commentary:
 ;;
@@ -26,7 +26,7 @@
       inhibit-splash-screen t
       initial-major-mode 'fundamental-mode
       initial-scratch-message nil
-      inhibit-redisplay (not init-file-debug)
+      inhibit-redisplay nil ;;(not init-file-debug)
       ;; disable gc, we are garbage collecting on idle
       gc-cons-threshold most-positive-fixnum
       use-file-dialog nil
@@ -49,11 +49,11 @@
 ;; to increase lsp-mode performance
 ;; (setenv "LSP_USE_PLISTS" "true")
 (setq +base/font-family (pcase system-type
-                          ('gnu/linux "Comic Code")
-                          ('windows-nt "Cas"))
+                          ('gnu/linux "Comic Code Ligatures")
+                          ('windows-nt "Comic Code"))
       +base/font-weight 'normal
       +base/font-size (pcase system-type
-                        ('windows-nt 10)
+                        ('windows-nt 17)
                         (_ 15))
       +base/font-spec (font-spec :family +base/font-family
                                  :weight +base/font-weight

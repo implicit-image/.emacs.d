@@ -2,19 +2,11 @@
 
 ;;; Code:
 (require 'meow)
-(require 'surround)
 (require 'implicit-meow-surround)
 (require 'implicit-ui)
 ;; (require 'implicit-meow-thing)
 ;; (require 'implicit-meow-beacon)
 
-
-;; multilpe-cursors functions
-(declare-function mc/remove-fake-cursors "multiple-cursors")
-(declare-function mc/create-fake-cursor-at-point "multiple-cursors")
-(declare-function mc/num-cursors "multiple-cursors")
-(declare-function mc/disable-multiple-cursors-mode "multiple-cursors")
-(declare-function mc/pop-state-from-overlay "multiple-cursors")
 
 ;; iedit functions
 (declare-function iedit-mode "iedit-mode")
@@ -24,6 +16,9 @@
 (declare-function iedit-restrict-region "iedit-mode")
 
 (declare-function async-start "async")
+
+(declare-function surround-mark-inner "surround")
+(declare-function surround-mark-outer "surround")
 
 ;;;; Variables
 
@@ -313,47 +308,6 @@
 ;;;###autoload
 (defun ii/meow-command (&optional arg)
   (interactive))
-
-;;;###autoload
-(defun ii/meow-mc-mark-all (beg end)
-  (interactive (if (region-active-p)
-                   (list (region-beginning) (region-end))
-                 (list (point-min) (point-max))))
-  (let ((search (car regexp-search-ring))
-        (case-fold-search nil))
-    (if (string= search "")
-        (message "Mark aborted")
-      (progn
-        (mc/remove-fake-cursors)
-        (goto-char beg)
-        (let ((lastmatch))
-          (while (and (< (point) end) ; can happen because of (forward-char)
-                      (search-forward-regexp search end t))
-            (push-mark (match-beginning 0))
-            (mc/create-fake-cursor-at-point)
-            (setq lastmatch (point))
-            (when (= (point) (match-beginning 0))
-              (forward-char)))
-          (unless lastmatch
-            (error "Search failed for %S" search)))
-        (goto-char (match-end 0))
-        (if (< (mc/num-cursors) 3)
-            (mc/disable-multiple-cursors-mode)
-          (mc/pop-state-from-overlay (mc/furthest-cursor-before-point))
-          (multiple-cursors-mode 1))))))
-
-;;;###autoload
-(defun ii/meow-mc-restrict-to-thing (thing arg)
-  "Delete all fake cursors except for ones in bounds of THING. If ARG is a number, use bounds of ARG THINGS. If ARG is negative, use bounds of ARG previous things."
-  (interactive (list (meow-thing-prompt "Restrict mc to: ") current-prefix-arg))
-  (if-let* ((bounds (meow--parse-bounds-of-thing-char thing))
-            (beg (car bounds))
-            (end (cdr bounds)))
-      (save-mark-and-excursion
-        (mc/for-each-fake-cursor
-         (when (or (< (overlay-start cursor) beg)
-                   (> (overlay-end cursor) end))
-           (mc/remove-fake-cursor cursor))))))
 
 ;; iedit-mode integration
 ;;;###autoload

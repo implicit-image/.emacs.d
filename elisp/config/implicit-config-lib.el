@@ -227,6 +227,18 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
   (interactive "P")
   (command-execute +lookup-documentation-function))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; UTILITY FUNCTIONS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun ii/emacs-unfocused-p ()
+  "Return non-nil if all Emacs frames are unfocused, nil otherwise."
+  (not (seq-find #'frame-focus-state (frame-list))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CONFIG MACROS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defmacro ii/packages! (&rest pkgs)
   "Expands to sequential `use-package' declarations with PKGS as arguments,."
   `(progn ,@(mapcar (lambda (pkg-sym)
@@ -257,15 +269,17 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
   `(let ((inhibit-message t))
      ,@body))
 
-(defmacro ii/with-default-directory! (dir &rest body)
+(defmacro ii/with-default-directory! (var dir &rest body)
   (declare (indent defun))
-  `(let ((default-directory ,dir))
+  `(let* ((,var (or ,dir default-directory))
+          (default-directory ,var))
      ,@body))
 
-(defmacro ii/with-project-root! (&rest body)
+(defmacro ii/with-project-root! (var &rest body)
   (declare (indent defun))
-  `(let ((default-directory (or (project-root (project-current t))
-                                default-directory)))
+  `(let* ((,var (or (project-root (project-current t))
+                    default-directory))
+          (default-directory ,var))
      ,@body))
 
 (defmacro ii/eval-on-first-execution (func name how pred &rest body)
@@ -295,5 +309,23 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
                                     (remove-function ,func ',func-symbol)
                                     (message "Setting up %s" ,name)
                                     ,@body)))))
+
+(defmacro ii/bind-keys (package &rest args)
+  (declare (indent defun))
+  `(progn
+     ,@(mapcar (lambda (bind)
+                 (when (and (consp bind) (stringp (car bind)))
+                   `(autoload #',(cdr bind) ,package nil t)))
+               args)
+     (bind-keys :package ,(intern package) ,@args)))
+
+(defmacro ii/bind-keys* (package &rest args)
+  (declare (indent defun))
+  `(progn
+     ,@(mapcar (lambda (bind)
+                 (when (and (consp bind) (stringp (car bind)))
+                   `(autoload #',(cdr bind) ,package nil t)))
+               args)
+     (bind-keys* :package ,(intern package) ,@args)))
 
 (provide 'implicit-config-lib)
