@@ -185,18 +185,28 @@
   (let ((default-directory user-emacs-directory))
     (command-execute 'consult-fd)))
 
+
+(defvar ii/random-image-history nil)
+
 (defun +utils/open-random-file-in-dir (dir)
   (interactive (list default-directory))
-  (if-let ((file (seq-random-elt
-                  (seq-remove
-                   (lambda (file)
-                     (string-equal file (buffer-file-name (current-buffer))))
-                   (directory-files dir)))))
-      (progn (clear-minibuffer-message)
-             (message "Opening %s" file)
-             (find-alternate-file file)
-             (run-with-timer 1.0 nil (lambda ()
-                                       (message " "))))
+  (if-let* ((files (seq-remove
+                    (lambda (file)
+                      (or (string-equal file (buffer-file-name (current-buffer)))
+                          (file-directory-p file)
+                          (= (random 4) 2)))
+                    (directory-files dir t)))
+            (file (seq-random-elt files))
+            (_ (file-exists-p file)))
+      (progn
+        (when (eq major-mode 'image-mode)
+          ;; (push (buffer-file-name) ii/random-image-history)
+          (image-flush (image-get-display-property)))
+        (clear-minibuffer-message)
+        (message "Opening %s" file)
+        (find-alternate-file file)
+        (run-with-timer 1.0 nil (lambda ()
+                                  (message " "))))
     (error "There are no ther files in %s" dir)))
 
 (defun +utils/ripgrep-modules ()
@@ -223,5 +233,10 @@
       (let ((default-directory "/home/root"))
         (find-file (concat "/sudo:root@localhost:" filename)))
     (user-error "Implemented only on gnu/linux")))
+
+;;;###autoload
+(defun ii/utils-clear-image-cache ()
+  (interactive)
+  (clear-image-cache)a)
 
 (provide 'implicit-utils)

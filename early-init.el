@@ -49,7 +49,7 @@
 ;; to increase lsp-mode performance
 ;; (setenv "LSP_USE_PLISTS" "true")
 (setq +base/font-family (pcase system-type
-                          ('gnu/linux "Comic Code Ligatures")
+                          ('gnu/linux "Comic ShannsMono Nerd Font Mono")
                           ('windows-nt "Comic Code"))
       +base/font-weight 'normal
       +base/font-size (pcase system-type
@@ -66,19 +66,13 @@
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars . nil) default-frame-alist)
 (push '(horizontal-scroll-bars . nil) default-frame-alist)
-(push `(font . ,(string-join `(,+base/font-family
-                               ,(number-to-string +base/font-size))
-                             "-"))
-      default-frame-alist)
+(push `(font . ,(concat +base/font-family "-" (number-to-string +base/font-size))) default-frame-alist)
 ;; initial frame parameters
 (push '(menu-bar-lines . 0) initial-frame-alist)
 (push '(tool-bar-lines . 0) initial-frame-alist)
 (push '(vertical-scroll-bars . nil) initial-frame-alist)
 (push '(horizontal-scroll-bars . nil) initial-frame-alist)
-(push `(font . ,(string-join `(,+base/font-family
-                               ,(number-to-string +base/font-size))
-                             "-"))
-      initial-frame-alist)
+(push `(font . ,(concat +base/font-family "-" (number-to-string +base/font-size))) initial-frame-alist)
 
 (defun my-minibuffer-setup-hook ()
   (setq gc-cons-threshold most-positive-fixnum))

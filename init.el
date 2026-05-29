@@ -149,6 +149,8 @@ with ARG."
 (unbind-key "C-/")
 ;; unbind scroll-down-command
 (unbind-key "C-v")
+;;(unbind-key "C-\[")
+(unbind-key "C-\]")
 
 (define-prefix-command 'meow-toggle-prefix-command 'meow-toggle-prefix-map "toggle")
 (define-prefix-command 'meow-quit-prefix-command 'meow-quit-prefix-map "quit")
@@ -226,12 +228,12 @@ with ARG."
       scroll-error-top-bottom t
       pixel-scroll-precision-use-momentum t
       pixel-scroll-precision-interpolate-mice nil
-      fast-but-imprecise-scrolling nil
+      fast-but-imprecise-scrolling t
       hscroll-step 1
       hscroll-margin 2
       auto-hscroll-mode t
       scroll-minibuffer-conservatively nil
-      lazy-highlight-initial-delay 0.2
+      lazy-highlight-initial-delay 0.1
       lazy-highlight-no-delay-length 4
       lazy-highlight-buffer t
       completion-ignore-case t
@@ -300,9 +302,9 @@ with ARG."
       kill-do-not-save-duplicates t
       save-interprogram-paste-before-kill t
       ;; undo
-      undo-limit (* 13 160000)
-      undo-strong-limit (* 13 240000)
-      undo-outer-limit (* 13 24000000)
+      undo-limit (* 2 1000 1000)
+      undo-strong-limit (* 4 1000 1000)
+      undo-outer-limit (* 24 1000 1000)
       ;; eval expr
       eval-expression-print-length 100
       eval-expression-print-level 5
@@ -367,8 +369,9 @@ with ARG."
                               (mapcar #'substring-no-properties
                                       (cl-remove-if-not #'stringp kill-ring)))))
 
-            ;; (desktop-save-mode 1)
-            ))
+            (unless init-file-debug
+              (desktop-save-mode 1)
+              (desktop-read desktop-dirname))))
 
 ;; load up `electric-pair-mode' only when its time for inserting text
 (ii/eval-on-first-hook meow-insert-enter-hook "electric-pairs" t (electric-pair-mode 1))
@@ -1160,7 +1163,7 @@ with ARG."
      '("M-3" . meow-expand-3)
      '("M-2" . meow-expand-2)
      '("M-1" . meow-expand-1)
-     '("`" . "")
+     (cons "`" esc-map)
      ;; '(cons "~" ii/text-change-map)
      ;; '("!" . ii/meow-shell-command)
      '("@" . "C-c @")
@@ -1425,7 +1428,7 @@ with ARG."
         isearch-repeat-on-direction-change t
         multi-isearch-pause t
         query-replace-skip-read-only t
-        fringe-mode (cons 8 7)
+        fringe-mode (cons 10 7)
         right-margin-width 1)
 
 (use-package debbugs)
@@ -1449,6 +1452,29 @@ with ARG."
    ("i" . wgrep-change-to-wgrep-mode))
   :hook
   (rg-mode-hook . ii/rg--setup))
+
+(with-eval-after-load 'grep
+  (defvar-local ii/grep-invis-overlays nil)
+  
+  (defun ii/grep-toggle-file-name-visibility ()
+    (interactive)
+    (save-mark-and-excursion
+      (if ii/grep-invis-overlays
+          (progn
+            (mapc #'delete-overlay ii/grep-invis-overlays)
+            (setq ii/grep-invis-overlays nil))
+        (goto-char (point-min))
+        (let ((prop nil)
+              ov num file )
+          (while (setq prop (text-property-search-forward 'compilation-message))
+            (setq ov (make-overlay (prop-match-beginning prop) (prop-match-end prop)))
+            (ignore-errors (save-mark-and-excursion
+                             (goto-char (pos-bol))
+                             (search-forward-regexp "^\\(\\)\:\\([0-9]+\\)\:")
+                             (match-string 1)))
+
+            (overlay-put ov 'display (string-pad num 6 32 t))
+            (push ov ii/grep-invis-overlays)))))))
 
 ;; emacs >= 31 includes `grep-edit-mode'
 (use-package wgrep
@@ -1664,7 +1690,7 @@ with ARG."
                   (derived-mode . grep-mode)
                   (derived-mode . xref--xref-buffer-mode)))
            (display-buffer-reuse-mode-window display-buffer-use-some-window)
-           (dedicated . t)
+           ;; (dedicated . t)
            (post-command-select-window . t))
           ((or . ("\*Completions\*"
                   (derived-mode . completion-list-mode)))
@@ -1960,6 +1986,48 @@ with ARG."
   ;; make sure no embark command asks for confirmation
   (dolist (entry embark-pre-action-hooks)
     (delete 'embark--confirm entry))
+
+
+  (defun ii/embark-consult-export-grep (lines)
+    (embark-consult--export-grep
+     :header "Exported grep results:\n\n"
+     :lines lines
+     :insert
+     (lambda (lines)
+       (save-mark-and-excursion
+         (let ((last-file "")
+               (inhibit-read-only t)
+               file line-num)
+           (dolist (line lines)
+             (setq file (get-text-property 0 'consult--prefix-group line)
+                   line-num (progn (string-match "^.+\:\\([0-9]+(\\).*$" line)
+                                   (match-string 1)))
+             (unless (string-equal file last-file)
+               (let* ((p (point))
+                      (ov (make-overlay p p nil nil nil)))
+                 (overlay-put ov 'face 'flymake-note-echo-at-eol)
+                 (insert (propertize (concat (propertize file 'face 'flymake-note-echo-at-eol) "\n") 'read-only t))
+                 (move-overlay ov p (1- (point)))))
+             (let ((p (point)))
+               (insert line "\n")
+               (save-mark-and-excursion
+                 (goto-char p)
+                 (let ((ov (make-overlay p (1+ (next-single-property-change p 'consult--prefix-group)) nil nil t)))
+                   (overlay-put ov 'invisible t)
+                   (overlay-put ov 'after-string (concat line-num)))))
+             (setq last-file file))))
+       (let ((count 0) prop)
+         (while (setq prop (text-property-search-forward
+                            'face 'consult-highlight-match t))
+           (setq count (+ count 1))
+           (put-text-property (prop-match-beginning prop)
+                              (prop-match-end prop)
+                              'font-lock-face
+                              'match))
+         count))
+     :footer #'ignore))
+  
+  (advice-add 'embark-consult-export-grep :override #'ii/embark-consult-export-grep)
   :bind
   ( :map embark-consult-search-map
     ([remap consult-find] . consult-fd)))
@@ -2010,7 +2078,6 @@ targets."
 
   (advice-add #'embark-completing-read-prompter
               :around #'ii/embark-hide-which-key-indicator)
-
   :bind*
   (("M-." . embark-dwim)
    ("M-'" . embark-act)
@@ -2203,7 +2270,7 @@ The default value is \"es -r\", which only works if you place the command line v
     (cons input (apply-partially #'orderless--highlight input t)))
 
   (setq affe-regexp-compiler #'affe-orderless-regexp-compiler
-        affe-count 10000)
+        affe-count 1000)
 
   ;; Manual preview key for `affe-grep'
   (consult-customize affe-grep
@@ -2273,7 +2340,7 @@ The default value is \"es -r\", which only works if you place the command line v
         eldoc-box-doc-separator "\n-------------------------------\n"
         eldoc-box-only-multi-line nil
         eldoc-box-fringe-use-same-bg nil)
-
+  
   (defun ii/eldoc-box--setup ()
     (if (bound-and-true-p eldoc-box-hover-mode)
         (setq-local eldoc-idle-delay 0.15
@@ -2343,8 +2410,8 @@ The default value is \"es -r\", which only works if you place the command line v
     (add-to-list 'dumb-jump-find-rules
                  '( :type "function" :supports ("rg" "git-grep") :language "nwscript"
                     :regex "\\b(struct +[A-Za-z0-9\_]+|int|void|float|object|itemproperty|effect|talent|location|command|action|cassowary|event|json|sqlquery|vector|string)[ \t]+\\s*JJJ *([ \t]*([^{]*))[ \t\n]*{"
-                    :tests ("void Func() {" "struct ps_effect Fire(struct test Test, int num)")
-                    :not ("void Func();" "struct ps_test {" "struct ps_test\n{" "")))
+                    :tests ("void test() {" "struct ps_struct test(struct ps_effect e, int num)")
+                    :not ("void test();" "struct test {" "struct test\n{" "")))
     (add-to-list 'dumb-jump-find-rules
                  '( :type "type" :supports ("rg" "git-grep") :language "nwscript"
                     :regex "\\b(struct \\s*JJJ[\n\t {]*"
@@ -2483,9 +2550,16 @@ The default value is \"es -r\", which only works if you place the command line v
   :init
   (ii/eval-on-first-hook find-file-hook "apheleia" t (apheleia-global-mode 1)))
 
+(use-package undo-fu-session
+  :config
+  (setopt undo-fu-session-incompatible-major-modes '(authinfo-mode)
+          undo-fu-session-incompatible-files '("\.zshrc" ))
+  :hook
+  (after-init-hook . undo-fu-session-global-mode))
+
 (use-package vundo
   :custom
-  (vundo-window-max-height 6)
+  (vundo-window-max-height 12)
   :bind
   (("C-x u" . vundo)
    :map vundo-mode-map
@@ -2873,7 +2947,7 @@ The default value is \"es -r\", which only works if you place the command line v
         corfu-preselect 'prompt
         corfu-preview-current nil
         corfu-auto nil
-        corfu-popupinfo-delay '(0.25 . 0.25)
+        corfu-popupinfo-delay '(0.25 . 0.1)
         corfu-left-margin-width 0
         corfu-right-margin-width 0
         corfu-bar-width 0
@@ -2885,7 +2959,7 @@ The default value is \"es -r\", which only works if you place the command line v
         corfu-quit-no-match t
         corfu-on-exact-match 'insert
         global-corfu-test-minibuffer nil)
-  
+
   ;; setup corfu first time something asks
   (ii/eval-on-first-execution completion-at-point
     "corfu"
@@ -3004,11 +3078,6 @@ The default value is \"es -r\", which only works if you place the command line v
   :init
   (setq sideline-eglot-code-actions-prefix "! "))
 
-(use-package sideline-flymake
-  :init
-  (setq sideline-flymake-display-mode 'point
-        sideline-flymake-max-lines 3))
-
 (use-package sideline
   :init
   (setq sideline-backends-left-skip-current-line t
@@ -3020,7 +3089,7 @@ The default value is \"es -r\", which only works if you place the command line v
         sideline-format-right "%s"
         sideline-priority 100
         sideline-display-backend-name nil
-        sideline-backends-right '(sideline-eglot sideline-flymake))
+        sideline-backends-right '(sideline-eglot))
 
   :bind
   (("C-c cS" . sideline-mode)))
@@ -3061,7 +3130,7 @@ The default value is \"es -r\", which only works if you place the command line v
             ;; :documentSymbolProvider
             ;; :workspaceSymbolProvider
             ;; :codeActionProvider
-            :codeLensProvider
+            ;; :codeLensProvider
             ;; :documentFormattingProvider
             ;; :documentRangeFormattingProvider
             :documentOnTypeFormattingProvider
@@ -3070,15 +3139,14 @@ The default value is \"es -r\", which only works if you place the command line v
             :colorProvider
             :foldingRangeProvider
             ;; :executeCommandProvider
-            :inlayHintProvider
+            ;; :inlayHintProvider
             :semanticTokensProvider
             ;; :typeHierarchyProvider
             ;; :callHierarchyProvider
             ;;:diagnosticProvider
             ))
   :config
-  (setopt eglot-code-action-indications '(eldoc-hint))
-
+  
   (defun ii/eglot-rename (&rest args)
     (interactive)
     (let ((case-fold-search nil))
@@ -3137,7 +3205,11 @@ The default value is \"es -r\", which only works if you place the command line v
 
 ;;; Indent indicators
 (setq whitespace-global-modes '(not fundamental-mode special-mode image-mode nov-mode pdf-view-mode archive-mode markdown-mode gfm-mode org-mode latex-mode dired-mode csv-mode nxml-mode ess-mode diff-mode wdired-mode magit-mode magit-diff-mode)
-      whitespace-display-mappings '((space-mark 32 [183] [46])
+      whitespace-display-mappings `((space-mark 32
+                                                [,(pcase +base/font-family
+                                                    ("Comic ShannsMono Nerd Font Mono" ?•)
+                                                    ("Comic Code Ligatures" 183))]
+                                                [46])
                                     (space-mark 160 [164] [95])
                                     (newline-mark 10 [36 10])
                                     (tab-mark 9 [187 9] [92 9]))
@@ -3177,7 +3249,7 @@ The default value is \"es -r\", which only works if you place the command line v
     (ii/outline-minor-mode--set-elipsis ii/outline-minor-mode-ellipsis)))
 
 (add-hook 'grep-mode-hook 'outline-minor-mode)
-(add-hook 'rg-mode-hook 'outline-minor-m)
+(add-hook 'rg-mode-hook 'outline-minor-mode)
 (add-hook 'prog-mode-hook 'outline-minor-mode)
 
 (add-hook 'outline-minor-mode-hook 'ii/outline-minor-mode--setup)
@@ -3358,6 +3430,13 @@ The default value is \"es -r\", which only works if you place the command line v
         vc-allow-async-diff t
         vc-dir-save-some-buffers-on-revert t
         vc-display-failed-async-commands t
+        vc-annotate-background-mode t
+        vc-annotate-display-mode 'fullscale
+        vc-annotate-color-map '((20 . "#73c936") (40 . "#a1cf35") (60 . "#d0d634") (80 . "#ffdd33")
+                                (100 . "#f9af31") (120 . "#f48130") (140 . "#ef532f") (160 . "#d16e61")
+                                (180 . "#b38a94") (200 . "#96a6c8") (220 . "#b5819b") (240 . "#d45c6e")
+                                (260 . "#f43841") (280 . "#d94c51") (300 . "#bf6161") (320 . "#a57672")
+                                (340 . "#5c5e5e") (360 . "#5c5e5e"))
         diff-font-lock-syntax t
         custom-magic-show nil
         diff-refine 'navigation
@@ -3460,7 +3539,7 @@ The default value is \"es -r\", which only works if you place the command line v
 
 (use-package diff-hl
   :init
-  (setq diff-hl-show-hunk-function 'ii/diff-hl-show-hunk-popup-window
+  (setq diff-hl-show-hunk-function 'diff-hl-show-hunk-inline-popup
         diff-hl-show-hunk-inline-popup-hide-hunk t
         diff-hl-show-hunk-inline-popup-smart-lines nil
         diff-hl-draw-borders nil
@@ -4506,6 +4585,8 @@ The default value is \"es -r\", which only works if you place the command line v
 (add-to-list 'auto-mode-alist '("\\(?:\\.\\(?:p\\(?:th\\|y[iw]?\\)\\)\\|/\\(?:SCons\\(?:\\(?:crip\\|truc\\)t\\)\\)\\)\\'" . python-ts-mode))
 (add-to-list 'auto-mode-alist '("\\/git-rebase-todo\\'" . conf-mode))
 
+(add-hook 'python-mode-hook #'python-ts-mode)
+
 (use-package tide
   :init
   (setq tide-enable-xref t
@@ -4702,6 +4783,7 @@ The default value is \"es -r\", which only works if you place the command line v
     (csv-align-mode 1)
     (setq-local csv-separators '("\t" "")
                 csv-separator-chars '(?\t 32)
+                buffer-invisibility-spec nil
                 font-lock-keywords nil
                 csv-separator-regexp "[\t ]+"
                 csv-font-lock-keywords nil

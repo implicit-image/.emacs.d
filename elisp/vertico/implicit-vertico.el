@@ -44,8 +44,7 @@
   ;; (when (window-configuration-p ii/vertico--window-config)
   ;;   (set-window-configuration ii/vertico--window-config)
   ;;   (setq ii/vertico--window-config nil))
-  (with-selected-window (selected-window)
-    (pulse-momentary-highlight-region (window-start) (window-end)))
+  (pulse-momentary-highlight-region (window-start) (window-end))
   (remove-hook 'minibuffer-exit-hook 'ii/vertico--restore-window-config))
 
 (defun ii/vertico--buffer-get-display-alist-props (wider command last-win)
@@ -82,7 +81,7 @@
          (new-alist (append (ii/vertico--get-buffer-alist this-command last-win) alist)))
     (when (not (one-window-p)) (delete-other-windows))
     (add-hook 'minibuffer-exit-hook 'ii/vertico--restore-window-config)
-    (cond ((with-current-buffer (window-buffer (minibuffer-selected-window))
+    (cond ((with-current-buffer (window-buffer last-win)
              (eq major-mode 'vertico-buffer-mode))
            (display-buffer-same-window buffer alist))
           (t (display-buffer-in-side-window buffer new-alist)))))
