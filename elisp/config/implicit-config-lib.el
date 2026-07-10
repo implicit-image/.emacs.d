@@ -328,4 +328,60 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
                args)
      (bind-keys* :package ,(intern package) ,@args)))
 
+(defun ii/defhook--parse-args (body)
+  "Parse keyword args prefixing BODY."
+  (let ((doc (car body))
+        curr once done place depth local next)
+    (setq doc (if (stringp doc)
+                  (progn
+                    (setq body (cdr body))
+                    doc)
+                ""))
+    (while (not done)
+      (setq curr (car body)
+            body (cdr body))
+      (cond
+       ((keywordp curr) (setq next curr))
+       ((keywordp next)
+        (pcase next
+          (:hook-var (setq place curr))
+          (:depth (setq depth curr))
+          (:once (setq once curr))
+          (:local (setq local curr))
+          (_ (user-error "Incorrect keyword, should be one of `:hook-var', `:depth', `:local', `:once'")))
+        (setq next nil))
+       ((and (null next) (consp curr))
+        (setq done t
+              body (cons curr body)))))
+    (when (null place) (user-error "Hook variable name in `:hook-var' shoould be provided"))
+    (list doc place depth once local body)))
+
+(defmacro ii/defhook! (name arglist &rest body)
+  "Define a function named NAME with ARGLIST and DOC.
+
+BODY should start with 1 or more keyword arguments, chosen from following
+`:hook-var' - hook variable to add function NAME to, MANDATORY!!,
+`:depth'    - hook depth at which to add the function, same as 3rd argument of `add-hook',
+`:local'    - whether the hook should be local, same as 4th argument of `add-hook'
+`:once'     - if non-nil, remove the function NAME from hook if evaluation of BODY returns non-nil."
+  (declare (indent defun))
+  (let* ((args (ii/defhook--parse-args body))
+         (doc (nth 0 args))
+         (place (nth 1 args))
+         (depth (nth 2 args))
+         (once (nth 3 args))
+         (local (nth 4 args))
+         (body (nth 5 args))
+         (fn-sym name))
+    (when (null fn-sym) (user-error "Hook function name NAME should be provided"))
+    `(progn
+       (defun ,fn-sym ,arglist
+         ,doc
+         ,@(if (not once)
+               body
+             `((when (progn ,@body)
+                 (remove-hook ',place #',fn-sym ,local)))))
+       (add-hook ',place #',fn-sym ,depth ,local))))
+
+
 (provide 'implicit-config-lib)

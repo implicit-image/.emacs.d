@@ -1,10 +1,9 @@
+;; -*- lexical-binding: t; -*-
 (require 'ob)
 (require 'consult)
 (require 'ob-jupyter)
 
 (defvar +org-template-dir (expand-file-name "+templates" user-emacs-directory))
-
-
 
 ;;;###autoload
 (defun +org-roam-mode--setup ()
@@ -61,8 +60,36 @@
                       subdir
                       filename)))
 
+(defun ii/org-setup-src-mode ()
+  (setq-local buffer-file-name nil
+              default-directory ))
+
+(defun ii/org-collect-blocks-with-header-arg (arg val)
+  (let ((res nil))
+    (org-babel-map-src-blocks nil
+      (let* ((info (org-babel-get-src-block-info)))
+        (when (eq val (cdr (assq arg (nth 2 info))))
+          (push))))
+    (nreverse res)))
+
+(defun ii/org-edit-src-blocks-with-header-arg (arg val)
+  (let ((blocks (ii/org-collect-blocks-with-header-arg arg val)))))
+
+(defun ii/org-edit-src-block ())
+
+;;;###autoload
+(defun ii/org-narrow-to-heading ()
+  (interactive))
+
+(defun ii/org-narrow-to-next-heading (n)
+  (interactive "p"))
+
 ;;;###autoload
 (defun +org-mode--jupyter-setup ())
 
+(defun ii/org-quick-setup ()
+  (interactive)
+  (setq-local default-directory "/home/b/programming/moder/"
+              buffer-file-name "/home/b/programming/moder/test-script.py"))
 
 (provide 'implicit-org)

@@ -52,6 +52,19 @@
   (when (use-region-p)
     (buffer-substring-no-properties (region-beginning) (region-end))))
 
+(defun ii/rotate-ring (ring)
+  (if (not (ring-p ring))
+      (error "`ring' has to be a ring")
+    (when ring
+      (let ((first (car ring)))
+        (ring-insert)))))
+
+(defun ii/rotate-yank-pointer (arg)
+  (interactive "p")
+  (rotate-yank-pointer arg)
+  (let ((text (copy-sequence (car-safe kill-ring-yank-pointer))))
+    (message "%S" (substring-no-properties text))))
+
 ;; (defun +utils-which-func-update-line-number ()
 ;;   "Update `which-func-line-number' with current number."
 ;;   (let ((wind (selected-window)))
@@ -118,29 +131,6 @@
         (copy-file curr-name dest)
         (find-file dest)))))
 
-(defun +utils/consult-set-font-family ()
-  "Set font family in all frames to selected one."
-  (interactive)
-  (if (display-graphic-p)
-      (let ((fg-color (doom-color 'strings))
-            (bg-color (doom-color 'bg)))
-        (consult--read (delete-dups (font-family-list))
-                       :prompt "Font family: "
-                       :annotate (lambda (font)
-                                   `(,(propertize
-                                       (concat font " ")
-                                       'face 'font-lock-keyword-face)
-                                     "Family: "
-                                     ,(propertize
-                                       "The quick brown fox jumps over the lazy dog."
-                                       'face `(:family ,font :foreground ,fg-color :background ,bg-color))))
-                       :require-match t
-                       :history 'consult-set-font-family-history
-                       :lookup (lambda (selected-font &rest args)
-                                 (interactive)
-                                 (set-frame-font selected-font t t t))))
-    (message "Cant change font family on tty")))
-
 (defun +utils/forward-defun (arg)
   (interactive "P")
   (beginning-of-defun (if arg (- arg) -1)))
@@ -190,24 +180,25 @@
 
 (defun +utils/open-random-file-in-dir (dir)
   (interactive (list default-directory))
-  (if-let* ((files (seq-remove
-                    (lambda (file)
-                      (or (string-equal file (buffer-file-name (current-buffer)))
-                          (file-directory-p file)
-                          (= (random 4) 2)))
-                    (directory-files dir t)))
-            (file (seq-random-elt files))
-            (_ (file-exists-p file)))
-      (progn
-        (when (eq major-mode 'image-mode)
-          ;; (push (buffer-file-name) ii/random-image-history)
-          (image-flush (image-get-display-property)))
-        (clear-minibuffer-message)
-        (message "Opening %s" file)
-        (find-alternate-file file)
-        (run-with-timer 1.0 nil (lambda ()
-                                  (message " "))))
-    (error "There are no ther files in %s" dir)))
+  (when (eq major-mode 'image-mode)
+    (if-let* ((files (seq-remove
+                      (lambda (file)
+                        (or (string-equal file (buffer-file-name (current-buffer)))
+                            (file-directory-p file)
+                            (= (random 4) 2)))
+                      (directory-files dir t)))
+              (file (seq-random-elt files))
+              (_ (file-exists-p file)))
+        (progn
+          (when (eq major-mode 'image-mode)
+            ;; (push (buffer-file-name) ii/random-image-history)
+            (image-flush (image-get-display-property)))
+          (clear-minibuffer-message)
+          (message "Opening %s" file)
+          (find-alternate-file file)
+          (run-with-timer 1.0 nil (lambda ()
+                                    (message " "))))
+      (error "There are no ther files in %s" dir))))
 
 (defun +utils/ripgrep-modules ()
   (interactive)
@@ -237,6 +228,42 @@
 ;;;###autoload
 (defun ii/utils-clear-image-cache ()
   (interactive)
-  (clear-image-cache)a)
+  (clear-image-cache))
+
+(defun ii/utils--read-font-family (prompt lookup-func &optional require-match history)
+  (consult--read (delete-dups (font-family-list))
+                 :prompt prompt
+                 :annotate (lambda (font)
+                             `(,(propertize
+                                 (concat font " ")
+                                 'face `(:family ,font :inherit font-lock-keyword-face))
+                               " "
+                               ,(propertize
+                                 "The quick brown fox jumps over the lazy dog."
+                                 'face `(:family ,font :inherit font-lock-string-face))))
+                 :require-match require-match
+                 :history history
+                 :lookup lookup-func))
+
+;;;###autoload
+(defun +utils/consult-set-font-family ()
+  "Set font family in all frames to selected one."
+  (interactive)
+  (if (display-graphic-p)
+      (ii/utils--read-font-family "Set Font Family: "
+                                  (lambda (selected-font &rest args)
+                                    (setq +base/font-family selected-font)
+                                    (set-frame-font selected-font t t t))
+                                  t
+                                  'consult-set-font-family-history)
+    (message "Cant change font family on tty")))
+
+;;;###autoload
+(defun ii/utils-insert-font-family-name (check-quotes)
+  (interactive "p")
+  (ii/utils--read-font-family "Insert Font Family: "
+                              (lambda (font &rest args)
+                                (insert font))
+                              t))
 
 (provide 'implicit-utils)

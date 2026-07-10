@@ -78,10 +78,8 @@
                                t
                                "[^\.]+"))
   (add-to-list 'load-path path))
-
-
 ;;; Commentary:
-;; 
+;;
 
 (require 'implicit-config-lib)
 
@@ -98,6 +96,8 @@ character if it is in `ii/smart-tab-skip-chars', otherwise call `indent-for-tab-
 with ARG."
   (interactive "P")
   (cond
+   ((region-active-p)
+    (funcall-interactively #'indent-region (region-beginning) (region-end)))
    ((bolp)
     (indent-for-tab-command arg))
    (t
@@ -136,20 +136,20 @@ with ARG."
       flymake-prefix-map (make-sparse-keymap)
       next-defun-repeat-map (make-sparse-keymap)
       outline-repeat-map (make-sparse-keymap)
-      transpose-repeat-map (make-sparse-keymap)
       project-dired-prefix-map (make-sparse-keymap)
       meow-grep-prefix-map (make-sparse-keymap)
       treesit-auto-install-grammar 'always)
 
-;; unbind kill (used for window keymap)
+;; unbind `kill-region' (used for window keymap)
 (unbind-key "C-w")
-;; unbind suspend (used for search keymap)
+;; unbind `suspend-emacs' (used for search keymap)
 (unbind-key "C-z")
-;; unbind undo (used for completion keymap)
+;; unbind `undo' (used for completion keymap)
 (unbind-key "C-/")
-;; unbind scroll-down-command
+;; unbind `scroll-down-command'
 (unbind-key "C-v")
 ;;(unbind-key "C-\[")
+;; unbind `abort-recursive-edit'
 (unbind-key "C-\]")
 
 (define-prefix-command 'meow-toggle-prefix-command 'meow-toggle-prefix-map "toggle")
@@ -162,7 +162,8 @@ with ARG."
 (define-prefix-command 'meow-C-/-prefix-command 'meow-C-/-prefix-map "C-/")
 (define-prefix-command 'project-dired-prefix-command 'project-dired-prefix-map "project-dired")
 (define-prefix-command 'meow-grep-prefix-command 'meow-grep-prefix-map "grep")
-(define-prefix-command 'meow-C-v-prefix-command 'meow-C-v-prefix-map "C-v")
+(define-prefix-command 'meow-C-v-prefix-command 'meow-C-v-prefix-map "vc")
+
 
 (bind-key "C-c t" meow-toggle-prefix-map)
 (bind-key "C-c q" meow-quit-prefix-map)
@@ -181,6 +182,7 @@ with ARG."
 
 (setq-default backup-inhibited t
               line-spacing 0.0
+              help-char (aref (kbd "M-h") 0)
               create-lockfiles nil
               truncate-lines t
               make-backup-files nil
@@ -194,7 +196,7 @@ with ARG."
               fill-column 80
               display-fill-column-indicator-character ?│
               global-display-fill-column-indicator-modes '(prog-mode)
-              jit-lock-chunk-size 3000
+              jit-lock-chunk-size 4000
               jit-lock-defer-time nil
               jit-lock-stealth-time 0.5
               tab-width 4
@@ -207,7 +209,9 @@ with ARG."
               scroll-up-aggressively 0.0
               scroll-down-aggressively 0.0
               scroll-preserve-screen-position nil
-              scroll-margin 7)
+              maximum-scroll-margin 0.25
+              scroll-margin 7
+              vertical-scroll-bar nil)
 
 (setq user-full-name "Błażej Niewiadomski"
       user-mail-address "blaz.nie@protonmail.com"
@@ -267,6 +271,7 @@ with ARG."
       savehist-autosave-interval nil
       savehist-additional-variables
       '(kill-ring
+        register-alist
         mark-ring
         global-mark-ring
         search-ring
@@ -275,7 +280,6 @@ with ARG."
         kmacro-ring)
       ;; kmacro
       kmacro-ring-max 32
-      kmacro-counter-value-start 1
       ;; imenu
       imenu-auto-rescan t
       imenu-flatten t
@@ -345,8 +349,8 @@ with ARG."
       ;; repeat mode
       repeat-exit-timeout 5)
 
-(bind-keys* ("C-=" . text-scale-increase)
-            ("C--" . text-scale-decrease))
+(bind-keys* ("C-M-=" . text-scale-increase)
+            ("C-M--" . text-scale-decrease))
 
 (let ((customization-file (expand-file-name "custom.el" user-emacs-directory)))
   (unless (file-exists-p customization-file)
@@ -354,24 +358,32 @@ with ARG."
   (setq custom-file customization-file)
   (load custom-file 'noerror))
 
-(add-hook 'after-init-hook
-          (lambda ()
-            (global-hl-line-mode 1)
-            (save-place-mode 1)
-            (recentf-mode 1)
-            (column-number-mode 1)
-            (delete-selection-mode 1)
-            (savehist-mode 1)
-            ;; strip text properties before saving the kill ring
-            (add-hook 'savehist-save-hook
-                      (lambda ()
-                        (setq kill-ring
-                              (mapcar #'substring-no-properties
-                                      (cl-remove-if-not #'stringp kill-ring)))))
+(ii/defhook! ii/setup-global-modes ()
+  "Turn on global modes (after initialization to not fuck up the state)."
+  :hook-var after-init-hook
+  (global-hl-line-mode 1)
+  (save-place-mode 1)
+  (recentf-mode 1)
+  (column-number-mode 1)
+  (line-number-mode -1)
+  (delete-selection-mode 1)
+  (savehist-mode 1)
+  ;; strip text properties before saving the kill ring
+  (ii/defhook! ii/savehist-strip-props ()
+    "Strip properties from text in kill ring."
+    :hook-var savehist-save-hook
+    (setq kill-ring
+          (mapcar #'substring-no-properties
+                  (cl-remove-if-not #'stringp kill-ring))))
+  (unless init-file-debug
+    (desktop-save-mode 1)
+    (desktop-read desktop-dirname)))
 
-            (unless init-file-debug
-              (desktop-save-mode 1)
-              (desktop-read desktop-dirname))))
+;; make desktop save mode ignore some minor modes
+(with-eval-after-load 'desktop
+  ;; envrc-mode
+  (add-to-list 'desktop-minor-mode-table '(envrc-mode nil))
+  (add-to-list 'desktop-minor-mode-table '(envrc-global-mode nil)))
 
 ;; load up `electric-pair-mode' only when its time for inserting text
 (ii/eval-on-first-hook meow-insert-enter-hook "electric-pairs" t (electric-pair-mode 1))
@@ -382,16 +394,9 @@ with ARG."
                    (lambda (buffer)
                      (diff-buffer-with-file (buffer-file-name buffer)))
                    "show diff between the buffer and its file"))
-
 (use-package emacs
   :init
-  (setq ii/goto-repeat-map (make-sparse-keymap)
-        paragraph-repeat-map (make-sparse-keymap)
-        sentence-repeat-map (make-sparse-keymap)
-        sexp-repeat-map (make-sparse-keymap)
-        list-repeat-map (make-sparse-keymap)
-        forward-buffer-thing-repeat-map (make-sparse-keymap)
-        backward-buffer-thing-repeat-map (make-sparse-keymap))
+  (setq ii/goto-repeat-map (make-sparse-keymap))
 
   (with-eval-after-load 'polymode
     (advice-add 'display-line-numbers-mode :around #'polymode-inhibit-in-indirect-buffers))
@@ -415,6 +420,12 @@ with ARG."
         (command-execute #'flush-lines)
       (command-execute #'keep-lines)))
 
+  (defun ii/visual-line--setup ()
+    (cond
+     ((bound-and-true-p visual-line-mode)
+      (visual-wrap-prefix-mode 1))
+     (t (visual-wrap-prefix-mode -1))))
+
   (ii/when-idle! 2.0
     (require 'server)
     (when (not (server-running-p))
@@ -431,15 +442,23 @@ with ARG."
                       (let ((gc-cons-threshold 80000))
                         (garbage-collect-maybe 1))))))
 
-  (defun ii/reload-path-from-shell ()
-    (interactive)
-    (+set-exec-path-from-shell))
+  (defun ii/reload-path-from-shell (arg)
+    (interactive "P")
+    (let ((default-directory (if (null arg)
+                                 user-emacs-directory
+                               (read-directory-name "Reload exec path from:"))))
+      (+set-exec-path-from-shell)))
 
   :bind
   (("<left>" . (lambda () (interactive) (message "No arrows!")))
    ("<right>" . (lambda () (interactive) (message "No arrows!")))
    ("<up>" . (lambda () (interactive) (message "No arrows!")))
    ("<down>" . (lambda () (interactive) (message "No arrows!")))
+   ("M-z" . zap-zap-up-to-char)
+   ("C-x C-b" . ibuffer)
+   ("M-u" . upcase-dwim)
+   ("M-l" . downcase-dwim)
+   ("M-c" . capitalize-dwim)
    ("C-TAB" . completion-at-point)
    ("C-<tab>" . completion-at-point)
    ("C-c to" . toggle-option)
@@ -462,8 +481,6 @@ with ARG."
    ("C-c ks" . kmacro-start-macro)
    ("C-c ke" . kmacro-end-macro)
    ("C-c tA" . artist-mode)
-   ("M-RET" . recenter)
-   ("M-<return>" . recenter)
 
    ;; lines
    ("C-c ld" . kill-matching-lines)
@@ -471,13 +488,17 @@ with ARG."
    ("C-c ls" . sort-lines)
    ("C-c lf" . flush-lines)
    ("C-c lt" . transpose-lines)
-   ("C-c lk" . keep-lines)
-   ("C-c lK" . consult-keep-lines)
    ("C-c lo" . occur)
    ("C-c lb" . delete-blank-lines)
    ("C-c le" . ensure-empty-lines)
    ("C-c lx" . delete-duplicate-lines)
    ("C-c lh" . highlight-lines-matching-regex)
+   ("C-c l." . what-line)
+   ("C-c lk" . keep-lines)
+   ("C-c lK" . consult-keep-lines)
+   ("C-c lg" . goto-line)
+   ("C-c lG" . consult-goto-line)
+   ("C-c l/" . consult-focus-lines)
 
    ;;;; windows
    ("C-w C-h" . windmove-left)
@@ -502,16 +523,7 @@ with ARG."
    ("C-w C-r p" . rotate-windows-back)
    ("C-w C-r N" . window-layout-rotate-clockwise)
    ("C-w C-r P" . window-layout-rotate-anticlockwise)
-   ("C-c tp" . completion-preview-mode)
-   :repeat-map window-repeat-map
-   ("H" . windmove-swap-states-left)
-   ("J" . windmove-swap-states-down)
-   ("K" . windmove-swap-states-up)
-   ("L" . windmove-swap-states-right)
-   ("C-h" . windmove-left)
-   ("C-j" . windmove-down)
-   ("C-k" . windmove-up)
-   ("C-l" . windmove-right))
+   ("C-c tp" . completion-preview-mode))
   :bind*
   (;; dont use arrows
    ("<left>" . (lambda () (interactive) (message "No arrows!")))
@@ -525,24 +537,6 @@ with ARG."
    ("RET" . minibuffer-choose-completion)
    ("M-n" . minibuffer-next-completion)
    ("M-p" . minibuffer-previous-completion)
-   :repeat-map sexp-repeat-map
-   ("s" . forward-sexp)
-   ("S" . backward-sexp)
-   :repeat-map list-repeat-map
-   ("\]i" . forward-list)
-   ("\[" . backward-list)
-   :repeat-map forward-buffer-thing-repeat-map
-   ("p" . forward-paragraph)
-   ("." . forward-sentence)
-   ("i" . forward-to-indentation)
-   :repeat-map backward-buffer-thing-repeat-map
-   ("p" . backward-paragraph)
-   ("." . backward-sentence)
-   ("i" . backward-to-indentation)
-   :repeat-map buffer-navigation-repeat-map
-   ("b" . next-buffer)
-   ("B" . previous-buffer)
-   ("K" . kill-this-buffer)
    :map goto-map
    ("\]p" . forward-paragraph)
    ("\[p" . backward-paragraph)
@@ -572,10 +566,10 @@ with ARG."
    ("+" . duplicate-dwim))
   :hook
   ((window-setup-hook server-after-make-frame-hook) . +font--setup)
+  (visual-line-mode-hook . ii/visual-line--setup)
   ((help-mode-hook helpful-mode-hook) . visual-line-mode)
   ((gfm-mode-hook prog-mode-hook) . display-line-numbers-mode)
   (after-init-hook . (lambda ()
-                       (line-number-mode -1)
                        (message (emacs-init-time)))))
 
 (use-package implicit-utils
@@ -644,9 +638,11 @@ with ARG."
 
 (setq which-key-popup-type 'side-window
       which-key-preserve-window-configuration nil
-      which-key-max-description-length 25
+      which-key-max-description-length 100
       which-key-side-window-max-width 0.2
-      which-key-idle-delay 0.4
+      which-key-idle-delay 100000
+      which-key-show-early-on-C-h t
+      ;;which-key-allow-multiple-replacements t
       which-key-side-window-max-height 0.12
       which-key-idle-secondary-delay 0.05
       which-key-separator " "
@@ -657,101 +653,158 @@ with ARG."
       which-key-compute-remaps t
       which-key-add-column-padding 1
       which-key-show-remaining-keys t
-      which-key-min-column-description-width 20)
+      which-key-min-column-description-width 0)
 
 
 ;; load which key only on first non-insert keypress
-(add-hook 'pre-command-hook (defun ii/which-key-setup ()
-                              (when (not (member this-command '(self-insert-command execute-extended-command)))
-                                (remove-hook 'pre-command-hook #'ii/which-key-setup)
-                                (repeat-mode 1)
-                                (require 'which-key)
-                                (which-key-mode 1))))
+(ii/defhook! ii/which-key-setup ()
+  "Setup `which-key' on first command thats not a self insert or `M-x'."
+  :hook-var pre-command-hook
+  :once t
+  (when (not (member this-command '(self-insert-command execute-extended-command)))
+    (repeat-mode 1)
+    (require 'which-key)
+    (which-key-mode 1)))
 
 
-(with-eval-after-load 'which-key
-  (which-key-add-key-based-replacements
-    ;; keypad
-    "<space> x k" "Kmacro"
-    "SPC x k" "Kmacro"
-    ;; kmacro map
-    "C-x C-k" "Kmacro"
-    "C-x C-k C-q" "Cond macro counter"
-    "C-x C-k C-r" "Counter to register"
-    "C-x C-k C-r a" "Cond counter to register"
-    ;; M-g
-    "M-g b" "Buffer"
-    "M-g \[" "Goto Prev"
-    "M-g ]" "Goto Next"
-    ;; C-x map
-    "C-x 4" "Other Window"
-    "C-x 5" "Other Frame"
-    "C-x RET" "Input System"
-    "C-x p" "Project"
-    "C-x r" "Register"
-    "C-x n" "Narrow"
-    "C-x t" "Tab bar"
-    "C-x t^" "Detach bar"
-    "C-x a" "Abbrev"
-    "C-x ai" "Add Abbrev"
-    "C-x w" "Window"
-    "C-x w^" "Detach"
-    "C-x wf" "Flip"
-    "C-x wo" "Rotate"
-    "C-x wr" "Rotate Layout"
-    "C-x v" "VC"
-    "C-x vB" "Since merge base"
-    "C-x vb" "Branch"
-    "C-x vM" "Merge"
-    "C-x vT" "Outstanding"
-    "C-x vw" "Working tree"
-    "C-x 8" "Insert Char"
-    "C-x 8 e" "Emoji"
-    "C-x x" "Buffer Content"
-    "C-x X" "Edebug"
-    "C-x C-a" "Edebug"
-    ;; C-c map
-    "C-c @" "Outline"
-    "C-c a" "LLM"
-    "C-c b" "Buffer"
-    "C-c b`" "Switch to last buffer"
-    "C-c c" "Code"
-    "C-c d" "Directory"
-    "C-c e" "Edit"
-    "C-c et" "Transpose"
-    "C-c f" "Files"
-    "C-c g" "Git"
-    "C-c h" "Help"
-    "C-c i" "Insert"
-    "C-c j" "Jump"
-    "C-c k" "Kmacro"
-    "C-c l" "Line"
-    "C-c m" "Mark"
-    "C-c n" "Notes"
-    "C-c o" "Open"
-    "C-c p" "Project"
-    "C-c q" "Quit"
-    "C-c r" "Run"
-    "C-c s" "Search"
-    "C-c t" "Toggle"
-    "C-c td" "Debug"
-    "C-c tw" "Window"
-    "C-c u" "U"
-    "C-c v" "V"
-    "C-c w" "Window"
-    "C-c x" "X"
-    "C-c y" "Y"
-    "C-c z" "Z"
-    "C-c '" "Normal mode map"
-    ;; window map
-    "C-w C-d" "Delete"
-    "C-w C-r" "Rotate"
-    ;; C-v
-    "C-v B" "Since merge base"
-    "C-v b" "Branch"
-    "C-v M" "Merge"
-    "C-v T" "Outstanding"
-    "C-v w" "Working tree"))
+(which-key-add-keymap-based-replacements global-map
+  "C-c a" "LLM"
+  "C-c b" "Buffer"
+  "C-c c" "Compile"
+  "C-c d" "Directory"
+  "C-c e" "Edit"
+  "C-c f" "File"
+  "C-c g" "Git"
+  "C-c h" "Help"
+  "C-c i" "Insert"
+  "C-c j" "Jump"
+  "C-c k" "Kmacro"
+  "C-c l" "Lines"
+  "C-c m" "Mark"
+  "C-c n" "Notes"
+  "C-c o" "Open"
+  "C-c p" "Projects"
+  "C-c q" "Quit"
+  "C-c r" "Run"
+  "C-c s" "Search"
+  "C-c t" "Toggle"
+  "C-c u" "UNUSED"
+  "C-c v" "UNUSED"
+  "C-c w" "Window"
+  "C-c x" "UNUSED"
+  "C-c y" "UNUSED"
+  "C-c z" "Grep")
+
+(which-key-add-keymap-based-replacements mode-specific-map
+  "a" "LLM"
+  "b" "Buffer"
+  "c" "Compile"
+  "d" "Directory"
+  "e" "Edit"
+  "f" "File"
+  "g" "Git"
+  "h" "Help"
+  "i" "Insert"
+  "j" "Jump"
+  "k" "Kmacro"
+  "l" "Lines"
+  "m" "Mark"
+  "n" "Notes"
+  "o" "Open"
+  "p" "Projects"
+  "q" "Quit"
+  "r" "Run"
+  "s" "Search"
+  "t" "Toggle"
+  "u" "UNUSED"
+  "v" "UNUSED"
+  "w" "Window"
+  "x" "UNUSED"
+  "y" "UNUSED"
+  "z" "Grep")
+
+(which-key-add-key-based-replacements
+  ;; ;; keypad
+  ;; "<space> x k" "Kmacro"
+  ;; "SPC x k" "Kmacro"
+  ;; kmacro map
+  "C-x C-k" "Kmacro"
+  "C-x C-k C-q" "Cond macro counter"
+  "C-x C-k C-r" "Counter to register"
+  "C-x C-k C-r a" "Cond counter to register"
+  ;; M-g
+  "M-g b" "Buffer"
+  "M-g \[" "Goto Prev"
+  "M-g ]" "Goto Next"
+  ;; C-x map
+  "C-x 4" "Other Window"
+  "C-x 5" "Other Frame"
+  "C-x RET" "Input System"
+  "C-x p" "Project"
+  "C-x r" "Register"
+  "C-x n" "Narrow"
+  "C-x t" "Tab bar"
+  "C-x t^" "Detach bar"
+  "C-x a" "Abbrev"
+  "C-x ai" "Add Abbrev"
+  "C-x w" "Window"
+  "C-x w^" "Detach"
+  "C-x wf" "Flip"
+  "C-x wo" "Rotate"
+  "C-x wr" "Rotate Layout"
+  "C-x v" "VC"
+  "C-x vB" "Since merge base"
+  "C-x vb" "Branch"
+  "C-x vM" "Merge"
+  "C-x vT" "Outstanding"
+  "C-x vw" "Working tree"
+  "C-x 8" "Insert Char"
+  "C-x 8 e" "Emoji"
+  "C-x x" "Buffer Content"
+  "C-x X" "Edebug"
+  "C-x C-a" "Edebug"
+  ;; C-c map
+  "C-c @" "Outline"
+  "C-c a" "LLM"
+  "C-c b" "Buffer"
+  "C-c b`" "Switch to last buffer"
+  "C-c c" "Code"
+  "C-c d" "Directory"
+  "C-c e" "Edit"
+  "C-c et" "Transpose"
+  "C-c f" "Files"
+  "C-c g" "Git"
+  "C-c h" "Help"
+  "C-c i" "Insert"
+  "C-c j" "Jump"
+  "C-c k" "Kmacro"
+  "C-c l" "Line"
+  "C-c m" "Mark"
+  "C-c n" "Notes"
+  "C-c o" "Open"
+  "C-c p" "Project"
+  "C-c q" "Quit"
+  "C-c r" "Run"
+  "C-c s" "Search"
+  "C-c t" "Toggle"
+  "C-c td" "Debug"
+  "C-c tw" "Window"
+  "C-c u" "U"
+  "C-c v" "V"
+  "C-c w" "Window"
+  "C-c x" "X"
+  "C-c y" "Y"
+  "C-c z" "Z"
+  "C-c '" "Normal mode map"
+  ;; window map
+  "C-w C-d" "Delete"
+  "C-w C-r" "Rotate"
+  ;; C-v
+  "C-v B" "Since merge base"
+  "C-v b" "Branch"
+  "C-v M" "Merge"
+  "C-v T" "Outstanding"
+  "C-v w" "Working tree")
 
 (use-package kkp
   :demand
@@ -764,6 +817,14 @@ with ARG."
                        :repo "CyberShadow/term-keys")
   :hook
   (tty-setup-hook . term-keys-mode))
+
+(use-package kitty-graphics
+  :straight ( :type git
+              :host github
+              :repo "cashmeredev/kitty-graphics.el")
+  :init
+  (setq kitty-gfx-enable-video t)
+  (kitty-graphics-setup))
 
 (use-package implicit-meow
   :straight `(implicit-meow :type nil
@@ -946,15 +1007,38 @@ with ARG."
   (defun ii/meow--line-numbers-toggle (&rest args)
     (when (and (bound-and-true-p display-line-numbers-mode) (null meow--beacon-overlays))
       (pcase display-line-numbers-type
-        ('relative (when meow-insert-mode
-                     (setq-local display-line-numbers-type t)
-                     (display-line-numbers--turn-on)))
+        ((or 'relative 'visual)
+         (when meow-insert-mode
+           (setq-local display-line-numbers-type t)
+           (display-line-numbers--turn-on)))
         (_ (when (not meow-insert-mode)
-             (setq-local display-line-numbers-type 'relative)
+             (setq-local display-line-numbers-type (if (bound-and-true-p visual-line-mode) 'visual 'relative))
              (display-line-numbers--turn-on))))))
 
   (defun meow-noop ()
     (interactive))
+
+  ;; integration for `xref-edit-mode' in Emacs 31
+  (defvar ii/meow--setup-xref-edit nil)
+
+  (defun ii/meow--setup-xref-edit (enable)
+    (setq ii/meow--setup-xref-edit enable)
+    (if enable
+        (progn
+          (advice-add 'xref-change-to-xref-edit-mode :after #'meow--switch-to-normal)
+          (advice-add 'xref-edit-save-changes :after #'meow--switch-to-motion))
+      (advice-remove 'xref-change-to-xref-edit-mode #'meow--switch-to-normal)
+      (advice-remove 'xref-edit-save-changes #'meow--switch-to-motion)))
+
+  (with-eval-after-load 'xref
+    (ii/meow--setup-xref-edit t))
+
+  (ii/defhook! ii/meow-setup-xref-edit ()
+    "Setup automatic meow state switching for `xref-edit-mode'."
+    :hook-var meow-global-mode-hook
+    (unless (bound-and-true-p meow-global-mode)
+      (ii/meow--setup-xref-edit nil)))
+
 
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -1085,6 +1169,14 @@ with ARG."
       (meow-macro-sequence-save meow-macro-sequence)
       (setq meow-macro-sequence nil))
 
+    (defun ii/meow--switch-to-normal ()
+      (interactive)
+      (if defining-kbd-macro
+          (progn
+            (message "Defining macro; doing nothing")
+            (cancel-kbd-macro-events))
+        (meow--switch-to-normal)))
+
     (defun meow--beacon-apply-kmacros-from-macro ()
       (meow--beacon-apply-command (lambda ()
                                     (interactive)
@@ -1113,9 +1205,12 @@ with ARG."
       '("<escape>" . meow-beacon-macro-exit))
 
     (meow-define-keys 'insert
-      '("C-z" . meow-beacon-insert-exit))
+      '("C-z" . ii/meow--switch-to-normal))
 
     (meow-motion-define-key
+     (cons "<escape>" esc-map)
+     (cons "ESC" esc-map)
+     '("M-SPC" . meow-keypad)
      '("C-w" . meow-window-prefix-command)
      '("j" . meow-next)
      '("k" . meow-prev)
@@ -1338,8 +1433,7 @@ with ARG."
                                                  (macro . "<M>")
                                                  (beacon . "<B>"))))
   :bind
-  (("M-SPC" . meow-keypad)
-   ("M-<backspace>" . meow-backward-kill-symbol)
+  (("M-<backspace>" . meow-backward-kill-symbol)
    ("C-o" . meow-pop-or-unpop-to-mark)
    ("C-`" . meow-pop-to-global-mark)
    ("C-c jf" . find-file-at-point)
@@ -1455,7 +1549,7 @@ with ARG."
 
 (with-eval-after-load 'grep
   (defvar-local ii/grep-invis-overlays nil)
-  
+
   (defun ii/grep-toggle-file-name-visibility ()
     (interactive)
     (save-mark-and-excursion
@@ -1516,6 +1610,15 @@ with ARG."
   (setq colorful-use-prefix t
         colorful-only-strings 'only-prog
         colorful-allow-mouse-clicks nil)
+
+  (defvar ii/colorful-highlight-string-modes '(help-mode helpful-mode))
+
+  (ii/defhook! ii/colorful-setup-prefix-use ()
+    "Override default `colorful-use-prefix' value for modes in `ii/colorful-highlight-string-modes'."
+    :hook-var colorful-mode-hook
+    (if (memq major-mode ii/colorful-highlight-string-modes)
+        (setq-local colorful-use-prefix nil)))
+
   :bind
   (("C-c tc" . colorful-mode))
   :hook
@@ -1571,24 +1674,34 @@ with ARG."
         (let* ((bg (doom-color 'bg))
                (bg-alt (doom-color 'bg-alt))
                (fg-alt (doom-color 'fg-alt))
-               (base3 (doom-color 'base3))
                (base0 (doom-color 'base0))
+               (base1 (doom-color 'base1))
+               (base2 (doom-color 'base2))
+               (base3 (doom-color 'base3))
+               (base4 (doom-color 'base4))
                (selection (doom-color 'selection))
                (base4 (doom-color 'base4)))
           (progn (message "Loading custom faces")
                  (custom-set-faces
                   `(secondary-selection (( t (:background ,bg :extend nil))))
+                  `(cua-rectangle ((t (:background ,selection))))
                   `(minibuffer-nonselected (( t (:background ,bg-alt :foreground ,fg-alt :extend nil))))
                   `(whitespace-space (( t (:foreground ,base3))))
-                  `(meow-beacon-fake-selection ((t (:foreground ,fg-alt))))
+                  `(meow-beacon-fake-selection ((t (:background ,selection :foreground ,(doom-color 'fg)))))
+                  `(meow-search-highlight ((t (:background ,selection))))
                   `(iedit-occurrence (( t (:background ,base3 :foreground ,fg-alt :weight bold :inverse-video nil))))
                   `(corfu-popupinfo ((t (:background ,base0))))
-                  `(vertico-group-separator (( t (:background ,bg-alt :foreground ,fg-alt :strike-through t))))
-                  `(vertico-group-title (( t (:background ,bg-alt :foreground ,fg-alt))))
+                  `(vertico-group-separator (( t (:background ,bg :foreground ,fg-alt :strike-through t))))
+                  `(vertico-group-title (( t (:background ,bg :foreground ,fg-alt))))
                   `(wgrep-face (( t (:background ,selection))))
                   `(embark-selected (( t (:background ,selection :foreground unspecified))))
                   `(which-key-posframe-border (( t (:background ,base4))))
-                  `(rg-file-tag-face (( t (:foreground ,bg-alt :extend t)))))))
+                  `(rg-file-tag-face (( t (:foreground ,bg-alt :extend t))))
+                  `(match (( t (:background ,bg-alt))))
+                  `(colorful-base ((t (:box nil))))
+                  `(eldoc-highlight-function-argument ((t (:inverse-video t))))
+                  `(eldoc-box-body (( t (:background ,base1))))
+                  `(mode-line ((t (:box (:line-width -1 :color ,base4 :style flat-button))))))))
       (custom-reset-faces
        `(secondary-selection ,theme)
        `(minibuffer-nonselected ,theme)
@@ -1628,23 +1741,23 @@ with ARG."
    ("C-w `" . ii/windows-quit-current-minibuffer)
    ("C-w \m" . +windows/toggle-maximize-window)
    ("C-w C-n" . ii/no-window-prefix)
-   ("C-w C-v" . +windows/below-selected-prefix)
-   ("C-w C-b" . +windows/bottom-window-prefix)
-   ("C-w C-M-h" . +windows/left-vsplit-prefix)
-   ("C-w C-M-j" . +windows/below-hsplit-prefix)
-   ("C-w C-M-k" . +windows/above-hsplit-prefix)
-   ("C-w C-M-l" . +windows/right-vsplit-prefix)
-   ("C-w M-h" . +windows/left-side-window-prefix)
-   ("C-w M-j" . +windows/bottom-side-windows-prefix)
-   ("C-w M-k" . +windows/top-side-window-prefix)
-   ("C-w M-l" . +windows/right-side-window-prefix)
+   ;; display action prefixes
+   ("C-w C-p C-v" . +windows/below-selected-prefix)
+   ("C-w C-p C-b" . +windows/bottom-window-prefix)
+   ("C-w C-p C-h" . +windows/left-vsplit-prefix)
+   ("C-w C-p C-j". +windows/below-hsplit-prefix)
+   ("C-w C-p C-k" . +windows/above-hsplit-prefix)
+   ("C-w C-p C-l" . +windows/right-vsplit-prefix)
+   ("C-w C-p h" . +windows/left-side-window-prefix)
+   ("C-w C-p j" . +windows/bottom-side-windows-prefix)
+   ("C-w C-p k" . +windows/top-side-window-prefix)
+   ("C-w C-p l" . +windows/right-side-window-prefix)
    ("C-w tM" . +windows/toggle-modeline)))
 
 (use-package window
   :straight nil
   :init
-  (setq window-repeat-map (make-sparse-keymap)
-        window-resize-pixelwise nil
+  (setq window-resize-pixelwise nil
         resize-mini-windows 'grow-only
         switch-to-buffer-in-dedicated-window nil
         switch-to-buffer-obey-display-actions nil
@@ -1684,7 +1797,7 @@ with ARG."
           ((and . ("\*Embark Export:*"
                    (or . ((derived-mode . grep-mode)
                           (derived-mode . occur-mode)))))
-           (display-buffer-reuse-mode-window display-buffer-use-some-window))
+           (display-buffer-reuse-mode-window display-buffer-pop-up-window display-buffer-use-some-window))
           ;; bottom side window
           ((or . ((derived-mode . rg-mode)
                   (derived-mode . grep-mode)
@@ -1727,6 +1840,7 @@ with ARG."
           ((or . ((derived-mode . flycheck-error-list-mode)
                   (derived-mode . comint-mode)
                   (derived-mode . compilation-mode)
+                  (derived-mode . ghostel-compile-view-mode)
                   (derived-mode . sly-repl-mode)
                   (derived-mode . lsp-treemacs-error-list-mode)
                   "\*Dictionary\*"
@@ -1765,14 +1879,6 @@ with ARG."
           ((or . ((derived-mode . proced-mode)))
            (display-buffer-same-window))))
 
-  (defvar ii/last-frame-kind nil)
-  ;; blink cursor after changing windows
-  (add-hook 'window-selection-change-functions (lambda (frame)
-                                                 (when (and (framep frame) (or (null ii/last-frame-kind) (eq ii/last-frame-kind 'parent)) (not (minibufferp)))
-                                                   (let ((pulse-iterations 10))
-                                                     (pulse-momentary-highlight-one-line (point) 'highlight))
-                                                   (setq ii/last-frame-kind (if (frame-parent frame) 'child 'parent)))))
-
   :bind
   (("C-c twd" . toggle-window-dedicated)
    ("C-c bp" . previous-buffer)
@@ -1795,14 +1901,7 @@ with ARG."
    ("b[" . previous-buffer)
    ("b]" . next-buffer)
    ("]b" . next-buffer)
-   ("[b" . previous-buffer)
-   :repeat-map window-repeat-map
-   ("v" . split-window-horizontally)
-   ("s" . split-window-vertically)
-   ("w" . other-window)
-   ("q" . delete-window)
-   :exit
-   ("=" . balance-windows)))
+   ("[b" . previous-buffer)))
 
 ;;;; Modeline
 
@@ -1857,38 +1956,43 @@ with ARG."
                                        (:propertize ,pname face success)
                                        ,@(when file `(ii/breadcrumbs--separator ,file)))))))
 (with-eval-after-load 'polymode
-  (advice-add 'ii/mode-line-update-project :around #'polymode-inhibit-in-indirect-buffers))
+  (advice-add 'ii/mode-line-update-project :around #'polymode-inhibit-during-initialization))
 
-(add-hook 'after-init-hook (defun ii/project-headerline-setup ()
-                             (add-hook 'window-buffer-change-functions 'ii/mode-line-update-project)
-                             (add-hook 'after-set-visited-file-name-hook 'ii/mode-line-update-project)))
+(ii/defhook! ii/project-headerline-setup ()
+  "Setup hooks for updating headerline breadcrumbs."
+  :hook-var after-init-hook
+  :once t
+  (add-hook 'window-buffer-change-functions 'ii/mode-line-update-project)
+  (add-hook 'after-set-visited-file-name-hook 'ii/mode-line-update-project))
 
 (defvar ii/breadcrumbs--separator " > "
   "Separator for breadcrumbs.")
 
-(add-hook 'after-init-hook
-          (defun ii/reset-modeline ()
-            (setq-default header-line-format nil
-                          mode-line-format
-                          '(" "
-                            (:eval (propertize "@"
-                                               'face
-                                               (alist-get meow--current-state meow-indicator-face-alist)))
-                            (iedit-mode iedit-mode-line)
-                            "%n "
-                            "%z%*%@ "
-                            "%["
-                            mode-line-buffer-identification
-                            "%] "
-                            mode-line-position
-                            " %I"
-                            mode-line-format-right-align
-                            (text-scale-mode text-scale-mode-lighter)
-                            mode-line-process
-                            (flymake-mode flymake-mode-line-counters)
-                            (vc-mode vc-mode)
-                            " "
-                            mode-name))))
+(ii/defhook! ii/reset-modeline ()
+  "Setup proper modeline after initialization."
+  :hook-var after-init-hook
+  (setq-default header-line-format nil
+                mode-line-format
+                '(" "
+                  (:eval (propertize "@"
+                                     'face
+                                     (alist-get meow--current-state meow-indicator-face-alist)))
+                  (iedit-mode iedit-mode-line)
+                  "%n "
+                  "%z%*%@ "
+                  "%["
+                  mode-line-buffer-identification
+                  "%] "
+                  mode-line-position
+                  " %I"
+                  mode-line-format-right-align
+                  mode-line-misc-info
+                  (text-scale-mode text-scale-mode-lighter)
+                  mode-line-process
+                  (flymake-mode flymake-mode-line-counters)
+                  (vc-mode vc-mode)
+                  " "
+                  mode-name)))
 
 (setq read-buffer-completion-ignore-case t
       read-file-name-completion-ignore-case t
@@ -1950,9 +2054,8 @@ with ARG."
             (consult-find buffer)
             (consult-fd buffer)
             (consult-info buffer)
-            
+
             (+utils/browse-modules buffer)
-            (consult-imenu buffer)
             (consult-outline buffer)
             (consult-buffer buffer)
             (project-find-file buffer)
@@ -2026,7 +2129,7 @@ with ARG."
                               'match))
          count))
      :footer #'ignore))
-  
+
   (advice-add 'embark-consult-export-grep :override #'ii/embark-consult-export-grep)
   :bind
   ( :map embark-consult-search-map
@@ -2036,6 +2139,7 @@ with ARG."
   :custom
   (embark-mixed-indicator-delay nil)
   (embark-quit-after-action t)
+  (embark-help-key "C-M-h")
   :init
   (advice-add 'embark--confirm :override (lambda (&rest args)
                                            nil))
@@ -2131,7 +2235,6 @@ targets."
 
   ;; setup preview for `find-file' and `project-find-file' commands
   (with-eval-after-load 'vertico
-    (setq read-file-name-function #'ii/consult-find-file-with-preview)
 
     (defun ii/consult-find-file-with-preview (prompt &optional dir default mustmatch initial pred)
       (interactive)
@@ -2143,7 +2246,7 @@ targets."
                        :require-match mustmatch
                        :predicate pred)))
 
-    (setq project-read-file-name-function #'ii/consult-project-find-file-with-preview)
+    (setq read-file-name-function #'ii/consult-find-file-with-preview)
 
     (defun ii/consult-project-find-file-with-preview (prompt all-files &optional pred hist _mb)
       (let ((prompt (if (and all-files (file-name-absolute-p (car all-files)))
@@ -2161,8 +2264,10 @@ targets."
                        :require-match t
                        :history hist
                        :category 'file
-                       :predicate pred))))
-  
+                       :predicate pred)))
+
+    (setq project-read-file-name-function #'ii/consult-project-find-file-with-preview))
+
   :config
   (defvar ii/consult-preview-excluded-modes nil)
   (setq ii/consult-preview-excluded-modes '(image-mode pdf-view-mode dired-sidebar-mode helpful-mode help-mode))
@@ -2340,14 +2445,16 @@ The default value is \"es -r\", which only works if you place the command line v
         eldoc-box-doc-separator "\n-------------------------------\n"
         eldoc-box-only-multi-line nil
         eldoc-box-fringe-use-same-bg nil)
-  
+
   (defun ii/eldoc-box--setup ()
     (if (bound-and-true-p eldoc-box-hover-mode)
-        (setq-local eldoc-idle-delay 0.15
+        (setq-local eldoc-idle-delay 0.1
                     eldoc-documentation-strategy 'eldoc-documentation-compose)))
 
   ;;; Makes working with child frames in gui and tty clients at once work correctly
   (defvar ii/last-frame-was-tty (and (not noninteractive) (display-graphic-p (selected-frame))))
+
+  (defvar ii/temp-child-frame-var-list '(corfu--frame corfu-popupinfo-frame eldoc-box--frame))
 
   (defun ii/child-frame-p (frame)
     (and (framep frame)
@@ -2355,20 +2462,22 @@ The default value is \"es -r\", which only works if you place the command line v
          (frame-parent frame)))
 
   (defun ii/reset-child-frames (&rest _)
-    "Delete currently existing child frames if the terminal type has changed from terminal to X or other way around."
+    "Delete currently existing child frames if the terminal type
+ has changed from terminal to X or other way around."
+    (interactive)
     (when (not (ii/child-frame-p (selected-frame)))
       (let ((inhibit-message t))
-        (message "resetting child frames"))
-      (let ((curr (not (display-graphic-p (frame-root-frame (selected-frame))))))
-        (unless (eq curr ii/last-frame-was-tty)
-          (mapc (lambda (frame-symbol)
-                  (when-let* ((frame (and (boundp frame-symbol)
-                                          (symbol-value frame-symbol)))
-                              (ii/child-frame-p frame))
-                    (delete-frame frame)
-                    (set frame-symbol nil)))
-                '(corfu--frame corfu-popupinfo--frame eldoc-box--frame)))
-        (setq ii/last-frame-was-tty curr))))
+        (let ((curr (not (display-graphic-p (frame-root-frame (selected-frame))))))
+          (unless (eq curr ii/last-frame-was-tty)
+            (message "resetting child frames")
+            (mapc (lambda (frame-symbol)
+                    (when-let* ((frame (and (boundp frame-symbol)
+                                            (symbol-value frame-symbol)))
+                                (ii/child-frame-p frame))
+                      (delete-frame frame)
+                      (set frame-symbol nil)))
+                  ii/temp-child-frame-var-list))
+          (setq ii/last-frame-was-tty curr)))))
 
   (add-function :after
                 after-focus-change-function
@@ -2377,9 +2486,9 @@ The default value is \"es -r\", which only works if you place the command line v
   (add-hook 'server-after-make-frame-hook #'ii/reset-child-frames)
   :config
   (setf (alist-get 'font eldoc-box-frame-parameters) +base/font-spec
-        (alist-get 'border-width eldoc-box-frame-parameters) 2
-        (alist-get 'outer-border-width eldoc-box-frame-parameters) 2
-        (alist-get 'internal-border-width eldoc-box-frame-parameters) 2)
+        (alist-get 'border-width eldoc-box-frame-parameters) 0
+        (alist-get 'outer-border-width eldoc-box-frame-parameters) 0
+        (alist-get 'internal-border-width eldoc-box-frame-parameters) 0)
 
   (defun ii/eldoc-box-toggle (arg)
     "Toggle what position function `eldoc-box' is using."
@@ -2392,6 +2501,7 @@ The default value is \"es -r\", which only works if you place the command line v
                    (if (eq eldoc-box-position-function 'eldoc-box--default-at-point-position-function)
                        'eldoc-box--default-upper-corner-position-function
                      'eldoc-box--default-at-point-position-function))))))
+
   :bind
   (("C-c te" . ii/eldoc-box-toggle)
    ("C-c ck" . eldoc-box-help-at-point))
@@ -2434,36 +2544,6 @@ The default value is \"es -r\", which only works if you place the command line v
 
 (setq xref-prompt-for-identifier nil
       xref-search-program 'ripgrep)
-
-(with-eval-after-load 'xref
-  ;; Makes any xref buffer "exportable" to a grep buffer with "E" so you can edit it with "e".
-  (defun ii/xref-to-grep-compilation ()
-    "Export the current Xref results to a grep-like buffer (Emacs 30+)."
-    (interactive)
-    (unless (derived-mode-p 'xref--xref-buffer-mode)
-      (user-error "Not in an Xref buffer"))
-    (let* ((items (and (boundp 'xref--fetcher)
-                       (funcall xref--fetcher)))
-           (buf-name "*xref grep*")
-           (grep-buf (get-buffer-create buf-name)))
-      (unless items
-        (user-error "No xref items found"))
-
-      (with-current-buffer grep-buf
-        (let ((inhibit-read-only t))
-          (erase-buffer)
-          (insert (format "-*- mode: grep; default-directory: %S -*-\n\n"
-                          default-directory))
-          (dolist (item items)
-            (let* ((loc (xref-item-location item))
-                   (file (xref-file-location-file loc))
-                   (line (xref-file-location-line loc))
-                   (summary (xref-item-summary item)))
-              (insert (format "%s:%d:%s\n" file line summary)))))
-        (grep-mode))
-      (pop-to-buffer grep-buf)))
-
-  (define-key xref--xref-buffer-mode-map (kbd "E") #'ii/xref-to-grep-compilation))
 
 (ii/bind-keys "xref"
   ("C-c jr" . xref-find-references)
@@ -2584,8 +2664,8 @@ The default value is \"es -r\", which only works if you place the command line v
   :autoload
   (window-stool-single-overlay)
   :init
-  (setopt window-stool-n-from-top 2
-          window-stool-n-from-bottom 3)
+  (setopt window-stool-n-from-top 1
+          window-stool-n-from-bottom 2)
 
   (defvar-local ii/window-stool-was-active nil)
 
@@ -2610,7 +2690,7 @@ The default value is \"es -r\", which only works if you place the command line v
     (window-stool-single-overlay (selected-window) (window-start))
     (add-hook 'post-command-hook #'ii/window-stool--reset t t)
     (setq-local window-stool-mode nil))
-  
+
   (defun ii/window-stool--reset (&rest args)
     (unless (eq real-this-command 'ii/window-stool-show-context)
       (mapc (lambda (pair)
@@ -2627,35 +2707,31 @@ The default value is \"es -r\", which only works if you place the command line v
         (window-stool-mode arg)
       (message "This file is too large for `window-stool-mode'")))
 
+  (defun ii/window-stool-hide-overlays ()
+    (when (minibufferp)
+      (walk-windows
+       (lambda (window)
+         (with-current-buffer (window-buffer window)
+           (when (bound-and-true-p window-stool-mode)
+             (window-stool-mode -1)
+             (setq-local ii/window-stool-was-active t))))
+       'none)))
+
+  (defun ii/window-stool-show-overlays ()
+    (message "resetting window stool")
+    (walk-windows
+     (lambda (window)
+       (with-current-buffer (window-buffer window)
+         (when (and (not (bound-and-true-p window-stool-mode))
+                    (bound-and-true-p ii/window-stool-was-active))
+           (window-stool-mode 1)
+           (window-stool-single-overlay window (window-start)))))))
+
   :hook
   (window-stool-mode-hook . (lambda (&rest args)
                               (setq-local ii/window-stool-was-active (bound-and-true-p window-stool-mode))))
-  (minibuffer-setup-hook . (lambda ()
-                             (when (minibufferp)
-                               (walk-windows
-                                (lambda (window)
-                                  (with-current-buffer (window-buffer window)
-                                    (when (bound-and-true-p window-stool-mode)
-                                      (window-stool-mode -1)
-                                      (setq-local ii/window-stool-was-active t))))
-                                'none))))
-  (minibuffer-exit-hook . (lambda ()
-                            (when (not (minibufferp))
-                              (walk-windows
-                               (lambda (window)
-                                 (with-current-buffer (window-buffer window)
-                                   (when (and (not (bound-and-true-p window-stool-mode))
-                                              (bound-and-true-p ii/window-stool-was-active)
-                                              (derived-mode-p '(prog-mode)))
-                                     (window-stool-mode 1)
-                                     (window-stool-single-overlay window (window-start)))))))))
-  (meow-view-mode-hook . (lambda ()
-
-                           (if (and meow-view-mode
-                                    window-stool-overlays)
-                               (window-stool-mode -1)
-                             (when (and (not meow-view-mode) (not window-stool-mode))
-                               (window-stool-mode 1)))))
+  (minibuffer-setup-hook . ii/window-stool-hide-overlays)
+  (minibuffer-exit-hook . ii/window-stool-show-overlays)
   :bind
   ("C-w C-a" . ii/window-stool-show-context)
   ("C-c tws" . window-stool-mode))
@@ -2706,8 +2782,6 @@ The default value is \"es -r\", which only works if you place the command line v
 (use-package flymake
   :straight nil
   :init
-
-  
   (setq flymake-show-diagnostics-at-end-of-line nil
         flymake-start-on-flymake-mode nil
         flymake-suppress-zero-counters nil
@@ -2842,9 +2916,12 @@ The default value is \"es -r\", which only works if you place the command line v
 (setq next-error-recenter 4
       next-error-highlight t
       next-error-highlight-no-select t
-      next-line-add-newlines nil)
+      next-line-add-newlines nil
+      strokes-use-strokes-buffer nil
+      cycle-spacing-actions '(just-one-space delete-space-after delete-space-before delete-all-space restore))
 
 (ii/bind-keys "simple"
+  ("M-SPC" . cycle-spacing)
   ("C-x k" . kill-current-buffer)
   ("C-c bK" . kill-current-buffer)
   ("C-c bx" . scratch-buffer)
@@ -2867,6 +2944,9 @@ The default value is \"es -r\", which only works if you place the command line v
   ("e" . next-error)
   (";" . negative-argument))
 
+(ii/bind-keys "re-builder"
+  ("C-c sR" . re-builder))
+
 (setq comint-eol-on-send t
       comint-prompt-read-only t)
 
@@ -2882,9 +2962,29 @@ The default value is \"es -r\", which only works if you place the command line v
 (setq compilation-scroll-output t
       compilation-auto-jump-to-first-error nil
       compilation-max-output-line-length 500
+      compilation-ask-about-save nil
       compilation-search-all-directories t
       compilation-context-lines t
       compilation-skip-threshold 0)
+
+(with-eval-after-load 'compile
+  (defvar ii/compile-current-root nil)
+
+  (defun ii/compile--before (&rest _args)
+    "Setup compilation vars."
+    (let ((root (or (project-root (project-current))
+                    default-directory)))
+      (setq ii/compile-current-root root)))
+
+  (defun ii/compile--after (&rest _args)
+    ""
+    (setq ii/compile-current-root nil))
+
+  (advice-add 'compile :before #'ii/compile--before)
+  (advice-add 'compile :after #'ii/compile--after)
+
+  (setopt compilation-save-buffers-predicate nil))
+
 
 ;; (defmacro ii/compile-register-build-file (name &rest args)
 ;;   (declare (indent defun))
@@ -2895,18 +2995,9 @@ The default value is \"es -r\", which only works if you place the command line v
 ;;          ,@parser-body)
 ;;        (add-to-list ))))
 
-(defun ii/compile--on-selection-change (window)
-  (if (and (not (equal (selected-window) window))
-           (not (one-window-p nil nil)))
-      (delete-window window)))
-
-(defun ii/compile-buffer-setup ()
-  (add-hook 'window-selection-change-functions 'ii/compile--on-selection-change nil t))
-
 (bind-key "C-c cc" 'compile)
 
 (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
-(add-hook 'compilation-mode-hook #'ii/compile-buffer-setup)
 
 (use-package fancy-compilation
   :commands (fancy-compilation-mode)
@@ -2981,7 +3072,7 @@ The default value is \"es -r\", which only works if you place the command line v
       (setq-local corfu-auto (not corfu-auto))
       (corfu-mode -1)
       (corfu-mode 1)))
-  
+
   (setopt corfu--frame-parameters '((no-accept-focus . t)
                                     (no-focus-on-map . t)
                                     (min-width . t)
@@ -3107,8 +3198,8 @@ The default value is \"es -r\", which only works if you place the command line v
   (setopt eglot-autoshutdown t
           eglot-extend-to-xref t
           eglot-sync-connect 1
-          eglot-code-action-indications '(margin mode-line)
-          eglot-code-action-indicator "→"
+          eglot-code-action-indications nil
+          eglot-codepp-action-indicator "→"
           eglot-prefer-plaintext t
           eglot-confirm-server-edits '(((create rename delete) . diff)
                                        (eglot-code-action-extract . maybe-diff)
@@ -3146,7 +3237,7 @@ The default value is \"es -r\", which only works if you place the command line v
             ;;:diagnosticProvider
             ))
   :config
-  
+
   (defun ii/eglot-rename (&rest args)
     (interactive)
     (let ((case-fold-search nil))
@@ -3189,10 +3280,7 @@ The default value is \"es -r\", which only works if you place the command line v
                                           "rass"
                                           "--" "typescript-language-server" "--stdio"
                                           "--" "eslint" "--stdio"
-                                          "--" "tailwindcss-language-server" "--stdio"))
-    ;; (add-to-list 'eglot-server-programs '(tsx-ts-mode (lambda (int project)
-    ;;                                                     (let ))))
-    )
+                                          "--" "tailwindcss-language-server" "--stdio")))
   :bind
   ( :map eglot-mode-map
     ("M-g R"  . ii/eglot-rename)
@@ -3201,6 +3289,7 @@ The default value is \"es -r\", which only works if you place the command line v
     ("C-c ch" . eglot-show-call-hierarchy)
     ("C-c ct" . eglot-show-type-hierarchy)
     ("C-c cf" . eglot-format)
+    ("C-c ci" . eglot-inlay-hints-mode)
     ("C-c ca" . eglot-code-actions)))
 
 ;;; Indent indicators
@@ -3221,6 +3310,7 @@ The default value is \"es -r\", which only works if you place the command line v
 (add-hook 'before-save-hook #'whitespace-cleanup)
 
 (ii/eval-on-first-hook find-file-hook "global-whitespace-mode" t
+  (add-hook 'whitespace-mode-hook #'delete-trailing-whitespace-mode)
   (global-whitespace-mode 1))
 
 (setq outline-minor-mode-cycle nil
@@ -3263,7 +3353,6 @@ The default value is \"es -r\", which only works if you place the command line v
   ("TAB" . outline-cycle))
 
 (use-package indent-bars
-  :disabled
   :straight (indent-bars :type git
                          :host github
                          :repo "jdtsmith/indent-bars")
@@ -3303,7 +3392,8 @@ The default value is \"es -r\", which only works if you place the command line v
     (when (not (memq major-mode ii/indent-bars-exclude-modes))
       (whitespace-toggle-options '(space-mark))
       (indent-bars-mode 1)))
-  (add-hook 'prog-mode-hook 'ii/indent-bars--maybe-turn-on))
+  ;;  (add-hook 'prog-mode-hook 'ii/indent-bars--maybe-turn-on)
+  )
 
 (use-package project
   :init
@@ -3322,24 +3412,44 @@ The default value is \"es -r\", which only works if you place the command line v
   (defun ii/project-occur (regexp n)
     (interactive (list (read-regexp "Search for: ") (prefix-numeric-value prefix-arg)))
     (if-let* ((p (project-current t)))
-        (multi-occur (seq-keep #'buffer-file-name
-                               (project-buffers p))
+        (multi-occur (seq-filter #'buffer-file-name
+                                 (project-buffers p))
                      regexp n)
       (message "Project not found.")))
 
   (defun ii/project-multi-isearch (ignore-mode)
     (interactive "p")
     (let ((bufs (match-buffers (if (not ignore-mode) `(derived-mode . ,major-mode) t)
-                               (seq-keep #'buffer-file-name
-                                         (project-buffers (project-current t))))))
+                               (seq-filter #'buffer-file-name
+                                           (project-buffers (project-current t))))))
       (multi-isearch-buffers bufs)))
 
   (defun ii/project-multi-isearch-regexp (ignore-mode)
     (interactive "p")
     (let ((bufs (match-buffers (if (not ignore-mode) `(derived-mode . ,major-mode) t)
-                               (seq-keep #'buffer-file-name
-                                         (project-buffers (project-current t))))))
+                               (seq-filter #'buffer-file-name
+                                           (project-buffers (project-current t))))))
       (multi-isearch-buffers-regexp bufs)))
+
+  (defun ii/project-multi-isearch-files (ignore-mode)
+    (interactive "p")
+    (let* ((ext (file-name-extension buffer-file-name))
+           (files (seq-filter (if (or ignore-mode (null ext))
+                                  #'identity
+                                (lambda (file)
+                                  (equal (file-name-extension file) ext)))
+                              (project-files (project-current t)))))
+      (multi-isearch-files files)))
+
+  (defun ii/project-multi-isearch-files-regexp (ignore-mode)
+    (interactive "p")
+    (let* ((ext (file-name-extension buffer-file-name))
+           (files (seq-filter (if (or ignore-mode (null ext))
+                                  #'identity
+                                (lambda (file)
+                                  (equal (file-name-extension file) ext)))
+                              (project-files (project-current t)))))
+      (multi-isearch-files-regexp files)))
 
   (defun ii/project-scratch-buffer (project)
     (interactive (list (project-current)))
@@ -3348,7 +3458,7 @@ The default value is \"es -r\", which only works if you place the command line v
         (with-current-buffer buffer
           (setq-local kill-buffer-query-functions (list )))
         (select-window (display-buffer buffer)))))
-  
+
   (defun ii/project-magit-status ()
     (interactive)
     (magit-status (project-root (project-current))))
@@ -3431,7 +3541,7 @@ The default value is \"es -r\", which only works if you place the command line v
         vc-dir-save-some-buffers-on-revert t
         vc-display-failed-async-commands t
         vc-annotate-background-mode t
-        vc-annotate-display-mode 'fullscale
+        vc-annotate-display-mode 'scale
         vc-annotate-color-map '((20 . "#73c936") (40 . "#a1cf35") (60 . "#d0d634") (80 . "#ffdd33")
                                 (100 . "#f9af31") (120 . "#f48130") (140 . "#ef532f") (160 . "#d16e61")
                                 (180 . "#b38a94") (200 . "#96a6c8") (220 . "#b5819b") (240 . "#d45c6e")
@@ -3450,6 +3560,8 @@ The default value is \"es -r\", which only works if you place the command line v
 (ii/bind-keys "vc"
   :map vc-prefix-map
   ("d" . project-vc-dir))
+
+(use-package vc-jj)
 
 (defun ii/smerge-maybe-start ()
   "Start `smerge-mode' if current file buffer contains merge markers."
@@ -3556,7 +3668,7 @@ The default value is \"es -r\", which only works if you place the command line v
   :config
 
   (defvar-local ii/diff-hl-popup-window nil)
-  
+
   (defun ii/diff-hl-show-hunk-popup-window (buffer &optional _line)
     (let ((popup-window (display-buffer-pop-up-window buffer nil)))
       (setq-local ii/diff-hl-popup-window popup-window)))
@@ -3565,7 +3677,7 @@ The default value is \"es -r\", which only works if you place the command line v
     (interactive)
     (when (windowp ii/diff-hl-popup-window)
       (select-window ii/diff-hl-popup-window)))
-  
+
   (defun ii/diff-hl-toggle-whitespace-display (&rest args)
     "Toggle off `whitespace-mode' when `diff-hl' popup is shown."
     (cond ((bound-and-true-p diff-hl-inline-popup-transient-mode)
@@ -3594,8 +3706,12 @@ The default value is \"es -r\", which only works if you place the command line v
               :host github
               :repo "dakra/ghostel")
   :init
-  (setopt ghostel-max-scrollback (* 10 1000 1000))
+  (setopt ghostel-max-scrollback (* 10 1000 1000)
+          ghostel-enable-url-detection nil
+          ghostel-enable-file-detection nil)
+  (add-hook 'after-init-hook 'ghostel-compile-global-mode)
   :config
+
   (with-eval-after-load 'eshell
     (ghostel-eshell-visual-command-mode 1))
 
@@ -3615,8 +3731,11 @@ The default value is \"es -r\", which only works if you place the command line v
         eat-minimum-latency 0.002)
   ;;; eat sets the terminfo directory to the straight build path, which contains only source and emacs Info files. This points it to the actual repo.
   (setq eat-term-terminfo-directory (expand-file-name "straight/repos/eat/terminfo" user-emacs-directory))
-  (add-hook 'eat-mode-hook (lambda ()
-                             (setq-local process-adaptive-read-buffering t)))
+
+  (ii/defhook! ii/fixup-eat ()
+    "Set `eat' local vars."
+    :hook-var eat-mode-hook
+    (setq-local process-adaptive-read-buffering t))
 
   (when (eq system-type 'gnu/linux)
     (ii/eval-on-first-hook eat-mode-hook "eat-eshell-mode" t (eat-eshell-mode 1)))
@@ -3818,14 +3937,12 @@ The default value is \"es -r\", which only works if you place the command line v
         dired-omit-verbose nil
         dired-vc-rename-file t
         dired-clean-confirm-killing-deleted-buffers nil)
+
   :bind
   (("M-g M-d" . dired-at-point)
    ("C-c d." . dired-at-point)
    ("C-c df" . dired)
    ("C-c dj" . dired-jump)
-   ;; ("C-c d/" . find-dired)
-   ;; ("C-c d*" . find-grep-dired)
-   ;; ("C-c dn" . find-name-dired)
    :map dired-mode-map
    ("e" . wdired-change-to-wdired-mode)
    ("-" . dired-up-directory)))
@@ -3851,17 +3968,28 @@ The default value is \"es -r\", which only works if you place the command line v
           ("markup"
            (extension "typ" "tex" "md" "org")))
         dired-filter-verbose nil
-        dired-subtree-line-prefix " >")
+        dired-subtree-use-backgrounds nil
+        dired-subtree-line-prefix "  │")
+
+  (defun ii/dired-subtree--after-insert-advice ()
+    "Advice for `dired-subtree--after-insert' to deal with nonexistant overlays."
+    (if (fboundp 'dired-insert-set-properties)
+        (let ((inhibit-read-only t)
+              (ov (dired-subtree--get-ov)))
+          (dired-insert-set-properties (overlay-start ov) (overlay-end ov)))
+      (when (featurep 'dired-details)
+        (dired-details-delete-overlays)
+        (dired-details-activate))))
+
   :bind
   ( :map dired-mode-map
-    ("C-y" . dired-ranger-copy)
-    ("C-y"    . dired-ranger-paste)
-    (""    . dired-ranger-move)
-    ("TAB"   . dired-subtree-toggle)
+    ("r c" . dired-ranger-copy)
+    ("r p" . dired-ranger-paste)
+    ("r m" . dired-ranger-move)
+    ("TAB" . dired-subtree-toggle)
     ("<tab>" . dired-subtree-toggle))
   :hook
-  (dired-mode-hook . dired-filter-mode)
-  (dired-mode-hook . dired-collapse-mode))
+  (dired-mode-hook . dired-filter-mode))
 
 (use-package dired-sidebar
   :init
@@ -4335,6 +4463,11 @@ The default value is \"es -r\", which only works if you place the command line v
     :map org-noter-notes-mode-map
     ("C-c nq" . org-noter-kill-session)))
 
+;;TODO: replace pdf tools with emacs reader
+
+;; (use-package emacs-reader
+;;   )
+
 (use-package pdf-tools
   :custom
   (pdf-outline-imenu-use-flat-menus t)
@@ -4501,7 +4634,7 @@ The default value is \"es -r\", which only works if you place the command line v
   (defvar ii/image-animate-max-delay 4)
 
   (defun ii/image-animate-timeout (image n count time-elapsed limit target-time)
-    "Advice to allow for lonegr delay while displaying animation frames."
+    "Advice to allow for longer delay while displaying animation frames."
     (plist-put (cdr image) :animate-tardiness
                (+ (* (plist-get (cdr image) :animate-tardiness) 0.9)
                   (float-time (time-since target-time))))
@@ -4592,10 +4725,12 @@ The default value is \"es -r\", which only works if you place the command line v
   (setq tide-enable-xref t
         tide-imenu-flatten t
         tide-completion-detailed t)
-  :hook (typescript-ts-mode-hook . (lambda ()
-                                     (interactive)
-                                     (tide-setup)
-                                     (tide-hl-identifier-mode +1))))
+
+  (ii/defhook! ii/tide--setup ()
+    "Setup tide."
+    :hook-var typescript-ts-mode-hook
+    (tide-setup)
+    (tide-hl-identifier-mode +1)))
 
 (use-package web-mode
   :mode "\\.html\\'"
@@ -4649,6 +4784,7 @@ The default value is \"es -r\", which only works if you place the command line v
   (add-hook 'lisp-interaction-mode-hook 'ii/emacs-lisp--setup)
   :bind*
   ( :map emacs-lisp-mode-map
+    ("C-c C-l" . elisp-enable-lexical-binding)
     ("C-c C-j" . eval-print-last-sexp)
     ("C-c C-m" . emacs-lisp-macroexpand)))
 
@@ -4758,12 +4894,26 @@ The default value is \"es -r\", which only works if you place the command line v
     (interactive "p")
     (2da-next-field (- n)))
 
+  (defun 2da-next-nonempty-row (arg)
+    (interactive "p")
+    (let ((pos (point))
+          (regexp "^[0-9]+[\t ]+[\"A-Za-z_-0-9]"))
+      (save-mark-and-excursion
+        (if (< 0 arg)
+            (progn
+              (forward-line 1)
+              (search-forward-regexp regexp (point-max) t)
+              (goto-char (match-beginning 0))
+              (setq pos (pos-bol)))
+          (search-backward-regexp regexp (point-min) t)
+          (goto-char (match-end 0))
+          (setq pos (pos-bol))))
+      (when pos (goto-char pos))))
+
   (defun 2da-next-field (n)
     (interactive "p")
-    (let ((hscroll-margin 1)
-          (hscroll-step 0.5))
-      (dotimes (_ (abs n))
-        (2da--forward-field-1 (> n 0)))))
+    (dotimes (_ (abs n))
+      (2da--forward-field-1 (> n 0))))
 
   (defun 2da--forward-field-1 (forward)
     (cond (forward
@@ -4776,6 +4926,22 @@ The default value is \"es -r\", which only works if you place the command line v
                  (t (when (thing-at-point 'symbol)
                       (forward-symbol -1)))))))
 
+  (defvar-local 2da--columns nil)
+
+  (defun 2da-set-header-line ()
+    "Set header line for 2da table."
+    (interactive)
+    (save-mark-and-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        ;; find first numbered line
+        (search-forward-regexp "^[0-9]+[ \t]+.*" (point-max) t 1)
+        (goto-char (match-beginning 0))
+        (forward-line -1)
+        (setq 2da--columns (append (list "ID") (string-split (thing-at-point 'line) '(32 ?\t))))
+        (csv-header-line t))))
+
   (define-derived-mode 2da-mode csv-mode "2da"
     "Major mode for editing Bioware's 2da files."
     :interactive t
@@ -4785,9 +4951,11 @@ The default value is \"es -r\", which only works if you place the command line v
                 csv-separator-chars '(?\t 32)
                 buffer-invisibility-spec nil
                 font-lock-keywords nil
+                hscroll-margin 20
                 csv-separator-regexp "[\t ]+"
                 csv-font-lock-keywords nil
-                csv-field-quotes nil))
+                csv-field-quotes nil)
+    (2da-set-header-line))
 
   (bind-keys :map 2da-mode-map
              ("TAB" . 2da-next-field)
@@ -4827,8 +4995,19 @@ The default value is \"es -r\", which only works if you place the command line v
 
 (use-package mastodon)
 
+(use-package eask-mode)
+
+(use-package osm
+  :init
+  (setq osm-max-tiles 512))
+
 ;; no config required
-(ii/packages! f dash ov embark-consult verb devdocs vlf realgud ob-sql-mode djvu forge org-contrib htmlize ox-rss org-roam-ui poly-markdown poly-R poly-org fsharp-mode erlang cuda-mode nushell-mode xenops auctex ocaml-ts-mode dune reason-mode solidity-mode lean-mode d-mode gdscript-mode nim-mode gpr-mode idris-mode vhdl-ts-mode vhdl-ext nasm-mode masm-mode fasm-mode riscv-mode mips-mode fstar-mode sharper shader-mode sln-mode csproj-mode robe otp edts ess purescript-mode dart-mode common-lisp-snippets geiser racket-mode clj-refactor clojure-snippets cider clojure-mode groovy-mode sbt-mode pyvenv)
+(ii/packages! f dash ov embark-consult verb devdocs vlf realgud ob-sql-mode djvu forge org-contrib htmlize
+              ox-rss org-roam-ui poly-markdown poly-R poly-org fsharp-mode erlang cuda-mode nushell-mode
+              xenops auctex ocaml-ts-mode dune reason-mode solidity-mode lean-mode d-mode gdscript-mode nim-mode
+              gpr-mode idris-mode vhdl-ts-mode vhdl-ext nasm-mode masm-mode fasm-mode riscv-mode mips-mode fstar-mode
+              sharper shader-mode sln-mode csproj-mode robe otp edts ess purescript-mode dart-mode common-lisp-snippets
+              geiser racket-mode clj-refactor clojure-snippets cider clojure-mode groovy-mode sbt-mode pyvenv)
 
 ;; load os-specific stuff
 (+os/per-system!
@@ -4850,11 +5029,13 @@ The default value is \"es -r\", which only works if you place the command line v
 (when init-file-debug
   (profiler-start 'cpu+mem)
   (message "starting profiler at %S" (current-time-string))
-  (add-hook 'after-init-hook (lambda ()
-                               (profiler-stop)
-                               (profiler-report)
-                               (message "finishing profiling at %S" (current-time-string)))
-            99))
-;; aliases
+  (ii/defhook! ii/debug-stop-init-profiler ()
+    "Stop and report profiler data after initialization."
+    :hook-var after-init-hook
+    :once t
+    :depth 99
+    (profiler-stop)
+    (profiler-report)
+    (message "finishing profiling at %S" (current-time-string))))
 
 ;;; init.el ends here;;
