@@ -278,9 +278,9 @@ COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
 (defmacro ii/with-project-root! (var &rest body)
   (declare (indent defun))
   `(let* ((,var (or (project-root (project-current t))
-                    default-directory))
-          (default-directory ,var))
-     ,@body))
+                    default-directory)))
+     (let ((default-directory ,var))
+       ,@body)))
 
 (defmacro ii/eval-on-first-execution (func name how pred &rest body)
   (declare (indent defun))

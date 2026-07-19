@@ -27,6 +27,7 @@
 
 ;;; Code:
 (require 'dired)
+(require 'dired-list)
 
 (defgroup ii/fd-dired nil
   "Run a `fd' command and Dired the output."
@@ -226,88 +227,6 @@ output of `find' (one file per line) when this function is called.")
                  (buffer-substring-no-properties start (line-end-position))))))
 
 ;;;###autoload
-(defun ii/fd-dired (dir args &optional suffix)
-  "Run `fd' and got into `dired-mode' on a buffer of the output"
-  (interactive (list (read-directory-name "Run fd in directory: " nil "" t)
-                     (read-string "Run fd (with args): " ii/fd-dired-args
-                                  (if ii/fd-dired-args
-                                      '(ii/fd-args-history . 1)
-                                    'ii/fd-args-history))))
-  (setq ii/fd-dired-args args
-        args (concat ii/fd-dired-program
-                     " "
-                     (ii/fd-dired--excaped-ls-option)
-                     " "
-                     (if (string= args "")
-                         ""
-                       (concat (shell-quote-argument "(")
-                               " " args " "
-                               (shell-quote-argument ")")
-                               " "))
-                     "."
-                     (or (and suffix (concat " " suffix)) "")))
-  (ii/fd-dired-with-command dir args))
-
-;; TODO: tidy up the command
-;;;###autoload
-(defun ii/fd-rg-dired (dir file-name-regexp content-regexp)
-  "Find files in DIR that contain matches for REGEXP and start Dired on output.
-The command run after changing into DIR is
-
-fd -exec `ii/rg-program' `ii/fd-rg-options' -e REGEXP {}; -ls DIR."
-  (interactive (list (read-directory-name "Fd-Rg (directory): ")
-                     (read-regexp "Fd-Rg (file name regexp): ")
-                     (read-regexp "Fd-Rg (grep regexp): ")))
-  (ii/fd-dired-with-command dir
-                            (concat
-                             ii/fd-dired-program
-                             ii/fd-dired-args
-                             " -X rg -0 --files-with-matches -e "
-                             (shell-quote-argument content-regexp)
-                             " "
-                             (shell-quote-argument "{}")
-                             " "
-                             (shell-quote-argument ";")
-                             " "
-                             (shell-quote-argument file-name-regexp)
-                             " . "
-                             " | " (format ii/fd-rg-dired-suffix "-lh" "%F"))))
-
-;;;###autoload
-(defun ii/fd-rg-dired-glob (dir glob-pattern content-regexp)
-  "Find files in DIR that contain matches for REGEXP and start Dired on output.
-The command run after changing into DIR is
-
-fd -exec `ii/rg-program' `ii/fd-rg-options' -e REGEXP {}; -ls DIR."
-  (interactive (list (read-directory-name "Fd-Rg (directory): ")
-                     (read-regexp "Fd-Rg (shell glob): ")
-                     (read-regexp "Fd-Rg (grep regexp): ")))
-  (ii/fd-dired-with-command dir
-                            (concat
-                             ii/fd-dired-program
-                             ii/fd-dired-args
-                             " -X rg -0 --files-with-matches -e "
-                             (shell-quote-argument content-regexp)
-                             " "
-                             (shell-quote-argument "{}")
-                             " "
-                             (shell-quote-argument ";")
-                             " --glob " (shell-quote-argument glob-pattern)
-                             " . "
-                             " | " (format ii/fd-rg-dired-suffix "-lh" "%F"))))
-
-;;;###autoload
-(defun ii/fd-dired-glob (dir glob-pattern)
-  (interactive (list (read-directory-name "Fd (directory): ")
-                     (read-string "Fd (shell glob): ")))
-  (ii/fd-dired-with-command dir
-                            (concat
-                             ii/fd-dired-program
-                             ii/fd-dired-args
-                             " --glob " (shell-quote-argument glob-pattern))
-                            " . "))
-
-;;;###autoload
 (defun ii/fd-dired-with-command (dir command)
   "Run `fd' and go into Dired mode on a buffer of the output.
 The user-supplied COMMAND is run after changing into DIR and should look like
@@ -328,6 +247,7 @@ it finishes, type \\[kill-find]."
                             (+ 1 (length ii/fd-dired-program) (length " . \\( ")))
                       'ii/fd-dired-history)))
   (let ((dired-buffers dired-buffers))
+    (message "dir: %s\n command: %s" dir command)
     ;; Expand DIR ("" means default-directory), and make sure it has a
     ;; trailing slash.
     (setq dir (file-name-as-directory (expand-file-name dir)))
@@ -396,6 +316,82 @@ it finishes, type \\[kill-find]."
     ;;   (dired-insert-set-properties point (point)))
     (setq buffer-read-only t)
     (setq mode-line-process '(":%s"))))
+
+(defun ii/fd-rg-dired (dir file-pattern content-regexp &optional glob)
+  (ii/fd-dired-with-command dir
+                            (concat
+                             ii/fd-dired-program
+                             ii/fd-dired-args
+                             " -X rg -0 --files-with-matches -e "
+                             (shell-quote-argument content-regexp)
+                             " "
+                             (shell-quote-argument "{}")
+                             " "
+                             (shell-quote-argument ";")
+                             (if glob " --glob " " ")
+                             (shell-quote-argument file-pattern)
+                             " . "
+                             " | " (format ii/fd-rg-dired-suffix "-lh" "%F"))))
+
+;;;###autoload
+(defun ii/fd-dired (dir args &optional suffix)
+  "Run `fd' and got into `dired-mode' on a buffer of the output"
+  (interactive (list (if current-prefix-arg
+                         (read-directory-name "Run fd in directory: " nil "" t)
+                       default-directory)
+                     (read-string "Run fd (with args): " ii/fd-dired-args
+                                  (if ii/fd-dired-args
+                                      '(ii/fd-args-history . 1)
+                                    'ii/fd-args-history))))
+  (ii/fd-dired-with-command dir
+                            (concat
+                             ii/fd-dired-program
+                             " "
+                             (ii/fd-dired--excaped-ls-option)
+                             " "
+                             (if (string= args "")
+                                 ""
+                               (concat (shell-quote-argument "(")
+                                       " " args " "
+                                       (shell-quote-argument ")")
+                                       " "))
+                             "."
+                             (or (and suffix (concat " " suffix)) ""))))
+
+
+;; TODO: tidy up the command
+;;;###autoload
+(defun ii/fd-rg-dired-regexp (dir file-name-regexp content-regexp)
+  "Find files in DIR that contain matches for REGEXP and start Dired on output.
+The command run after changing into DIR is
+
+fd -exec `ii/rg-program' `ii/fd-rg-options' -e REGEXP {}; -ls DIR."
+  (interactive (list (read-directory-name "Fd-Rg (directory): ")
+                     (read-regexp "Fd-Rg (file name regexp): ")
+                     (read-regexp "Fd-Rg (grep regexp): ")))
+  (ii/fd-rg-dired dir file-name-regexp content-regexp))
+
+
+(defun ii/fd-rg-dired-glob (dir glob-pattern content-regexp)
+  "Find files in DIR that contain matches for REGEXP and start Dired on output.
+The command run after changing into DIR is
+
+fd -exec `ii/rg-program' `ii/fd-rg-options' -e REGEXP {}; -ls DIR."
+  (interactive (list (read-directory-name "Fd-Rg (directory): ")
+                     (read-regexp "Fd-Rg (shell glob): ")
+                     (read-regexp "Fd-Rg (grep regexp): ")))
+  (ii/fd-rg-dired dir glob-pattern content-regexp t))
+
+;;;###autoload
+(defun ii/fd-dired-glob (dir glob-pattern)
+  (interactive (list (read-directory-name "Fd (directory): ")
+                     (read-string "Fd (shell glob): ")))
+  (ii/fd-dired-with-command dir
+                            (concat
+                             ii/fd-dired-program
+                             ii/fd-dired-args
+                             " --glob " (shell-quote-argument glob-pattern)
+                             " . ")))
 
 ;;;###autoload
 (defun ii/fd-rg-dired-project (file-name-regexp content-regexp)

@@ -292,8 +292,8 @@ with ARG."
       windmove-wrap-around nil
       minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt)
       enable-recursive-minibuffers t
-      completion-preview-minimum-symbol-length 4
-      completion-preview-idle-delay 2
+      completion-preview-minimum-symbol-length 2
+      completion-preview-idle-delay 0.2
       dabbrev-upcase-means-case-search t
       dabbrev-ignored-buffer-modes '(archive-mode image-mode docview-mode pdf-view-mode tags-table-mode csv-mode)
       treesit-enabled-modes t
@@ -349,8 +349,8 @@ with ARG."
       ;; repeat mode
       repeat-exit-timeout 5)
 
-(bind-keys* ("C-M-=" . text-scale-increase)
-            ("C-M--" . text-scale-decrease))
+(bind-keys ("C-M-=" . text-scale-increase)
+           ("C-M--" . text-scale-decrease))
 
 (let ((customization-file (expand-file-name "custom.el" user-emacs-directory)))
   (unless (file-exists-p customization-file)
@@ -410,9 +410,10 @@ with ARG."
      :map completion-preview-active-mode-map
      ("M-n" . completion-preview-next-candidate)
      ("M-p" . completion-preview-prev-candidate)
-     ("TAB" . completion-at-point)
-     ("<tab>" . completion-at-point)
-     ("M-TAB" . completion-preview-insert)))
+     ("C-TAB" . completion-at-point)
+     ("C-<tab>" . completion-at-point)
+     ("<tab>" . completion-preview-insert)
+     ("TAB" . completion-preview-insert)))
 
   (defun ii/filter-lines (negated)
     (interactive "p")
@@ -455,6 +456,7 @@ with ARG."
    ("<up>" . (lambda () (interactive) (message "No arrows!")))
    ("<down>" . (lambda () (interactive) (message "No arrows!")))
    ("M-z" . zap-zap-up-to-char)
+   ("C-M-w" . kill-region)
    ("C-x C-b" . ibuffer)
    ("M-u" . upcase-dwim)
    ("M-l" . downcase-dwim)
@@ -806,6 +808,26 @@ with ARG."
   "C-v T" "Outstanding"
   "C-v w" "Working tree")
 
+(use-package which-func
+  :straight nil
+  :init
+  (setopt which-func-display 'header)
+  :config
+  (setq which-func-format `("["
+                            (:propertize which-func-current
+                                         local-map ,which-func-keymap
+                                         face which-func
+                                         mouse-face mode-line-highlight
+                                         help-echo ,(substitute-command-keys
+                                                     (concat
+                                                      "Current function\n"
+                                                      "\\`mouse-1': go to beginning\n"
+                                                      "\\`mouse-2': toggle rest visibility\n"
+                                                      "\\`mouse-3': go to end")))
+                            "]"))
+  (with-eval-after-load 'prog-mode
+    (which-function-mode 1)))
+
 (use-package kkp
   :demand
   :config
@@ -994,6 +1016,10 @@ with ARG."
   :init
   (advice-add 'meow--select :after (lambda (selection &optional activate backwards)
                                      (message "%S" selection)))
+
+  (advice-add 'meow--maybe-toggle-beacon-state :around (lambda (og)
+                                                         (unless (minibufferp)
+                                                           (funcall og))))
 
   (setopt meow-use-dynamic-face-color nil
           meow-update-display-in-macro nil
@@ -1423,6 +1449,7 @@ with ARG."
     (meow-global-mode 1)
     (add-to-list 'meow-indicator-face-alist '(view . meow-motion-indicator))
     (add-to-list 'meow-indicator-face-alist '(macro . meow-normal-indicator))
+
     (setq-default meow-replace-state-name-list '((eat . "<T>")
                                                  (ghostel . "<G>")
                                                  (normal . "<N>")
@@ -1825,10 +1852,6 @@ with ARG."
            (display-buffer-reuse-mode-window display-buffer-below-selected)
            (window-height . 0.4)
            (post-command-select-window . t))
-          ;; shell command
-          ((or . ((derived-mode . shell-command-mode)))
-           (display-buffer-below-selected)
-           (window-height . (body-lines . shrink-window-if-larger-than-buffer)))
           ;; embark shenanigans
           ((or . ("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                   " *Embark Actions*"
@@ -1954,7 +1977,8 @@ with ARG."
                                              (list remote ii/breadcrumbs--separator)
                                            (list (user-login-name) "@" (system-name) ii/breadcrumbs--separator))
                                        (:propertize ,pname face success)
-                                       ,@(when file `(ii/breadcrumbs--separator ,file)))))))
+                                       ,@(when file `(ii/breadcrumbs--separator ,file))
+                                       ,@header-line-format)))))
 (with-eval-after-load 'polymode
   (advice-add 'ii/mode-line-update-project :around #'polymode-inhibit-during-initialization))
 
@@ -1971,6 +1995,8 @@ with ARG."
 (ii/defhook! ii/reset-modeline ()
   "Setup proper modeline after initialization."
   :hook-var after-init-hook
+
+
   (setq-default header-line-format nil
                 mode-line-format
                 '(" "
@@ -2230,8 +2256,7 @@ targets."
         consult-async-min-input 1
         consult-async-refresh-delay 0.1
         consult-async-input-debounce 0.2
-        consult-async-input-throttle 0.2
-        consult-register-prefix "")
+        consult-async-input-throttle 0.2)
 
   ;; setup preview for `find-file' and `project-find-file' commands
   (with-eval-after-load 'vertico
@@ -2267,6 +2292,17 @@ targets."
                        :predicate pred)))
 
     (setq project-read-file-name-function #'ii/consult-project-find-file-with-preview))
+
+  ;;; find dired from consult-find
+
+  (defun ii/consult--fd-dired ()
+    (interactive)
+    (when (minibufferp)
+      (let* ((prompt-end (minibuffer-prompt-end))
+             (pattern (substring (minibuffer-contents-no-properties) prompt-end))
+             (dir ))
+        (exit-minibuffer)
+        (ii/fd-dired))))
 
   :config
   (defvar ii/consult-preview-excluded-modes nil)
@@ -2713,7 +2749,9 @@ The default value is \"es -r\", which only works if you place the command line v
        (lambda (window)
          (with-current-buffer (window-buffer window)
            (when (bound-and-true-p window-stool-mode)
-             (window-stool-mode -1)
+             (let ((ov (alist-get window window-stool-overlays)))
+               (when (overlayp ov)
+                 (delete-overlay ov)))
              (setq-local ii/window-stool-was-active t))))
        'none)))
 
@@ -3957,6 +3995,13 @@ The default value is \"es -r\", which only works if you place the command line v
   :hook
   (dired-mode-hook . diredfl-mode))
 
+(use-package fd-dired
+  :config
+  (defun ii/fd-name-dired-project (pattern)
+    (interactive (list (read-string "Pattern: ")))
+    (let ((default-directory (or (project-root (project-current nil)) default-directory)))
+      (fd-name-dired default-directory pattern))))
+
 (use-package dired-hacks
   :init
   (setq dired-filter-group-saved-groups
@@ -4999,7 +5044,16 @@ The default value is \"es -r\", which only works if you place the command line v
 
 (use-package osm
   :init
-  (setq osm-max-tiles 512))
+  (setq osm-max-tiles 512)
+  :bind
+  ( :map osm-mode-map
+    ("h" . osm-left)
+    ("j" . osm-down-down)
+    ("k" . osm-up-up)
+    ("l" . osm-right)
+    ("C-M-=" . osm-zoom-in)
+    ("C-M--" . osm-zoom-out)
+    ("C-c C-l" . org-store-link)))
 
 ;; no config required
 (ii/packages! f dash ov embark-consult verb devdocs vlf realgud ob-sql-mode djvu forge org-contrib htmlize
